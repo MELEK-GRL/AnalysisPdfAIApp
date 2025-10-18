@@ -1,0 +1,29 @@
+# Genel node ve sistem dosyaları
+node_modules/
+npm-debug.log
+yarn-error.log
+.DS_Store
+.idea
+.gradle
+build/
+dist/
+
+# Çevre değişkenleri
+.env
+.env.*
+PdfAICli/.env
+PdfAICli/.env.*
+PdfAIServer/.env
+PdfAIServer/.env.*
+
+# iOS / Android build klasörleri
+ios/Pods/
+android/.gradle/
+android/app/build/
+
+# Logs
+logs/
+*.log
+
+# Metro cache
+.metro-health-check*

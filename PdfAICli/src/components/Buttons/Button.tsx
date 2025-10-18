@@ -20,7 +20,7 @@ type Props = {
     activityIndicatorLoading?: boolean;
     style?: ViewStyle;
     width?: number | string;
-    backgroundColor?: string; // 🔹 Dışarıdan renk verilebilir
+    backgroundColor?: string;
 };
 
 const Button: React.FC<Props> = ({

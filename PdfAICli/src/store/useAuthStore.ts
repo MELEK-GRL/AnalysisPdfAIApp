@@ -1,4 +1,3 @@
-// src/store/useAuthStore.ts
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,17 +21,12 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             token: null,
             setUserAndToken: async (u, t) => {
-                await saveToken(t); // apiFetcher'a yaz
-                set({ user: u, token: t }); // store'a yaz
+                await saveToken(t);
+                set({ user: u, token: t });
             },
             logout: async () => {
-                // 1) token & header
                 await wipeToken();
-
-                // 2) varsa başka local/persist verileri temizle
-                await AsyncStorage.multiRemove(['@user', '@settings']); // projene göre
-
-                // 3) store'u temizle
+                await AsyncStorage.multiRemove(['@user', '@settings']);
                 set({ user: null, token: null });
             },
         }),

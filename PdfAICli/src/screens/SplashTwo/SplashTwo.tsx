@@ -1,4 +1,3 @@
-// src/screens/SplashTwo/index.tsx
 import React, { useState, useCallback } from 'react';
 import {
     View,
@@ -127,7 +126,6 @@ const SplashTwo: React.FC = () => {
                     </View>
                 </View>
 
-                {/* Kart + içerik */}
                 <View style={s.containerView}>
                     <View style={s.scrollContainer}>
                         <ScrollView
@@ -152,7 +150,6 @@ const SplashTwo: React.FC = () => {
                         </ScrollView>
                     </View>
 
-                    {/* Checkbox */}
                     <TouchableOpacity
                         onPress={() => setAccepted(!accepted)}
                         activeOpacity={0.8}
@@ -211,8 +208,6 @@ const styles = (w1px: number, h1px: number, fs1px: number) =>
             paddingBottom: 24 * h1px,
             paddingHorizontal: 16 * w1px,
         },
-
-        // Logo
         logoContent: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -226,8 +221,6 @@ const styles = (w1px: number, h1px: number, fs1px: number) =>
             resizeMode: 'contain',
             marginBottom: 8 * h1px,
         },
-
-        // İçerik kartı
         containerView: {
             position: 'relative',
             bottom: h1px * 10,
@@ -251,8 +244,6 @@ const styles = (w1px: number, h1px: number, fs1px: number) =>
             elevation: 2,
         },
         scrollView: { flexGrow: 0 },
-
-        // Checkbox
         checkboxRow: {
             flexDirection: 'row',
             alignItems: 'center',

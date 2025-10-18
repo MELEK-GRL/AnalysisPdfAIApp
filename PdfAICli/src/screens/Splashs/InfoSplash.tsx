@@ -19,7 +19,6 @@ const InfoSplash: React.FC = () => {
     return (
         <GradientLayout>
             <View style={s.container}>
-                {/* Orta kısım */}
                 <View style={s.centerWrap}>
                     <Image
                         source={require('../../assets/icons/test8.png')}
@@ -28,8 +27,6 @@ const InfoSplash: React.FC = () => {
                         accessibilityLabel="Tahlil Analizi Logo"
                     />
                 </View>
-
-                {/* CTA */}
                 <View style={s.cta}>
                     <Button
                         buttonText="Devam Et"

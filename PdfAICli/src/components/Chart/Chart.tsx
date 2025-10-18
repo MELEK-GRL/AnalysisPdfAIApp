@@ -7,14 +7,12 @@ import T from '../../components/Text/T';
 
 type Props = { items: LabItem[]; width?: number };
 
-// --- Renk paleti ------------------------------------------------------------
 const BLUE = '#3b82f6'; // mavi ok
 const YELLOW = '#f59e0b'; // düşük
 const GREEN = '#10b981'; // normal
 const RED = '#ef4444'; // yüksek
 const GRAY = '#E5E7EB'; // referans yoksa tek bant
 
-// --- Yardımcılar ------------------------------------------------------------
 const fmtNum = (n: number) =>
     Number.isFinite(n)
         ? Math.abs(n) >= 100
@@ -39,12 +37,10 @@ const hasRef = (it: LabItem) => {
     return Number.isFinite(lo) && Number.isFinite(hi) && lo < hi;
 };
 
-// --- Ana Chart --------------------------------------------------------------
 const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
     const { w1px, h1px, fs1px } = useResponsive();
     const widthPx = width * w1px;
 
-    // STYLES — her zaman/koşulsuz oluştur
     const s = useMemo(
         () =>
             StyleSheet.create({
@@ -71,7 +67,7 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
                     position: 'absolute',
                     width: 2 * w1px,
                     top: 0,
-                    bottom: 14 * h1px, // okun üstünde yer kalsın
+                    bottom: 14 * h1px,
                     borderRadius: 2 * w1px,
                 },
                 markerArrow: {
@@ -113,7 +109,6 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
         [w1px, h1px],
     );
 
-    // FİLTRE — hook’lar koşulsuz çağrılır
     const filtered = useMemo(() => {
         const arr = Array.isArray(items) ? items : [];
         return arr.filter(it => {
@@ -125,7 +120,6 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
         });
     }, [items]);
 
-    // KOŞULLU RENDER — hook'lardan sonra
     if (!filtered.length) {
         return (
             <View style={s.placeholder}>
@@ -140,14 +134,13 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
         );
     }
 
-    // İç satır bileşeni — hook kullanmıyor (güvenli)
+
     const RangeRow: React.FC<{ item: LabItem }> = ({ item }) => {
         const v = Number(item.value);
         const _hasRef = hasRef(item);
         const refLow = _hasRef ? Number(item.refLow) : v;
         const refHigh = _hasRef ? Number(item.refHigh) : v;
 
-        // Skala
         let scaleMin = _hasRef ? Math.min(refLow, v) : v - 1;
         let scaleMax = _hasRef ? Math.max(refHigh, v) : v + 1;
         if (scaleMin === scaleMax) {
@@ -277,7 +270,6 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
                     </T>
                 </View>
 
-                {/* Ref aralığı ve durum */}
                 <View style={s.bottom}>
                     <T size={14} color="#6B7280">
                         Ref: {_hasRef ? `${fmtNum(refLow)}–${fmtNum(refHigh)}` : '—'}
@@ -291,7 +283,6 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
         );
     };
 
-    // Tek veya çoklu gösterim
     if (filtered.length === 1) {
         return <RangeRow item={filtered[0]} />;
     }

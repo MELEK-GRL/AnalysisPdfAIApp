@@ -2,8 +2,6 @@ const mongoose = require('mongoose');
 
 const DeviceSessionSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-
-    // Aynı cihazı tanımak için opsiyonel hash (installationId hash’i önerilir)
     installationIdHash: { type: String, index: true },
 
     device: {
@@ -21,7 +19,7 @@ const DeviceSessionSchema = new mongoose.Schema({
 
     createdAt: { type: Date, default: Date.now },
     lastSeenAt: { type: Date, default: Date.now },
-    revokedAt: { type: Date, default: null }, // kullanıcı "cihazı çıkar" derse işaretle
+    revokedAt: { type: Date, default: null },
 });
 
 module.exports = mongoose.model('DeviceSession', DeviceSessionSchema);

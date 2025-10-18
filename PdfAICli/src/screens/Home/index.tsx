@@ -25,14 +25,11 @@ import T from '../../components/Text/T';
 import colors from '../../theme/colors';
 import DetailModal from '../../components/Modals/DetailModal';
 import Header from '../../components/Header/Header';
-import GradientLayout from '../../components/Layout/GradientLayout';
 
 type Phase = 'idle' | 'loading' | 'result';
 
 const Home: React.FC = () => {
     const nav = useNavigation<any>();
-
-    // UI/state
     const [phase, setPhase] = useState<Phase>('idle');
     const [fileName, setFileName] = useState<string | null>(null);
     const [commentModal, setCommentModal] = useState<boolean>(false);
@@ -42,24 +39,15 @@ const Home: React.FC = () => {
     const user = useAuthStore(s => s.user);
     const [displayName, setDisplayName] = useState<string>(user?.name || '');
     const [items, setItems] = useState<LabItem[]>([]);
-    const [analysis, setAnalysis] = useState<string>(''); // ⬅️ analiz metni
-    console.log('--->analysis', JSON.stringify(analysis, null, 2));
-
-    // ——— CenterModal state’leri (her Alert için ayrı) ———
+    const [analysis, setAnalysis] = useState<string>('');
     const [selectErrorVisible, setSelectErrorVisible] = useState(false);
     const [selectErrorMessage, setSelectErrorMessage] = useState<string>('');
-
     const [uploadSuccessVisible, setUploadSuccessVisible] = useState(false);
-
     const [notLabVisible, setNotLabVisible] = useState(false);
-
     const [uploadErrorVisible, setUploadErrorVisible] = useState(false);
     const [uploadErrorMessage, setUploadErrorMessage] = useState<string>('');
-
-    // responsive helpers
     const { w1px, h1px, fs1px } = useResponsive();
 
-    // styles (memoize, performans)
     const styles = useMemo(
         () =>
             StyleSheet.create({
@@ -199,7 +187,7 @@ const Home: React.FC = () => {
             const data = await uploadPdf(form);
             if (data.type === 'lab') {
                 setItems(data.items || []);
-                setAnalysis(data.analysis || ''); // ⬅️ analiz metnini al
+                setAnalysis(data.analysis || '');
                 setPhase('result');
                 setUploadSuccessVisible(true);
             } else {
@@ -294,7 +282,6 @@ const Home: React.FC = () => {
                         <ScrollView style={styles.detailModalView}>
                             <Pressable>
                                 <View>
-                                    {/* Başlık rozeti */}
                                     <View style={styles.pill}>
                                         <T size={12} weight="700" color="#065F46">
                                             ANALİZ
@@ -302,7 +289,6 @@ const Home: React.FC = () => {
                                     </View>
 
                                     {analysis ? (
-                                        // Tek parça metin geldiyse satırlara bölerek gösterelim
                                         analysis.split(/\n+/).map((line, idx) => (
                                             <T
                                                 key={idx}
@@ -322,8 +308,6 @@ const Home: React.FC = () => {
                                     )}
 
                                     <View style={styles.sectionGap} />
-
-                                    {/* ÖNERİLER başlığı (analiz içinde yoksa yine de bir alan göster) */}
                                     <View style={styles.pill}>
                                         <T size={12} weight="700" color="#065F46">
                                             ÖNERİLER
@@ -334,10 +318,7 @@ const Home: React.FC = () => {
                                         çoğu parametre için destekleyicidir. Spesifik bir ilaç veya
                                         takviye önerisi **doktor kontrolü** dışında yapılmamalıdır.
                                     </T>
-
                                     <View style={styles.sectionGap} />
-
-                                    {/* UYARI */}
                                     <View style={[styles.pill, { backgroundColor: '#FEF2F2' }]}>
                                         <T size={12} weight="700" color="#991B1B">
                                             ÖNEMLİ UYARI

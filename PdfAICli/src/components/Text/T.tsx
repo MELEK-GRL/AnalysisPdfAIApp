@@ -4,7 +4,7 @@ import { useResponsive } from '../../utils/deviceStore/device';
 
 type Props = TextProps & {
     children: React.ReactNode;
-    size?: number; // Yazı boyutu (örnek: 14)
+    size?: number;
     weight?:
     | '100'
     | '200'
@@ -15,9 +15,9 @@ type Props = TextProps & {
     | '700'
     | '800'
     | '900';
-    color?: string; // Renk kodu
+    color?: string;
     align?: 'left' | 'center' | 'right';
-    style?: TextStyle; // Ek stil
+    style?: TextStyle;
 };
 
 const T: React.FC<Props> = ({
@@ -39,7 +39,7 @@ const T: React.FC<Props> = ({
                     fontWeight: weight,
                     color,
                     textAlign: align,
-                    fontFamily: 'System', // 🔹 Default font — istersen Roboto, SF Pro vs. yapabiliriz
+                    fontFamily: 'System',
                 },
             }),
         [size, weight, color, align, fs1px],

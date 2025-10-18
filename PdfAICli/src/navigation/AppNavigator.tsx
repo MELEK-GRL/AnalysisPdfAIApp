@@ -1,4 +1,3 @@
-// src/navigation/AppNavigator.tsx
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -38,21 +37,18 @@ const AppNavigator = () => {
     useEffect(() => {
         (async () => {
             try {
-                const consent = await AsyncStorage.getItem('consent_given_once'); // '1' ise onaylanmış
+                const consent = await AsyncStorage.getItem('consent_given_once');
                 setHasConsentOnce(consent === '1');
 
-                const token = await AsyncStorage.getItem('@auth_token'); // login token
+                const token = await AsyncStorage.getItem('@auth_token');
                 if (!token) {
                     setHasToken(false);
                     return;
                 }
-
-                // Token'ı backend'de doğrula
                 try {
-                    await api.get('/auth/me'); // 200 → geçerli
+                    await api.get('/auth/me');
                     setHasToken(true);
                 } catch {
-                    // 401 vb → token geçersiz, temizle
                     await AsyncStorage.removeItem('@auth_token');
                     setHasToken(false);
                 }
@@ -65,17 +61,11 @@ const AppNavigator = () => {
     if (!ready) {
         return <Loader />;
     }
-
-    // Başlangıç rotası:
-    // - Consent verildiyse: token varsa Home, yoksa Login
-    // - Consent verilmediyse: InfoSplash
     const initialRouteName: keyof RootStackParamList = hasConsentOnce
         ? hasToken
             ? 'Home'
             : 'Login'
         : 'InfoSplash';
-
-    // Consent varsa splash ekranlarını stack’e hiç ekleme
     const showInfoSplash = !hasConsentOnce;
     const showSplashTwo = !hasConsentOnce;
 

@@ -1,4 +1,3 @@
-// src/screens/Register/index.tsx
 import React, { useState, useMemo } from 'react';
 import {
     View,
@@ -155,7 +154,6 @@ const Register: React.FC = () => {
 
         setLoading(true);
         try {
-            // 1) Kayıt
             const payload = {
                 name: form.name.trim(),
                 email: form.email.trim(),
@@ -165,9 +163,6 @@ const Register: React.FC = () => {
                 password_confirmation: form.confirm.trim(),
             };
             const regRes = await registerApi(payload);
-
-            // Beklenen: backend register dönüşünde { token, user } var.
-            // Yoksa otomatik login at:
             let token = regRes?.token;
             let user = regRes?.user;
 
@@ -183,8 +178,6 @@ const Register: React.FC = () => {
             if (!token || !user) {
                 throw new Error('Kayıt sonrası oturum açılamadı.');
             }
-
-            // 2) Consent attach + device session (login ile aynı)
             try {
                 const installationId = await getInstallationId();
                 const headers = { headers: { Authorization: `Bearer ${token}` } };
@@ -209,7 +202,6 @@ const Register: React.FC = () => {
                 console.warn('Post-register attach/session failed:', e?.message || e);
             }
 
-            // 3) Store’a yaz ve yönlendir
             await useAuthStore.getState().setUserAndToken(user, token);
 
             setModal({
@@ -218,7 +210,6 @@ const Register: React.FC = () => {
                 message: 'Kayıt tamamlandı.',
                 type: 'success',
             });
-            // küçük bir gecikme ile Home
             setTimeout(() => nav.replace('Home'), 600);
         } catch (err: any) {
             const msg =

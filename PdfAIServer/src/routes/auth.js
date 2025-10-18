@@ -1,19 +1,14 @@
-// routes/auth.js
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
-const requireAuth = require('../middleware/requireAuth'); // sadece /me için
+const requireAuth = require('../middleware/requireAuth');
 
-// Ortak yardımcılar
 const signToken = (user) =>
     jwt.sign({ sub: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
 const toSafeUser = (u) => ({ _id: u._id, name: u.name, email: u.email });
 
-/**
- * POST /api/auth/register
- */
 router.post('/register', async (req, res) => {
     try {
         let { name, email, password } = req.body || {};
@@ -25,7 +20,6 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'Missing fields' });
         }
 
-        // E-posta tekilliği
         const exists = await User.findOne({ email }).lean();
         if (exists) return res.status(409).json({ message: 'Email in use' });
 
@@ -40,10 +34,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-/**
- * POST /api/auth/login
- * identifier: email veya kullanıcı adı
- */
+
 router.post('/login', async (req, res) => {
     try {
         let { identifier, password } = req.body || {};
@@ -54,13 +45,11 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Missing credentials' });
         }
 
-        // Email ise lowercase karşılaştır
         const isEmail = identifier.includes('@');
         const query = isEmail
             ? { email: identifier.toLowerCase() }
             : { name: identifier };
 
-        // Şifre karşılaştırması için password alanını da çek
         const user = await User.findOne(query).select('_id name email password');
         if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
@@ -75,9 +64,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-/**
- * GET /api/auth/me (korumalı)
- */
 router.get('/me', requireAuth, (req, res) => {
     try {
         return res.json({ user: toSafeUser(req.user) });
@@ -87,7 +73,6 @@ router.get('/me', requireAuth, (req, res) => {
 });
 router.post('/session', requireAuth, async (req, res) => {
     try {
-        // İleride DeviceSession kaydı yapabilirsin; şimdilik OK dönelim.
         return res.json({ ok: true });
     } catch (e) {
         console.error('SESSION ERR:', e?.message || e);

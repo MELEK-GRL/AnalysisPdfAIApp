@@ -1,4 +1,3 @@
-// src/components/Layout/GradientLayout.tsx
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -14,7 +13,7 @@ type Props = {
 
 const GradientLayout: React.FC<Props> = ({
     children,
-    gradientColors = ['#FFFFFF', '#F5F3FF'], // Login'dekiyle birebir
+    gradientColors = ['#FFFFFF', '#F5F3FF'],
     topBlobColor = '#8B5CF6',
     bottomBlobColor = '#8B5CF6',
     style,
@@ -45,7 +44,6 @@ const GradientLayout: React.FC<Props> = ({
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             style={[s.gradient, style]}>
-            {/* Dekoratif, çok soluk arka plan şekilleri */}
             <View style={[s.blob, s.blobTop, { backgroundColor: topBlobColor }]} />
             <View
                 style={[s.blob, s.blobBottom, { backgroundColor: bottomBlobColor }]}

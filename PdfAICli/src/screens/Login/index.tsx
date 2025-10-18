@@ -1,4 +1,3 @@
-// src/screens/Login/index.tsx
 import React, { useState, useMemo } from 'react';
 import { View, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +15,6 @@ import TextInputComponent from '../../components/Inputs/TextInputComponent';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
 
-// --- installationId helper ---
 async function getInstallationId() {
     let id = await AsyncStorage.getItem('installation_id');
     if (!id) {
@@ -31,8 +29,6 @@ async function getInstallationId() {
 const Login: React.FC = () => {
     const nav = useNavigation<any>();
     const { w1px, h1px, fs1px } = useResponsive();
-
-    // states
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -43,8 +39,6 @@ const Login: React.FC = () => {
     });
 
     const setUserAndToken = useAuthStore(s => s.setUserAndToken);
-
-    // styles
     const s = useMemo(
         () =>
             StyleSheet.create({
@@ -75,8 +69,6 @@ const Login: React.FC = () => {
             }),
         [w1px, h1px, fs1px],
     );
-
-    // login işlemi
     const handleLogin = async () => {
         if (!identifier || !password) {
             setModal({
@@ -89,8 +81,6 @@ const Login: React.FC = () => {
 
         try {
             setLoading(true);
-
-            // 1) Login
             const res = await login({
                 identifier: identifier.trim(),
                 password: password.trim(),
@@ -100,32 +90,24 @@ const Login: React.FC = () => {
             if (!token) {
                 throw new Error('Token alınamadı.');
             }
-
-            // 2) (Opsiyonel) Cihaz ve consent attach
             try {
                 const installationId = await getInstallationId();
                 const headers = { headers: { Authorization: `Bearer ${token}` } };
                 const consentId = await AsyncStorage.getItem('last_consent_id');
 
                 if (consentId) {
-                    // id ile bağlama
                     await api.post(`/consents/${consentId}/attach`, {}, headers);
-                    // ✅ bağlama başarılı → bir daha splash göstermemek için işaretle
                     await AsyncStorage.setItem('consent_given_once', '1');
                 } else {
-                    // installationId ile bağlama
                     const r = await api.post(
                         '/consents/attach-by-installation',
                         { installationId },
                         headers,
                     );
                     if (r?.data?.ok) {
-                        // ✅ eşleşme bulundu ve bağlandı
                         await AsyncStorage.setItem('consent_given_once', '1');
                     }
                 }
-
-                // (opsiyonel) cihaz oturum kaydı
                 await api.post(
                     '/auth/session',
                     { installationId, device: { platform: Platform.OS } },
@@ -133,13 +115,8 @@ const Login: React.FC = () => {
                 );
             } catch (e: any) {
                 console.warn('Post-login attach/session failed:', e?.message || e);
-                // Not: attach başarısızsa consent_given_once set etmiyoruz.
             }
-
-            // 3) Store’a yaz ve yönlendir
             await setUserAndToken(res.user, token);
-
-            // (opsiyonel) ileride lazım olabilir
             await AsyncStorage.setItem('has_ever_logged_in', '1');
 
             nav.replace('Home');

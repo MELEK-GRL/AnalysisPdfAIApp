@@ -14,7 +14,7 @@ import DocumentPicker, {
 type Props = {
     onPicked?: (file: DocumentPickerResponse) => void;
     onUpload?: (file: DocumentPickerResponse) => Promise<void> | void;
-    disableUploadButton?: boolean; // sadece seçme istiyorsan true yap
+    disableUploadButton?: boolean;
 };
 
 const Pdf: React.FC<Props> = ({ onPicked, onUpload, disableUploadButton }) => {
@@ -25,14 +25,14 @@ const Pdf: React.FC<Props> = ({ onPicked, onUpload, disableUploadButton }) => {
         try {
             const file = await DocumentPicker.pickSingle({
                 type: [types.pdf],
-                copyTo: 'cachesDirectory', // iOS/Android güvenli path
+                copyTo: 'cachesDirectory',
             });
             setSelected(file);
             onPicked?.(file);
         } catch (e: any) {
             if (DocumentPicker.isCancel(e)) {
                 return;
-            } // kullanıcı iptal etti
+            }
             console.warn('PDF seçilirken hata:', e);
         }
     };

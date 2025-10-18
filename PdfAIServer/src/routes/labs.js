@@ -1,10 +1,7 @@
-// src/routes/labs.js
 const express = require('express');
-const LatestLabResult = require('../models/LatestLabResult'); // MODELİ routes içinde oluşturma, sadece kullan
-
+const LatestLabResult = require('../models/LatestLabResult');
 const router = express.Router();
 
-// GET /api/labs/latest  -> Son kayıt
 router.get('/latest', async (req, res) => {
     try {
         if (!req.user?._id) return res.status(401).json({ message: 'Unauthorized' });

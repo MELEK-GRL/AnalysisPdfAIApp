@@ -1,4 +1,3 @@
-// src/api/User.ts
 import { get, post, setToken } from '../apiFetcher';
 
 export type User = { _id: string; name: string; email: string };
@@ -12,11 +11,10 @@ export type RegisterPayload = {
 };
 export type AuthResponse = { token: string; user: User };
 
-// endpoint path’leri tek yerde
 const endpoints = {
     register: '/auth/register',
     login: '/auth/login',
-    me: '/auth/me', // backend’de eklediğinde çalışır
+    me: '/auth/me',
 };
 
 export async function register(

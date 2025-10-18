@@ -1,4 +1,3 @@
-// src/server/apiFetcher.ts
 import axios, { AxiosError, AxiosRequestConfig, Method } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@env';
@@ -10,8 +9,6 @@ export const api = axios.create({
     timeout: 15000,
 });
 
-// ⛏️ RN/axios bazı sürümlerde method-specific default CT atıyor.
-// Hepsini baştan TEMİZLE.
 const d = api.defaults.headers as any;
 ['common', 'post', 'put', 'patch'].forEach(k => {
     if (d[k]?.['Content-Type']) {
@@ -22,7 +19,6 @@ const d = api.defaults.headers as any;
     }
 });
 
-/** ---- default Authorization ---- */
 export function setAuthHeader(token?: string | null) {
     if (token) {
         (api.defaults.headers as any).common = {
@@ -44,19 +40,15 @@ export async function clearToken() {
 }
 export const getToken = () => AsyncStorage.getItem(TOKEN_KEY);
 
-// REQUEST LOG + FormData fix
 api.interceptors.request.use(async config => {
     const h: Record<string, any> = (config.headers as any) || {};
 
-    // Auth ekle
     if (!h.Authorization) {
         const token = await AsyncStorage.getItem(TOKEN_KEY);
         if (token) {
             h.Authorization = `Bearer ${token}`;
         }
     }
-
-    // 🚑 FormData ise Content-Type’ı hem config’ten hem defaults’tan temizle
     const isFormData =
         typeof FormData !== 'undefined' &&
         (config.data instanceof FormData ||
@@ -69,7 +61,6 @@ api.interceptors.request.use(async config => {
         delete h['content-type'];
         (config as any).headers = h;
 
-        // defaults’taki method CT’larını da tekrar sil
         const defs = api.defaults.headers as any;
         ['common', 'post', 'put', 'patch'].forEach(k => {
             if (defs[k]?.['Content-Type']) {
@@ -95,7 +86,6 @@ api.interceptors.request.use(async config => {
     return config;
 });
 
-// RESPONSE / ERROR LOG
 api.interceptors.response.use(
     res => {
         console.log('[RES]', res.status, res.config.url);

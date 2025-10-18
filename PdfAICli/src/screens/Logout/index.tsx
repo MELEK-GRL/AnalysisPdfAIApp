@@ -1,4 +1,3 @@
-// src/screens/Logout/index.tsx
 import React, { useCallback, useState, useMemo } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
@@ -18,7 +17,6 @@ const Logout: React.FC = () => {
     const s = useMemo(
         () =>
             StyleSheet.create({
-                // GradientLayout zaten padding veriyor; içeriği ortalayıp kart gibi göstereceğiz
                 container: {
                     flex: 1,
                     justifyContent: 'center',
@@ -54,7 +52,7 @@ const Logout: React.FC = () => {
         }
         try {
             setLoading(true);
-            await logout(); // store + persist temizliği
+            await logout();
             nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
         } catch (e: any) {
             Alert.alert('Hata', e?.message || 'Çıkış yapılamadı.');

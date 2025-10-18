@@ -1,4 +1,3 @@
-// src/routes/consents.js
 console.log('>>> CONSENTS ROUTER LOADED');
 
 const express = require('express');
@@ -6,17 +5,11 @@ const router = express.Router();
 const Consent = require('../models/Consent');
 const requireAuth = require('../middleware/requireAuth');
 
-// -------------------------------------------------------
-// Basit ping (test amaçlı)
-// -------------------------------------------------------
 router.get('/ping', (_req, res) => {
     console.log('PING endpoint hit');
     res.json({ ok: true, from: 'router' });
 });
 
-// -------------------------------------------------------
-// Public: kullanıcı uygulamayı ilk açtığında onay verir
-// -------------------------------------------------------
 router.post('/accept', async (req, res) => {
     try {
         let { installationId, termsVersion, method, device } = req.body || {};
@@ -47,9 +40,6 @@ router.post('/accept', async (req, res) => {
     }
 });
 
-// -------------------------------------------------------
-// Protected: login sonrası consent'i kullanıcıya bağlar
-// -------------------------------------------------------
 router.post('/attach-by-installation', requireAuth, async (req, res) => {
     try {
         const installationId = String(req.body?.installationId || '').trim();
@@ -74,9 +64,6 @@ router.post('/attach-by-installation', requireAuth, async (req, res) => {
     }
 });
 
-// -------------------------------------------------------
-// Protected: doğrudan id ile bağlama (opsiyonel)
-// -------------------------------------------------------
 router.post('/:id/attach', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;

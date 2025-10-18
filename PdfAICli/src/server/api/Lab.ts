@@ -1,4 +1,3 @@
-// src/server/api/Lab.ts
 import { api, getToken } from '../apiFetcher';
 import { API_BASE_URL } from '@env';
 
@@ -29,7 +28,6 @@ export async function getLatestLabs(): Promise<LabItem[]> {
 export async function uploadPdf(form: FormData): Promise<UploadResponse> {
     try {
         const res = await api.post<UploadResponse>('/upload', form, {
-            // ❌ Content-Type verme
             timeout: 60_000,
             responseType: 'json',
             maxBodyLength: Infinity,
@@ -37,7 +35,6 @@ export async function uploadPdf(form: FormData): Promise<UploadResponse> {
         });
         return res.data;
     } catch (e) {
-        // 🔁 Axios “Network Error” ise fetch ile tekrar dene (debug için çok faydalı)
         const token = await getToken();
         const r = await fetch(`${API_BASE_URL}/api/upload`, {
             method: 'POST',

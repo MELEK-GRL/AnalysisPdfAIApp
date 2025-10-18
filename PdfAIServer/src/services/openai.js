@@ -1,24 +1,20 @@
-// AnalysisPdfServer/src/services/openai.js
+
 const OpenAI = require('openai');
 
-// ---- Env & client -----------------------------------------------------------
 if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY missing');
 }
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// ---- Tunables ---------------------------------------------------------------
 const DEV = process.env.NODE_ENV !== 'production';
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
-const TIMEOUT_PRIMARY = DEV ? 20000 : 15000; // 12s → 20s
-const TIMEOUT_SECONDARY = DEV ? 12000 : 10000; // 8s  → 12s
-const TIMEOUT_ANALYSIS = DEV ? 12000 : 12000; // 9s  → 12s
-// analiz metni timeout
-const MAX_INPUT_CHARS = 900;                 // prompt kısaltma limiti
-const MAX_ITEMS_FOR_ANALYSIS = 40;            // analize gidecek madde sayısı limiti
+const TIMEOUT_PRIMARY = DEV ? 20000 : 15000;
+const TIMEOUT_SECONDARY = DEV ? 12000 : 10000;
+const TIMEOUT_ANALYSIS = DEV ? 12000 : 12000;
+const MAX_INPUT_CHARS = 900;
+const MAX_ITEMS_FOR_ANALYSIS = 40;
 
-// ---- Helpers ----------------------------------------------------------------
 function clamp01(n) {
     const x = Number(n);
     if (!Number.isFinite(x)) return 0;
@@ -48,8 +44,6 @@ function coerceAndValidate(payload) {
 
     return out;
 }
-
-// Basit, hızlı yerel çıkarım (timeout/failure durumunda garanti sonuç)
 function regexExtract(text) {
     if (typeof text !== 'string') return { items: [] };
 
@@ -130,11 +124,9 @@ function reduceToLikelyLabLines(text) {
     if (typeof text !== 'string') return '';
     const lines = text.split(/\r?\n/);
 
-    // rakam içeren ve test-vari satırlar kalsın
     const keepRx = /[A-Za-zÇÖŞÜĞİıçöşüğ\-\/() ]{2,}\s+[<>≈~]?\s*\d/;
     const kept = lines.filter(l => keepRx.test(l));
 
-    // tekrarlayan boşlukları azalt, ilk 120 satırı al
     const trimmed = kept.map(l =>
         l.replace(/\u00A0/g, ' ')
             .replace(/\s+/g, ' ')
@@ -143,7 +135,6 @@ function reduceToLikelyLabLines(text) {
 
     const joined = trimmed.join('\n');
 
-    // son bir kısaltma: sadece ilk 900 karakter
     return joined.length > MAX_INPUT_CHARS ? joined.slice(0, MAX_INPUT_CHARS) : joined || text.slice(0, MAX_INPUT_CHARS);
 }
 
@@ -156,11 +147,9 @@ function withTimeout(promise, ms, label = 'operation') {
     return Promise.race([promise, timer]).finally(() => clearTimeout(t));
 }
 
-// Responses API için metin çıkarımı (output_text varsa onu kullanıyoruz)
 function extractOutputText(resp) {
     if (resp?.output_text && typeof resp.output_text === 'string') return resp.output_text;
     try {
-        // Bazı sürümlerde içerik düğümü array olarak gelir
         const node = resp.output?.[0]?.content?.find?.((c) => c?.type === 'output_text');
         if (node?.text) return String(node.text);
     } catch (_) { }
@@ -181,7 +170,6 @@ function tryParseJSON(s) {
     return null;
 }
 
-// ---- Structured output schema (Responses API) ------------------------------
 const LAB_EXTRACTION_FORMAT = {
     type: 'json_schema',
     name: 'LabExtraction',
@@ -221,10 +209,9 @@ async function callOpenAI({ instructions, input, timeoutMs = TIMEOUT_PRIMARY, mo
     const resp = await withTimeout(
         openai.responses.create({
             model,
-            // Responses API'de "instructions" + "input" birlikte çalışır
             instructions: `${instructions}\n\nIMPORTANT: Output valid JSON matching the schema.`,
             input: `TEXT:\n${input}\n\nReturn only JSON.`,
-            text: { format: LAB_EXTRACTION_FORMAT }, // <-- ŞEMAYI BURADA VER
+            text: { format: LAB_EXTRACTION_FORMAT },
         }),
         timeoutMs,
         'openai.responses.create'
@@ -238,9 +225,6 @@ async function callOpenAI({ instructions, input, timeoutMs = TIMEOUT_PRIMARY, mo
     return coerceAndValidate(parsed);
 }
 
-
-
-// ---- Analysis text generation ----------------------------------------------
 function itemsToBulletedText(items) {
     return items
         .slice(0, MAX_ITEMS_FOR_ANALYSIS)
@@ -284,7 +268,6 @@ ${bullet}
 `;
 
     try {
-        // !!! Değişiklik: response_format yok; düz metin istiyoruz
         const resp = await withTimeout(
             openai.responses.create({
                 model: MODEL,
@@ -331,7 +314,6 @@ function defaultAnalysisFallback() {
     ].join('\n');
 }
 
-// ---- Public API -------------------------------------------------------------
 async function classifyAndExtract(text) {
     const baseInstr = `You receive text extracted from a PDF... (aynı içerik)`;
     const reduced = reduceToLikelyLabLines(text || '');
@@ -342,7 +324,6 @@ async function classifyAndExtract(text) {
 
     console.log('[OPENAI] model=', MODEL, 'len=', clipped.length, 'dev=', DEV);
 
-    // 1) Birinci deneme
     try {
         const r1 = await callOpenAI({
             instructions: baseInstr,
@@ -376,7 +357,6 @@ async function classifyAndExtract(text) {
         console.warn('OPENAI TRY1 ERR:', e?.message || e);
     }
 
-    // 2) İkinci deneme
     try {
         const r2 = await callOpenAI({
             instructions: 'Output ONLY the JSON as previously described.',
@@ -410,7 +390,6 @@ async function classifyAndExtract(text) {
         console.warn('OPENAI TRY2 ERR:', e?.message || e);
     }
 
-    // 3) Tamamen timeout/exception: regex fallback
     const local = local0;
     const isLab = (local.items?.length || 0) > 0;
     const fallback = {

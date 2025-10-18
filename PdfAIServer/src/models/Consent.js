@@ -1,22 +1,18 @@
 const mongoose = require('mongoose');
 
 const ConsentSchema = new mongoose.Schema({
-    // Kullanıcı login olmadan da onay verebilir → user optional
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true, required: false },
-
-    // Cihaz/kurulum kimliği: client’ın ürettiği installationId (UUID)
     installationId: { type: String, index: true, required: true },
 
-    consentGiven: { type: Boolean, default: true }, // ileride revoke edilebilir
-    termsVersion: { type: String, required: true }, // ör: "v1.0.3" veya metnin sha256’ı
-    method: { type: String, default: 'checkbox' }, // checkbox / modal / link
+    consentGiven: { type: Boolean, default: true },
+    termsVersion: { type: String, required: true },
+    method: { type: String, default: 'checkbox' },
 
     ip: { type: String },
     userAgent: { type: String },
 
-    // İsteğe bağlı cihaz/app bilgileri (fazlası kişisel veri olabilir, ölçülü tut)
     device: {
-        platform: String,         // iOS / Android
+        platform: String,
         osVersion: String,
         appVersion: String,
         buildNumber: String,

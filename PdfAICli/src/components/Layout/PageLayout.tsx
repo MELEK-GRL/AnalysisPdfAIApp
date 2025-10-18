@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
 import { SafeAreaView, View, StyleSheet, ViewStyle } from 'react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
-import GradientLayout from './GradientLayout';
 
 type Props = {
     children: React.ReactNode;
-    style?: ViewStyle; // 🔹 Ek stil desteği
-    bgColor?: string; // 🔹 Arka plan rengi (default: #F7F7FB)
-    paddingVertical?: number; // 🔹 İç boşluk (default: 16)
+    style?: ViewStyle;
+    bgColor?: string;
+    paddingVertical?: number;
     paddingHorizontal?: number;
 };
 

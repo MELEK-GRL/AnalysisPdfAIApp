@@ -1,0 +1,45 @@
+[
+    {
+        "text": "Bu uygulama yalnızca bilgilendirme ve genel farkındalık sağlama amacıyla hazırlanmıştır. Tıbbi tanı, teşhis veya tedavi hizmeti sunmaz."
+    },
+    {
+        "text": "Uygulamada sunulan veriler, analizler ve yapay zekâ çıktıları tavsiye niteliğinde değildir. Kullanıcı, elde ettiği bilgileri kendi takdirinde değerlendirir ve buna göre hareket eder."
+    },
+    {
+        "text": "Kullanıcı, uygulama üzerinden elde ettiği bilgi veya yönlendirmelere dayanarak verdiği kararların tüm sorumluluğunu kendisinin taşıdığını kabul eder.",
+        "children": [
+            {
+                "text": "Uygulama geliştiricisi, bu bilgilerden kaynaklanabilecek doğrudan veya dolaylı hiçbir zarardan sorumlu tutulamaz."
+            },
+            {
+                "text": "Uygulama, sağlık profesyonellerinin görüş ve teşhisinin yerini alamaz."
+            }
+        ]
+    },
+    {
+        "text": "Kullanıcı, uygulamaya yüklediği veya paylaştığı verilerin doğruluğundan ve gizliliğinden kendisi sorumludur."
+    },
+    {
+        "text": "Uygulamada kullanılan yapay zekâ servisleri (örneğin OpenAI, Google veya benzeri üçüncü taraf hizmetler), verileri anonimleştirerek işleyebilir. Kullanıcı bu hizmetlerin kullanımına açık onay vermiş sayılır."
+    },
+    {
+        "text": "Uygulama geliştiricisi, kullanıcı tarafından sağlanan verilerin güvenliği için makul teknik önlemler alır; ancak verilerin üçüncü taraflarca yetkisiz erişiminden doğabilecek zararlardan sorumlu değildir."
+    },
+    {
+        "text": "Uygulama, teknik nedenlerle (bakım, güncelleme, sunucu arızası vb.) geçici olarak hizmet dışı kalabilir. Kullanıcı, bu tür kesintilerden dolayı herhangi bir hak veya tazminat talebinde bulunamaz."
+    },
+    {
+        "text": "Uygulamanın içeriğinde, analiz algoritmalarında veya hizmet koşullarında değişiklik yapılabilir. Bu değişiklikler kullanıcının onayına sunularak yürürlüğe girer."
+    },
+    {
+        "text": "Kullanıcı, uygulamayı yalnızca yasal amaçlarla ve kendi kişisel kullanımı için kullanmayı taahhüt eder. Başkalarının haklarını ihlal edecek şekilde kullanılamaz."
+    },
+    {
+        "text": "“Kabul Ediyorum” seçeneğini işaretleyen kullanıcı, yukarıdaki tüm koşulları okuduğunu, anladığını ve bu koşullar altında uygulamayı kendi sorumluluğunda kullanmayı kabul ettiğini beyan eder.",
+        "children": [
+            {
+                "text": "Kullanıcı, bu sözleşmeyi kabul ederek geliştiriciye karşı herhangi bir zarar, kayıp, iddia veya dava hakkından feragat etmiş olur."
+            }
+        ]
+    }
+]

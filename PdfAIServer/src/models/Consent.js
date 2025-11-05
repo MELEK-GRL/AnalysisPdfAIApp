@@ -27,3 +27,5 @@ const ConsentSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Consent', ConsentSchema);
+
+

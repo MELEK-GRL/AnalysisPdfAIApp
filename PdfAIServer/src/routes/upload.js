@@ -33,17 +33,20 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'PDF gerekli' });
 
-        // 0.5) Rate limit: 24h/2 analiz
-        const since = new Date(Date.now() - RATE_LIMIT_ANALYSIS_WINDOW_MS);
-        const count = await LabHistory.countDocuments({
-            user: req.user._id,
-            createdAt: { $gte: since },
-        });
-        if (count >= RATE_LIMIT_ANALYSIS_MAX) {
-            return res.status(429).json({
-                message: 'Günlük analiz limitine ulaştınız. 24 saat içinde en fazla 2 PDF analiz edebilirsiniz.',
-                code: 'RATE_LIMIT_EXCEEDED',
+        // 0.5) Rate limit: 24h/2 analiz (dev ortamında devre dışı)
+        const isDev = process.env.NODE_ENV === 'development';
+        if (!isDev) {
+            const since = new Date(Date.now() - RATE_LIMIT_ANALYSIS_WINDOW_MS);
+            const count = await LabHistory.countDocuments({
+                user: req.user._id,
+                createdAt: { $gte: since },
             });
+            if (count >= RATE_LIMIT_ANALYSIS_MAX) {
+                return res.status(429).json({
+                    message: 'Günlük analiz limitine ulaştınız. 24 saat içinde en fazla 2 PDF analiz edebilirsiniz.',
+                    code: 'RATE_LIMIT_EXCEEDED',
+                });
+            }
         }
 
         tmpPath = req.file.path;

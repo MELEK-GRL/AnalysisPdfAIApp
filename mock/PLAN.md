@@ -45,7 +45,7 @@
 
 ## Fazlar
 
-**Durum:** Faz 9 tamamlandı.
+**Durum:** Faz 9 tamamlandı. Faz 10 eklendi.
 
 | Faz | İçerik | Durum |
 |-----|--------|-------|
@@ -58,6 +58,7 @@
 | 6 | **Geliştirme tamamlama** – bug fix, stabilite, temizlik | ✓ |
 | 8 | **Hata düzeltmeleri / İyileştirmeler** – Geçmiş API hataları, UX | ✓ |
 | **9** | **Tipografi, ikon standardizasyonu, bottom menü** – Text/Title tek yerden, ikonlar standart, tab bar şık tasarım ve tıklanma alanları | ✓ |
+| **10** | **Dev / UAT / Prod ortamları** – Git dalları, env dosyaları, backend deploy URL’leri. Dev’de 24h/2 analiz limiti yok; UAT ve Prod’da geçerli. | bekliyor |
 | **7 (Son Faz)** | **Play Store / Canlı yayın hazırlığı** – ertelendi, canlıya alınacak zaman | ertelendi |
 
 ---

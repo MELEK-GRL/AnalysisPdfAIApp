@@ -345,6 +345,53 @@
 
 ---
 
+## FAZ 10 – Dev / UAT / Prod Ortamları
+
+**Hedef:** Geliştirme (dev), kabul testi (uat) ve canlı (prod) ortamlarını ayırmak. Git dalları, env dosyaları ve backend URL yapılandırması. **Rate limit:** Dev ortamında 24 saatte 2 sorgu kuralı uygulanmayacak (test için sınırsız); UAT ve Prod’da geçerli olacak.
+
+### Sprint 10.1 – Git dalları
+- [ ] `dev` dalı oluştur (main’den fork, günlük geliştirme)
+- [x] `uat` dalı oluştur (test / kabul için)
+- [x] `main` = prod (canlı, sadece merge ile güncellenir)
+- [ ] Branches koruma kuralları (opsiyonel): main’e direkt push kısıtı
+
+**→ Tamamlandıktan sonra izin al, Sprint 10.2’ye geç**
+
+---
+
+### Sprint 10.2 – Backend env yapısı (PdfAIServer) ✓ Tamamlandı
+- [x] `.env.example` güncellendi: MONGODB_URI, JWT_SECRET, OPENAI_API_KEY, PORT, NODE_ENV, DB_NAME
+- [ ] Ortamlara göre:
+  - **dev**: local MongoDB, test key (veya geliştirme OpenAI key), NODE_ENV=development
+  - **uat**: ayrı Atlas cluster veya ayrı DB, staging URL, NODE_ENV=production (veya uat)
+  - **prod**: production Atlas, production key, NODE_ENV=production
+- [ ] **Rate limit:** `NODE_ENV=development` iken 24h/2 analiz limiti devre dışı; UAT ve Prod’da aktif
+- [ ] Hosting: UAT ve Prod için ayrı servisler (örn. Render’da 2 servis: pdfai-uat, pdfai-prod)
+
+**→ Tamamlandıktan sonra izin al, Sprint 10.3’e geç**
+
+---
+
+### Sprint 10.3 – Mobil env yapısı (PdfAICli)
+- [ ] `.env.example` oluştur: API_BASE_URL
+- [ ] Ortam dosyaları (gitignore’da kalacak, commit edilmez):
+  - `.env.development` → `http://10.0.2.2:4000` (Android emülatör) veya Mac IP
+  - `.env.uat` → UAT backend URL (örn. `https://pdfai-uat.onrender.com`)
+  - `.env.production` → Prod backend URL (örn. `https://pdfai-prod.onrender.com`)
+- [ ] Babel veya build script: ortam seçimi (env-copy script veya react-native-dotenv path override)
+- [ ] Basit çözüm: `cp .env.development .env` ile manuel geçiş; veya `APP_ENV=uat yarn start` gibi script
+
+**→ Tamamlandıktan sonra izin al, Sprint 10.4’e geç**
+
+---
+
+### Sprint 10.4 – Dokümantasyon ve doğrulama ✓ Tamamlandı
+- [x] `mock/ENVIRONMENTS.md` – ortam kurulum rehberi, hızlı başlangıç
+- [ ] README veya ENVIRONMENTS’a “Ortam nasıl değiştirilir?” maddesi
+- [ ] Dev, UAT, Prod için akış doğrulaması (login, PDF analizi)
+
+---
+
 ## FAZ 7 – Play Store Hazırlık *(ertelendi – canlıya alınacak zaman)*
 
 ### Sprint 7.1 – Teknik hazırlık

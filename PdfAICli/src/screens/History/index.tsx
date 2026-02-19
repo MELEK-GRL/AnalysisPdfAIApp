@@ -25,6 +25,7 @@ import { iconSize } from '../../constants/icons';
 import CenterModal from '../../components/Modals/CenterModal';
 import PopupModal from '../../components/Modals/PopupModal';
 import Chart from '../../components/Chart/Chart';
+import EmptyState from '../../components/EmptyState/EmptyState';
 
 const History: React.FC = () => {
     useScreenTime('History');
@@ -212,14 +213,11 @@ const History: React.FC = () => {
                             </T>
                         </View>
                     ) : items.length === 0 ? (
-                        <View style={styles.empty}>
-                            <T size={fontSize.subtitle} weight="600" color="#6B7280">
-                                {t('history.emptyTitle')}
-                            </T>
-                            <T size={fontSize.body} color="#9CA3AF" style={{ marginTop: 8 }}>
-                                {t('history.emptySub')}
-                            </T>
-                        </View>
+                        <EmptyState
+                            title={t('history.emptyTitle')}
+                            subtitle={t('history.emptySub')}
+                            style={styles.empty}
+                        />
                     ) : (
                         <FlatList
                             data={items}

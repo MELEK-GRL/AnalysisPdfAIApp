@@ -1,12 +1,13 @@
 // src/components/Chart.tsx
 // Yaşlı dostu, şık tahlil sonucu gösterimi
 import React, { useMemo, useState } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import type { LabItem } from '../../server/api/Lab';
 import { useResponsive } from '../../utils/deviceStore/device';
 import { useT } from '../../store/useLocaleStore';
 import T from '../../components/Text/T';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
 
@@ -118,17 +119,6 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
                     paddingHorizontal: 12 * w1px,
                     borderRadius: 999,
                 },
-                placeholder: {
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '70%',
-                },
-                imageView: {
-                    alignSelf: 'center',
-                    width: 80 * w1px,
-                    height: 80 * h1px,
-                    resizeMode: 'contain',
-                },
             }),
         [w1px, h1px],
     );
@@ -144,15 +134,10 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
 
     if (!filtered.length) {
         return (
-            <View style={s.placeholder}>
-                <Image
-                    source={require('../../assets/icons/noData.png')}
-                    style={s.imageView}
-                />
-                <T size={fontSize.subtitle} weight="700" color="#6B7280">
-                    {t('history.noData')}
-                </T>
-            </View>
+            <EmptyState
+                title={t('history.noData')}
+                style={{ height: '70%' }}
+            />
         );
     }
 

@@ -138,6 +138,7 @@ yarn android
 | `Unable to load script` | Metro çalışıyor mu kontrol edin, `yarn start` ile yeniden başlatın |
 | `Unsupported class file major version 68` | JDK 17 kullanın (Bölüm 2) |
 | Gradle build fail | `cd android && ./gradlew clean` sonra tekrar deneyin |
+| `Could not determine a usable wildcard IP` | `gradle.properties` içinde `org.gradle.jvmargs` satırına `-Djava.net.preferIPv4Stack=true` ekleyin |
 | `ENOENT debugger-frontend rn_fusebox.html` | Metro cache temizle: `yarn start --reset-cache` veya temiz kurulum (aşağıya bakın) |
 
 ---

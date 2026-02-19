@@ -316,16 +316,13 @@ const Home: React.FC = () => {
                                     width={h1px * 200}
                                 />
 
-                                <View style={styles.fileView}>
-                                    {fileName && (
+                                {fileName && (
+                                    <View style={styles.fileView}>
                                         <T size={fontSize.subtitle} color="#232426ff">
                                             {t('home.selected')}: {fileName}
                                         </T>
-                                    )}
-                                    <T size={fontSize.body} color="#232426ff">
-                                        {t('home.pdfHint')}
-                                    </T>
-                                </View>
+                                    </View>
+                                )}
 
                                 <View style={styles.resultCard}>
                                     <T

@@ -168,14 +168,14 @@ const History: React.FC = () => {
             activeOpacity={0.7}>
             <View style={styles.cardContent}>
                 <View style={styles.cardTitle}>
-                    <T size={fontSize.bodyMedium} weight="600" color="#111827" numberOfLines={1} style={{ flex: 1 }}>
+                    <T size={fontSize.subtitle} weight="600" color="#111827" numberOfLines={1} style={{ flex: 1 }}>
                         {item.pdfName || t('history.labReport')}
                     </T>
-                    <T size={fontSize.captionLarge} color="#9CA3AF" style={{ marginLeft: 8 }}>
+                    <T size={fontSize.bodySmall} color="#9CA3AF" style={{ marginLeft: 8 }}>
                         {formatDate(item.createdAt)}
                     </T>
                 </View>
-                <T size={fontSize.bodySmall} color="#6B7280">
+                <T size={fontSize.body} color="#6B7280">
                     {item.itemCount > 0
                         ? `${item.itemCount} ${t('history.paramCount')}`
                         : t('history.notLabReport')}

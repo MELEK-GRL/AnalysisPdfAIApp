@@ -10,6 +10,7 @@ import { getProfile } from '../server/api/User';
 import { fontSize } from '../constants/typography';
 import { iconSize } from '../constants/icons';
 import { AUTH_TOKEN, CONSENT_GIVEN_ONCE } from '../constants/storageKeys';
+import colors from '../theme/colors';
 
 import Home from '../screens/Home';
 import History from '../screens/History';
@@ -35,29 +36,36 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
-const MIN_TAP_HEIGHT = 48; // 48dp Android / 44pt+ iOS accessibility
 const MainTabs = () => {
     const t = useLocaleStore((s) => s.t);
     return (
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: '#7453E0',
-                tabBarInactiveTintColor: '#9CA3AF',
-                tabBarLabelStyle: { fontSize: fontSize.label },
+                tabBarActiveTintColor: colors.backgroundPurple,
+                tabBarInactiveTintColor: '#A1A1AA',
+                tabBarLabelStyle: {
+                    fontSize: fontSize.label,
+                    fontWeight: '600',
+                },
                 tabBarStyle: {
                     backgroundColor: '#fff',
                     borderTopWidth: 1,
-                    borderTopColor: '#E5E7EB',
+                    borderTopColor: '#F3F4F6',
+                    height: 60,
+                    paddingTop: 6,
+                    paddingBottom: 6,
+                    elevation: 8,
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: -2 },
-                    shadowOpacity: 0.06,
+                    shadowOpacity: 0.04,
                     shadowRadius: 8,
-                    elevation: 8,
                 },
                 tabBarItemStyle: {
-                    minHeight: MIN_TAP_HEIGHT,
-                    paddingTop: 6,
+                    paddingVertical: 0,
+                },
+                tabBarIconStyle: {
+                    marginBottom: 0,
                 },
             }}>
             <Tab.Screen

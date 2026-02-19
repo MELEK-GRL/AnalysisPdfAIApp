@@ -45,7 +45,7 @@
 
 ## Fazlar
 
-**Durum:** Faz 6 tamamlandı. Play Store hazırlık ertelendi.
+**Durum:** Faz 8 tamamlandı. Play Store hazırlık ertelendi.
 
 | Faz | İçerik | Durum |
 |-----|--------|-------|
@@ -56,6 +56,7 @@
 | 4 | Backend + mobil testler | ✓ |
 | 5 | Clean code refaktör | ✓ |
 | 6 | **Geliştirme tamamlama** – bug fix, stabilite, temizlik | ✓ |
+| 8 | **Hata düzeltmeleri / İyileştirmeler** – Geçmiş API hataları, UX | ✓ |
 | **7 (Son Faz)** | **Play Store / Canlı yayın hazırlığı** – ertelendi, canlıya alınacak zaman | ertelendi |
 
 ---

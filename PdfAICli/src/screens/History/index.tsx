@@ -12,6 +12,7 @@ import { useResponsive } from '../../utils/deviceStore/device';
 import { getLabHistory, getLabHistoryItem, LabHistoryItem, LabHistoryDetail } from '../../server/api/Lab';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
+import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
 import Header from '../../components/Header/Header';
 import PageLayout from '../../components/Layout/PageLayout';
@@ -32,6 +33,7 @@ const History: React.FC = () => {
     const [detailLoading, setDetailLoading] = useState(false);
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [errorSource, setErrorSource] = useState<'fetch' | 'detail'>('fetch');
     const t = useLocaleStore((s) => s.t);
     const { w1px, h1px, fs1px } = useResponsive();
 
@@ -44,13 +46,17 @@ const History: React.FC = () => {
             setItems(history);
             if (me?.name) setDisplayName(me.name);
         } catch (e) {
-            setErrorMessage(t('history.fetchError'));
+            const msg = isNetworkError(e)
+                ? t('history.fetchErrorNetwork')
+                : t('history.fetchErrorServer');
+            setErrorMessage(msg);
+            setErrorSource('fetch');
             setErrorVisible(true);
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         fetchHistory();
@@ -58,6 +64,12 @@ const History: React.FC = () => {
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
+        fetchHistory();
+    }, [fetchHistory]);
+
+    const handleRetry = useCallback(() => {
+        setErrorVisible(false);
+        setLoading(true);
         fetchHistory();
     }, [fetchHistory]);
 
@@ -70,11 +82,12 @@ const History: React.FC = () => {
             setSelectedDetail(detail);
         } catch (e) {
             setErrorMessage(t('history.detailError'));
+            setErrorSource('detail');
             setErrorVisible(true);
         } finally {
             setDetailLoading(false);
         }
-    }, []);
+    }, [t]);
 
     const formatDate = (s: string) => {
         const d = new Date(s);
@@ -250,8 +263,10 @@ const History: React.FC = () => {
                 title={t('common.error')}
                 message={errorMessage}
                 type="error"
-                rightButtonText={t('common.ok')}
-                onRightPress={() => setErrorVisible(false)}
+                leftButtonText={errorSource === 'fetch' ? t('common.close') : undefined}
+                rightButtonText={errorSource === 'fetch' ? t('common.retry') : t('common.ok')}
+                onLeftPress={errorSource === 'fetch' ? () => setErrorVisible(false) : undefined}
+                onRightPress={errorSource === 'fetch' ? handleRetry : () => setErrorVisible(false)}
             />
         </View>
     );

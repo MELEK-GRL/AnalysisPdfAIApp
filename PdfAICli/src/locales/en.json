@@ -8,7 +8,8 @@
     "error": "Error",
     "warning": "Warning",
     "loading": "Loading...",
-    "back": "Back"
+    "back": "Back",
+    "retry": "Retry"
   },
   "header": {
     "welcome": "Welcome"
@@ -86,6 +87,8 @@
     "labReport": "Lab report",
     "notLabReport": "Not a lab report",
     "fetchError": "Could not load history. Please try again.",
+    "fetchErrorNetwork": "Could not connect to server. Please check your internet connection and that the backend is running.",
+    "fetchErrorServer": "Server error occurred. Please try again later.",
     "detailError": "Could not load detail."
   },
   "tabs": {

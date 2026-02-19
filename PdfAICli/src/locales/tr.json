@@ -8,7 +8,8 @@
     "error": "Hata",
     "warning": "Uyarı",
     "loading": "Yükleniyor...",
-    "back": "Geri"
+    "back": "Geri",
+    "retry": "Tekrar Dene"
   },
   "header": {
     "welcome": "Hoş geldin"
@@ -86,6 +87,8 @@
     "labReport": "Tahlil raporu",
     "notLabReport": "Tahlil raporu değil",
     "fetchError": "Geçmiş yüklenemedi. Lütfen tekrar deneyin.",
+    "fetchErrorNetwork": "Sunucuya bağlanılamadı. İnternet bağlantınızı ve backend'in çalıştığını kontrol edin.",
+    "fetchErrorServer": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.",
     "detailError": "Detay alınamadı."
   },
   "tabs": {

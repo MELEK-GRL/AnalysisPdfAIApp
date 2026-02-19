@@ -255,6 +255,46 @@
 
 ---
 
+## FAZ 8 – Hata Düzeltmeleri / İyileştirmeler
+
+### Sprint 8.1 – Geçmiş / API Hata Düzeltmesi ✓ Tamamlandı
+
+**Sorun:** Geçmiş sekmesinde "Geçmiş yüklenemedi. Lütfen tekrar deneyin." hatası, backend erişilemez olduğunda veya ağ sorununda tetikleniyor.
+
+### Görevler
+- [x] Geçmiş yükleme hatası: Daha açıklayıcı mesaj (örn. "Sunucuya bağlanılamadı. İnternet bağlantınızı ve backend'in çalıştığını kontrol edin.")
+- [x] Hata modalında "Tekrar Dene" butonu ekle (fetchHistory yeniden çağrılsın)
+- [x] Ağ hatası (Network Error, timeout) ile sunucu hatası (401, 500) ayrımı – kullanıcıya uygun mesaj
+- [x] Tab bar ikonları: Ionicons eklendi – fonts.gradle ve Info.plist doğrulandı
+
+**→ Tamamlandı. Sprint 8.2 zaten tamamlanmıştı.**
+
+---
+
+### Sprint 8.2 – Gizlilik politikası Ayarlar'dan kaldırma
+
+**Bağlam:** Gizlilik politikası kullanıcı kayıt olmadan önce SplashTwo ekranında kabul edilir ve DB'ye eklenir.
+
+**Görev:**
+- [x] Ayarlar ekranından "Gizlilik Politikası" satırını kaldır (SplashTwo'da zaten kabul ediliyor) ✓ Tamamlandı
+
+**→ Tamamlandıktan sonra izin al, Sprint 8.3'e geç**
+
+---
+
+### Sprint 8.3 – Çıkış Yap onay modalı ✓ Tamamlandı
+
+**Görev:**
+- [x] Ayarlar'da "Çıkış Yap" tıklandığında önce onay modalı göster: "Oturumu kapatmak istiyor musun?" – "Evet, Çıkış Yap" / "Vazgeç"
+
+**→ Tamamlandı. Bir sonraki sprinte geç.**
+
+---
+
+### Sprint 8.4 – *(ileride eklenebilir)*
+
+---
+
 ## FAZ 7 – Play Store Hazırlık *(ertelendi – canlıya alınacak zaman)*
 
 ### Sprint 7.1 – Teknik hazırlık

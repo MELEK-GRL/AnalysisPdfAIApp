@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useLocaleStore } from '../store/useLocaleStore';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -45,12 +46,30 @@ const MainTabs = () => {
             <Tab.Screen
                 name="Analiz"
                 component={Home}
-                options={{ title: t('tabs.analysis') }}
+                options={{
+                    title: t('tabs.analysis'),
+                    tabBarIcon: ({ focused, color, size }) => (
+                        <Ionicons
+                            name={focused ? 'document-text' : 'document-text-outline'}
+                            size={size}
+                            color={color}
+                        />
+                    ),
+                }}
             />
             <Tab.Screen
                 name="Geçmiş"
                 component={History}
-                options={{ title: t('tabs.history') }}
+                options={{
+                    title: t('tabs.history'),
+                    tabBarIcon: ({ focused, color, size }) => (
+                        <Ionicons
+                            name={focused ? 'time' : 'time-outline'}
+                            size={size}
+                            color={color}
+                        />
+                    ),
+                }}
             />
         </Tab.Navigator>
     );

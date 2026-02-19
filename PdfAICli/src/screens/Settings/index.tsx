@@ -1,10 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useLocaleStore } from '../../store/useLocaleStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
+import PopupModal from '../../components/Modals/PopupModal';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
 
@@ -12,6 +14,8 @@ const Settings: React.FC = () => {
     const nav = useNavigation<any>();
     useScreenTime('Settings');
     const { locale, setLocale, t } = useLocaleStore();
+    const logout = useAuthStore(s => s.logout);
+    const [logoutModalVisible, setLogoutModalVisible] = useState(false);
     const { w1px, h1px, fs1px } = useResponsive();
 
     const styles = useMemo(
@@ -78,6 +82,16 @@ const Settings: React.FC = () => {
         [w1px, h1px, fs1px],
     );
 
+    const handleLogoutConfirm = useCallback(async () => {
+        setLogoutModalVisible(false);
+        try {
+            await logout();
+            nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
+        } catch (_) {
+            setLogoutModalVisible(true);
+        }
+    }, [logout, nav]);
+
     return (
         <GradientLayout>
             <View style={styles.container}>
@@ -120,23 +134,24 @@ const Settings: React.FC = () => {
                 </View>
 
                 <TouchableOpacity
-                    style={styles.row}
-                    onPress={() => nav.navigate('PrivacyPolicy')}
-                    activeOpacity={0.8}>
-                    <T size={16} weight="500" color="#111827">
-                        {t('settings.privacyPolicy')}
-                    </T>
-                </TouchableOpacity>
-
-                <TouchableOpacity
                     style={styles.logoutRow}
-                    onPress={() => nav.navigate('Logout')}
+                    onPress={() => setLogoutModalVisible(true)}
                     activeOpacity={0.8}>
                     <T size={16} weight="600" color="#DC2626">
                         {t('settings.logout')}
                     </T>
                 </TouchableOpacity>
             </View>
+
+            <PopupModal
+                visible={logoutModalVisible}
+                title={t('logout.title')}
+                type="info"
+                leftButtonText={t('logout.cancel')}
+                rightButtonText={t('logout.confirm')}
+                onLeftPress={() => setLogoutModalVisible(false)}
+                onRightPress={handleLogoutConfirm}
+            />
         </GradientLayout>
     );
 };

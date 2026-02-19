@@ -3,6 +3,7 @@ import { View, StyleSheet, Modal } from 'react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import Button from '../Buttons/Button';
+import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
 
 type Props = {
@@ -14,6 +15,8 @@ type Props = {
     rightButtonText?: string;
     onLeftPress?: () => void;
     onRightPress?: () => void;
+    leftButtonBackgroundColor?: string;
+    rightButtonBackgroundColor?: string;
 };
 
 const CenterModal: React.FC<Props> = ({
@@ -25,6 +28,8 @@ const CenterModal: React.FC<Props> = ({
     rightButtonText,
     onLeftPress,
     onRightPress,
+    leftButtonBackgroundColor = colors.backgroundPurple,
+    rightButtonBackgroundColor = colors.backgroundPurple,
 }) => {
     const { w1px, h1px, fs1px } = useResponsive();
     const hasChildren = !!children;
@@ -42,6 +47,7 @@ const CenterModal: React.FC<Props> = ({
                     width: hasChildren ? '95%' : 320 * w1px,
                     maxWidth: 400,
                     maxHeight: '85%',
+                    ...(hasChildren && { height: '85%' }),
                     backgroundColor: '#fff',
                     borderRadius: 8 * w1px,
                     paddingVertical: 20 * h1px,
@@ -59,11 +65,17 @@ const CenterModal: React.FC<Props> = ({
                     width: '100%',
                     gap: 12 * w1px,
                     marginTop: 20 * h1px,
+                    flexShrink: 0,
+                },
+                buttonHalf: {
+                    flex: 1,
+                    minWidth: 0,
                 },
                 contentWrap: {
                     marginTop: 6 * h1px,
                     alignItems: 'center',
                     width: '100%',
+                    ...(hasChildren && { flex: 1, minHeight: 0 }),
                 },
             }),
         [w1px, h1px, fs1px, hasChildren],
@@ -98,19 +110,22 @@ const CenterModal: React.FC<Props> = ({
                         {(leftButtonText || rightButtonText) && (
                             <View style={styles.buttonRow}>
                                 {leftButtonText && (
-                                    <Button
-                                        buttonText={leftButtonText}
-                                        onPress={onLeftPress}
-                                        width={h1px * 160}
-                                    />
+                                    <View style={styles.buttonHalf}>
+                                        <Button
+                                            buttonText={leftButtonText}
+                                            onPress={onLeftPress}
+                                            backgroundColor={leftButtonBackgroundColor}
+                                        />
+                                    </View>
                                 )}
-
                                 {rightButtonText && (
-                                    <Button
-                                        buttonText={rightButtonText}
-                                        onPress={onRightPress}
-                                        width={h1px * 160}
-                                    />
+                                    <View style={styles.buttonHalf}>
+                                        <Button
+                                            buttonText={rightButtonText}
+                                            onPress={onRightPress}
+                                            backgroundColor={rightButtonBackgroundColor}
+                                        />
+                                    </View>
                                 )}
                             </View>
                         )}

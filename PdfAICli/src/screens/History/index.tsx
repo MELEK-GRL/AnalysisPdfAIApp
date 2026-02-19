@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
-import { getLabHistory, getLabHistoryItem, LabHistoryItem, LabHistoryDetail } from '../../server/api/Lab';
+import { getLabHistory, getLabHistoryItem, deleteLabHistoryItem, LabHistoryItem, LabHistoryDetail } from '../../server/api/Lab';
 import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { isNetworkError } from '../../utils/errorUtils';
@@ -240,7 +240,22 @@ const History: React.FC = () => {
             <CenterModal
                 visible={detailModal}
                 title={selectedDetail?.pdfName || t('history.detailTitle')}
+                leftButtonText={t('common.delete')}
                 rightButtonText={t('common.close')}
+                leftButtonBackgroundColor="#DC2626"
+                onLeftPress={async () => {
+                    if (selectedDetail) {
+                        try {
+                            await deleteLabHistoryItem(selectedDetail.id);
+                            setItems((prev) => prev.filter((i) => i.id !== selectedDetail.id));
+                            setDetailModal(false);
+                        } catch (err) {
+                            setErrorMessage(t('history.fetchErrorServer'));
+                            setErrorSource('fetch');
+                            setErrorVisible(true);
+                        }
+                    }
+                }}
                 onRightPress={() => setDetailModal(false)}>
                 <ScrollView
                     style={styles.detailModalView}

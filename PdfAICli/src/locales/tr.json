@@ -4,6 +4,7 @@
     "genericError": "Bir hata oluştu",
     "cancel": "İptal",
     "close": "Kapat",
+    "delete": "Sil",
     "understand": "Anladım",
     "error": "Hata",
     "warning": "Uyarı",
@@ -62,6 +63,7 @@
   "home": {
     "dragOrSelect": "Sürükle veya Seç",
     "uploadPdf": "Tahlil Raporunu Yükle",
+    "newPdfUpload": "Yeni PDF Yükle",
     "send": "Gönder",
     "selected": "Seçilen",
     "pdfHint": "Sadece PDF kabul edilir. Max ~10MB önerilir.",

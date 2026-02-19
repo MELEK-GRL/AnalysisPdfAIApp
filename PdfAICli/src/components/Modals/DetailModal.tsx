@@ -1,5 +1,5 @@
 import React, { useMemo, ReactNode } from 'react';
-import { View, StyleSheet, TouchableWithoutFeedback, Modal } from 'react-native';
+import { View, StyleSheet, Modal, Dimensions } from 'react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import Button from '../Buttons/Button';
@@ -29,26 +29,21 @@ const DetailModal: React.FC<Props> = ({
 }) => {
     const { w1px, h1px, fs1px } = useResponsive();
 
-    const styles = useMemo(
-        () =>
-            StyleSheet.create({
+    const styles = useMemo(() => {
+        const { width, height } = Dimensions.get('window');
+        return StyleSheet.create({
                 overlay: {
-                    flex: 1,
-                    backgroundColor: 'rgba(17, 24, 39, 0.4)',
-                    justifyContent: 'center',
-                    alignItems: 'center',
+                    width,
+                    height,
+                    backgroundColor: colors.white,
                 },
                 box: {
-                    width: '95%',
+                    flex: 1,
+                    width: '100%',
                     backgroundColor: colors.white,
-                    borderRadius: 8 * w1px,
                     paddingVertical: 18 * h1px,
-                    paddingHorizontal: 8 * w1px,
-                    alignItems: 'center',
-                    shadowColor: '#000',
-                    shadowOpacity: 0.15,
-                    shadowRadius: 10 * w1px,
-                    elevation: 5,
+                    paddingHorizontal: 16 * w1px,
+                    alignItems: 'stretch',
                 },
                 buttonRow: {
                     flexDirection: 'row',
@@ -58,23 +53,25 @@ const DetailModal: React.FC<Props> = ({
                     marginTop: 20 * h1px,
                 },
                 contentWrap: {
+                    flex: 1,
                     marginTop: 6 * h1px,
-                    alignItems: 'center',
                     width: '100%',
                 },
-            }),
-        [w1px, h1px, fs1px],
-    );
+            });
+    }, [w1px, h1px, fs1px]);
 
     if (!visible) {
         return null;
     }
 
     return (
-        <Modal visible={visible} transparent animationType="fade">
-            <TouchableWithoutFeedback>
-                <View style={styles.overlay}>
-                    <View style={styles.box}>
+        <Modal
+            visible={visible}
+            animationType="slide"
+            statusBarTranslucent
+            presentationStyle="fullScreen">
+            <View style={styles.overlay}>
+                <View style={styles.box}>
                         <T
                             size={fontSize.title}
                             weight="700"
@@ -116,8 +113,7 @@ const DetailModal: React.FC<Props> = ({
                             </View>
                         )}
                     </View>
-                </View>
-            </TouchableWithoutFeedback>
+            </View>
         </Modal>
     );
 };

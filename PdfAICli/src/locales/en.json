@@ -4,6 +4,7 @@
     "genericError": "An error occurred",
     "cancel": "Cancel",
     "close": "Close",
+    "delete": "Delete",
     "understand": "Got it",
     "error": "Error",
     "warning": "Warning",
@@ -62,6 +63,7 @@
   "home": {
     "dragOrSelect": "Drag or Select",
     "uploadPdf": "Upload Lab Report",
+    "newPdfUpload": "Upload New PDF",
     "send": "Send",
     "selected": "Selected",
     "pdfHint": "Only PDF accepted. Max ~10MB recommended.",

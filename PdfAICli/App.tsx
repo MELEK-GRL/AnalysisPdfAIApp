@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
+import { View } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
+import AnalysisModalRoot from './src/components/Modals/AnalysisModalRoot';
 import { Dimensions, AppState, AppStateStatus } from 'react-native';
 import useDeviceStore from './src/store/useDeviceStore';
-import { useAuthStore } from './src/store/useAuthStore';
 const App = () => {
   const setDimensions = useDeviceStore(state => state.setDimensions);
   const appState = useRef(AppState.currentState);
@@ -29,7 +30,12 @@ const App = () => {
     const stateSub = AppState.addEventListener('change', handleAppStateChange);
     return () => stateSub.remove();
   }, []);
-  return <AppNavigator />;
+  return (
+    <View style={{ flex: 1 }}>
+      <AppNavigator />
+      <AnalysisModalRoot />
+    </View>
+  );
 };
 
 export default App;

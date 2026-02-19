@@ -29,7 +29,7 @@ import T from '../../components/Text/T';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
-import DetailModal from '../../components/Modals/DetailModal';
+import { useAnalysisModalStore } from '../../store/useAnalysisModalStore';
 import Header from '../../components/Header/Header';
 
 type Phase = 'idle' | 'loading' | 'result';
@@ -39,7 +39,6 @@ const Home: React.FC = () => {
     useScreenTime('Home');
     const [phase, setPhase] = useState<Phase>('idle');
     const [fileName, setFileName] = useState<string | null>(null);
-    const [commentModal, setCommentModal] = useState<boolean>(false);
     const [pickedFile, setPickedFile] = useState<DocumentPickerResponse | null>(
         null,
     );
@@ -54,6 +53,7 @@ const Home: React.FC = () => {
     const [uploadErrorVisible, setUploadErrorVisible] = useState(false);
     const [uploadErrorMessage, setUploadErrorMessage] = useState<string>('');
     const [rateLimitModalVisible, setRateLimitModalVisible] = useState(false);
+    const [showUploadArea, setShowUploadArea] = useState(true);
     const t = useT();
     const resetTrigger = useAnalizResetStore((s) => s.resetTrigger);
     const { w1px, h1px, fs1px } = useResponsive();
@@ -64,6 +64,7 @@ const Home: React.FC = () => {
         setPickedFile(null);
         setItems([]);
         setAnalysis('');
+        setShowUploadArea(true);
         setSelectErrorVisible(false);
         setUploadSuccessVisible(false);
         setNotLabVisible(false);
@@ -166,7 +167,7 @@ const Home: React.FC = () => {
                 },
                 buttonView: { paddingTop: h1px * 18, paddingBottom: h1px * 16 },
                 detailModalView: {
-                    height: h1px * 600,
+                    flex: 1,
                     width: '100%',
                     paddingHorizontal: 12 * w1px,
                 },
@@ -236,6 +237,7 @@ const Home: React.FC = () => {
                 setItems(data.items || []);
                 setAnalysis(data.analysis || '');
                 setPhase('result');
+                setShowUploadArea(false);
                 setUploadSuccessVisible(true);
             } else {
                 setItems([]);
@@ -263,65 +265,166 @@ const Home: React.FC = () => {
             <PageLayout>
                 <ScrollView
                     style={styles.scrollView}
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
+                    contentContainerStyle={{ flexGrow: 1, paddingTop: 16, paddingBottom: 24 }}
                     showsVerticalScrollIndicator={false}
                     bounces={true}>
                     <View style={styles.cardContainer}>
                         <View style={styles.cardView}>
                             <View style={styles.card}>
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        trackButtonClick('select_pdf', { screen: 'Home' });
-                                        handleSelectPdf();
-                                    }}
-                                    disabled={phase === 'loading'}
-                                    activeOpacity={0.8}
-                                    style={styles.uploadCard}>
-                                    <T
-                                        size={fontSize.body}
-                                        color="#6B7280"
-                                        style={styles.uploadCardTop}>
-                                        {t('home.dragOrSelect')}
-                                    </T>
-                                    <View style={styles.uploadCardContent}>
-                                        <View style={styles.uploadIconWrap}>
-                                            <Ionicons
-                                                name="cloud-upload"
-                                                size={iconSize.xxl}
-                                                color={colors.backgroundPurple}
-                                            />
-                                        </View>
-                                        <View style={styles.uploadTextWrap}>
+                                {(items.length === 0 || showUploadArea) ? (
+                                    <>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                trackButtonClick('select_pdf', { screen: 'Home' });
+                                                handleSelectPdf();
+                                            }}
+                                            disabled={phase === 'loading'}
+                                            activeOpacity={0.8}
+                                            style={styles.uploadCard}>
                                             <T
-                                                size={fontSize.subtitle}
-                                                weight="700"
-                                                color="#111827"
-                                                style={{ marginBottom: 4 }}>
-                                                {t('home.uploadPdf')}
+                                                size={fontSize.body}
+                                                color="#6B7280"
+                                                style={styles.uploadCardTop}>
+                                                {t('home.dragOrSelect')}
                                             </T>
-                                            <T size={fontSize.bodySmall} color="#9CA3AF">
-                                                {t('home.pdfHint')}
-                                            </T>
-                                        </View>
-                                    </View>
-                                </TouchableOpacity>
+                                            <View style={styles.uploadCardContent}>
+                                                <View style={styles.uploadIconWrap}>
+                                                    <Ionicons
+                                                        name="cloud-upload"
+                                                        size={iconSize.xxl}
+                                                        color={colors.backgroundPurple}
+                                                    />
+                                                </View>
+                                                <View style={styles.uploadTextWrap}>
+                                                    <T
+                                                        size={fontSize.subtitle}
+                                                        weight="700"
+                                                        color="#111827"
+                                                        style={{ marginBottom: 4 }}>
+                                                        {t('home.uploadPdf')}
+                                                    </T>
+                                                    <T size={fontSize.bodySmall} color="#9CA3AF">
+                                                        {t('home.pdfHint')}
+                                                    </T>
+                                                </View>
+                                            </View>
+                                        </TouchableOpacity>
 
-                                <Button
-                                    buttonText={t('home.send')}
-                                    onPress={() => {
-                                        trackButtonClick('send_pdf', { screen: 'Home' });
-                                        handleSendPdf();
-                                    }}
-                                    disabled={!pickedFile || phase === 'loading'}
-                                    width={h1px * 200}
-                                />
+                                        <Button
+                                            buttonText={t('home.send')}
+                                            onPress={() => {
+                                                trackButtonClick('send_pdf', { screen: 'Home' });
+                                                handleSendPdf();
+                                            }}
+                                            disabled={!pickedFile || phase === 'loading'}
+                                            width={h1px * 200}
+                                        />
 
-                                {fileName && (
-                                    <View style={styles.fileView}>
-                                        <T size={fontSize.subtitle} color="#232426ff">
-                                            {t('home.selected')}: {fileName}
+                                        {fileName && (
+                                            <View
+                                                style={{
+                                                    flexDirection: 'row',
+                                                    alignItems: 'center',
+                                                    gap: 10 * w1px,
+                                                    backgroundColor: colors.backgroundPurpleSoft,
+                                                    paddingVertical: 10 * h1px,
+                                                    paddingHorizontal: 14 * w1px,
+                                                    borderRadius: 12 * w1px,
+                                                    borderWidth: 1,
+                                                    borderColor: colors.backgroundPurple + '25',
+                                                    marginTop: 8 * h1px,
+                                                }}>
+                                                <View
+                                                    style={{
+                                                        width: 36 * w1px,
+                                                        height: 36 * w1px,
+                                                        borderRadius: 8,
+                                                        backgroundColor: colors.white,
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                    }}>
+                                                    <Ionicons
+                                                        name="document-text"
+                                                        size={iconSize.medium}
+                                                        color={colors.backgroundPurple}
+                                                    />
+                                                </View>
+                                                <View style={{ flex: 1 }}>
+                                                    <T
+                                                        size={fontSize.bodySmall}
+                                                        color="#6B7280"
+                                                        numberOfLines={1}>
+                                                        {t('home.selected')}
+                                                    </T>
+                                                    <T
+                                                        size={fontSize.subtitle}
+                                                        weight="600"
+                                                        color="#111827"
+                                                        numberOfLines={1}
+                                                        style={{ marginTop: 2 }}>
+                                                        {fileName}
+                                                    </T>
+                                                </View>
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setPickedFile(null);
+                                                        setFileName(null);
+                                                    }}
+                                                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                                                    style={{ padding: 4 }}>
+                                                    <Ionicons
+                                                        name="trash-outline"
+                                                        size={iconSize.medium}
+                                                        color="#DC2626"
+                                                    />
+                                                </TouchableOpacity>
+                                                <Ionicons
+                                                    name="checkmark-circle"
+                                                    size={iconSize.medium}
+                                                    color={colors.backgroundPurple}
+                                                />
+                                            </View>
+                                        )}
+                                    </>
+                                ) : (
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            trackButtonClick('show_upload_area', { screen: 'Home' });
+                                            setShowUploadArea(true);
+                                        }}
+                                        activeOpacity={0.7}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            alignSelf: 'center',
+                                            gap: 8 * w1px,
+                                            paddingVertical: 12 * h1px,
+                                            paddingHorizontal: 16 * w1px,
+                                            backgroundColor: colors.backgroundPurpleSoft,
+                                            borderRadius: 12 * w1px,
+                                            borderWidth: 1,
+                                            borderColor: colors.backgroundPurple + '40',
+                                            borderStyle: 'dashed',
+                                            marginTop: 12 * h1px,
+                                            marginBottom: 8 * h1px,
+                                        }}>
+                                        <Ionicons
+                                            name="cloud-upload-outline"
+                                            size={iconSize.medium}
+                                            color={colors.backgroundPurple}
+                                        />
+                                        <T
+                                            size={fontSize.body}
+                                            weight="600"
+                                            color={colors.backgroundPurple}>
+                                            {t('home.newPdfUpload')}
                                         </T>
-                                    </View>
+                                        <Ionicons
+                                            name="chevron-down"
+                                            size={iconSize.small}
+                                            color={colors.backgroundPurple}
+                                        />
+                                    </TouchableOpacity>
                                 )}
 
                                 <View style={styles.resultCard}>
@@ -339,7 +442,59 @@ const Home: React.FC = () => {
                                                 trackButtonClick('interpret_result', {
                                                     screen: 'Home',
                                                 });
-                                                setCommentModal(true);
+                                                useAnalysisModalStore.getState().open({
+                                                    title: t('home.analysisTitle'),
+                                                    content: (
+                                                        <ScrollView
+                                                            style={styles.detailModalView}
+                                                            showsVerticalScrollIndicator={false}
+                                                            showsHorizontalScrollIndicator={false}>
+                                                            <Pressable>
+                                                                <View>
+                                                                    <View style={styles.pill}>
+                                                                        <T size={fontSize.label} weight="700" color="#111827">
+                                                                            ANALİZ
+                                                                        </T>
+                                                                    </View>
+                                                                    {analysis ? (
+                                                                        analysis.split(/\n+/).map((line, idx) => (
+                                                                            <T
+                                                                                key={idx}
+                                                                                size={fontSize.body}
+                                                                                color="#111827"
+                                                                                style={{ marginBottom: 6 * h1px }}>
+                                                                                {line}
+                                                                            </T>
+                                                                        ))
+                                                                    ) : (
+                                                                        <T size={fontSize.body} color="#111827">
+                                                                            {t('home.noAnalysis')}
+                                                                        </T>
+                                                                    )}
+                                                                    <View style={styles.sectionGap} />
+                                                                    <View style={styles.pill}>
+                                                                        <T size={fontSize.label} weight="700" color="#111827">
+                                                                            {t('home.suggestions')}
+                                                                        </T>
+                                                                    </View>
+                                                                    <T size={fontSize.body} color="#111827">
+                                                                        {t('home.suggestionsText')}
+                                                                    </T>
+                                                                    <View style={styles.sectionGap} />
+                                                                    <View style={[styles.pill, { backgroundColor: '#FEF2F2' }]}>
+                                                                        <T size={fontSize.label} weight="700" color="#991B1B">
+                                                                            {t('home.importantWarning')}
+                                                                        </T>
+                                                                    </View>
+                                                                    <T size={fontSize.body} color="#991B1B">
+                                                                        {t('home.disclaimer')}
+                                                                    </T>
+                                                                </View>
+                                                            </Pressable>
+                                                        </ScrollView>
+                                                    ),
+                                                    onClose: () => {},
+                                                });
                                             }}
                                             activeOpacity={0.7}
                                             style={{
@@ -381,65 +536,6 @@ const Home: React.FC = () => {
                             </View>
                         </View>
                     </View>
-
-                    {/* ANALİZ MODALI */}
-                    <DetailModal
-                        visible={commentModal}
-                        title={t('home.analysisTitle')}
-                        rightButtonText={t('common.close')}
-                        onRightPress={() => setCommentModal(false)}>
-                        <ScrollView
-                            style={styles.detailModalView}
-                            showsVerticalScrollIndicator={false}
-                            showsHorizontalScrollIndicator={false}>
-                            <Pressable>
-                                <View>
-                                    <View style={styles.pill}>
-                                        <T size={fontSize.label} weight="700" color="#111827">
-                                            ANALİZ
-                                        </T>
-                                    </View>
-
-                                    {analysis ? (
-                                        analysis.split(/\n+/).map((line, idx) => (
-                                            <T
-                                                key={idx}
-                                                size={fontSize.body}
-                                                color="#111827"
-                                                style={{ marginBottom: 6 * h1px }}>
-                                                {line}
-                                            </T>
-                                        ))
-                                    ) : (
-                                        <>
-                                            <T size={fontSize.body} color="#111827">
-                                                {t('home.noAnalysis')}
-                                            </T>
-                                        </>
-                                    )}
-
-                                    <View style={styles.sectionGap} />
-                                    <View style={styles.pill}>
-                                        <T size={fontSize.label} weight="700" color="#111827">
-                                            {t('home.suggestions')}
-                                        </T>
-                                    </View>
-                                    <T size={fontSize.body} color="#111827">
-                                        {t('home.suggestionsText')}
-                                    </T>
-                                    <View style={styles.sectionGap} />
-                                    <View style={[styles.pill, { backgroundColor: '#FEF2F2' }]}>
-                                        <T size={fontSize.label} weight="700" color="#991B1B">
-                                            {t('home.importantWarning')}
-                                        </T>
-                                    </View>
-                                    <T size={fontSize.body} color="#991B1B">
-                                        {t('home.disclaimer')}
-                                    </T>
-                                </View>
-                            </Pressable>
-                        </ScrollView>
-                    </DetailModal>
 
                     <PopupModal
                         visible={selectErrorVisible}

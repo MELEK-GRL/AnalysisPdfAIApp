@@ -47,6 +47,22 @@ router.get('/history/:id', async (req, res) => {
     }
 });
 
+router.delete('/history/:id', async (req, res) => {
+    try {
+        const result = await LabHistory.findOneAndDelete({
+            _id: req.params.id,
+            user: req.user._id,
+        });
+        if (!result) {
+            return res.status(404).json({ message: 'Kayıt bulunamadı' });
+        }
+        return res.json({ success: true });
+    } catch (e) {
+        console.error('LABS/HISTORY/:id DELETE ERR:', e?.message || e);
+        return res.status(500).json({ message: 'Kayıt silinemedi', detail: e?.message });
+    }
+});
+
 router.get('/latest', async (req, res) => {
     try {
         const doc = await LatestLabResult.findOne({ user: req.user._id }).lean();

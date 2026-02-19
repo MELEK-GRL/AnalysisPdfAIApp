@@ -100,7 +100,7 @@ api.interceptors.response.use(
             const detail = [msg, code, status ? `HTTP ${status}` : null, url]
                 .filter(Boolean)
                 .join(' | ');
-            console.warn('[API ERR]', detail);
+            console.log('[API ERR]', detail);
         }
         return Promise.reject(error);
     },

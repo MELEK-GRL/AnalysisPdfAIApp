@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useLocaleStore } from '../store/useLocaleStore';
+import { useT } from '../store/useLocaleStore';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useAnalizResetStore } from '../store/useAnalizResetStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfile } from '../server/api/User';
 import { fontSize } from '../constants/typography';
@@ -37,7 +38,8 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 const MainTabs = () => {
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
+    const requestAnalizReset = useAnalizResetStore((s) => s.requestAnalizReset);
     return (
         <Tab.Navigator
             screenOptions={{
@@ -85,6 +87,9 @@ const MainTabs = () => {
             <Tab.Screen
                 name="Geçmiş"
                 component={History}
+                listeners={{
+                    tabPress: () => requestAnalizReset(),
+                }}
                 options={{
                     title: t('tabs.history'),
                     tabBarIcon: ({ focused, color }) => (

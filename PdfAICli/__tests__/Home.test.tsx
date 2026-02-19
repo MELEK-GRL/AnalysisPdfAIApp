@@ -26,10 +26,11 @@ jest.mock('../src/store/useAuthStore', () => ({
     useAuthStore: (fn: (s: any) => any) => fn({ user: { name: 'Test' } }),
 }));
 jest.mock('../src/store/useLocaleStore', () => ({
-    useLocaleStore: (fn: (s: any) => any) =>
-        fn({
-            t: (k: string) => k,
-        }),
+    useLocaleStore: (fn?: (s: any) => any) =>
+        typeof fn === 'function'
+            ? fn({ t: (k: string) => k, locale: 'tr', setLocale: jest.fn() })
+            : { t: (k: string) => k, locale: 'tr', setLocale: jest.fn() },
+    useT: () => (k: string) => k,
 }));
 jest.mock('../src/utils/deviceStore/device', () => ({
     useResponsive: () => ({

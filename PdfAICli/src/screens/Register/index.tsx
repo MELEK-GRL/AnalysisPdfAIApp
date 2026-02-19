@@ -22,7 +22,7 @@ import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { useAuthStore } from '../../store/useAuthStore';
-import { useLocaleStore } from '../../store/useLocaleStore';
+import { useT } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { getInstallationId } from '../../utils/analytics/getInstallationId';
 import { api } from '../../server/apiFetcher';
@@ -31,7 +31,7 @@ import { LAST_CONSENT_ID } from '../../constants/storageKeys';
 const Register: React.FC = () => {
     const nav = useNavigation<any>();
     useScreenTime('Register');
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
     const { w1px, h1px, fs1px } = useResponsive();
     const setUserAndToken = useAuthStore(s => s.setUserAndToken);
 

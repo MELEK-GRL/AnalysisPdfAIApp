@@ -2,7 +2,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useAuthStore } from '../../store/useAuthStore';
-import { useLocaleStore } from '../../store/useLocaleStore';
+import { useT } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import Button from '../../components/Buttons/Button';
 import T from '../../components/Text/T';
@@ -13,7 +13,7 @@ import GradientLayout from '../../components/Layout/GradientLayout';
 const Logout: React.FC = () => {
     const nav = useNavigation<any>();
     useScreenTime('Logout');
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
     const [loading, setLoading] = useState(false);
     const logout = useAuthStore(s => s.logout);
     const { w1px, h1px, fs1px } = useResponsive();

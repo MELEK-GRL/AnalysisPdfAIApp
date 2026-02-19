@@ -18,6 +18,8 @@
     "title": "Settings",
     "language": "Language",
     "languageSub": "Turkish / English",
+    "langTr": "Turkish",
+    "langEn": "English",
     "logout": "Logout",
     "privacyPolicy": "Privacy Policy"
   },
@@ -78,7 +80,7 @@
     "uploadError": "Could not upload PDF."
   },
   "history": {
-    "emptyTitle": "No analysis history yet",
+    "emptyTitle": "Data not found",
     "emptySub": "Your history will appear here as you upload and analyze PDFs",
     "detailTitle": "Detail",
     "labValues": "LAB VALUES",
@@ -104,6 +106,14 @@
     "history": "History"
   },
   "splash": {
+    "logoAlt": "Lab Analysis Logo",
+    "goToLoginHint": "Go to sign in screen",
+    "termsTitle": "User Agreement",
+    "termsIntro": "By using this app you agree to the following terms:",
+    "consentCheckbox": "I have read and accept the agreement.",
+    "saving": "Saving…",
+    "continue": "Continue",
+    "consentHint": "By continuing you accept the terms of use",
     "consentRequired": "You must accept the User Agreement to continue.",
     "consentError": "Could not save consent. Please check your internet connection and try again.",
     "info": "Info"

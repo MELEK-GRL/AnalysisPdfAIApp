@@ -8,10 +8,12 @@ import Button from '../../components/Buttons/Button';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
 import GradientLayout from '../../components/Layout/GradientLayout';
+import { useT } from '../../store/useLocaleStore';
 
 const InfoSplash: React.FC = () => {
     const navigation = useNavigation<any>();
     useScreenTime('InfoSplash');
+    const t = useT();
     const animRef = useRef<LottieView>(null);
     const { w1px, h1px, fs1px } = useResponsive();
 
@@ -26,12 +28,12 @@ const InfoSplash: React.FC = () => {
                         source={require('../../assets/icons/test8.png')}
                         style={s.logo}
                         accessible
-                        accessibilityLabel="Tahlil Analizi Logo"
+                        accessibilityLabel={t('splash.logoAlt')}
                     />
                 </View>
                 <View style={s.cta}>
                     <Button
-                        buttonText="Devam Et"
+                        buttonText={t('splash.continue')}
                         onPress={goNext}
                         width={h1px * 220}
                         style={{
@@ -41,8 +43,8 @@ const InfoSplash: React.FC = () => {
                             shadowOffset: { width: 0, height: 6 },
                             elevation: 3,
                         }}
-                        accessibilityLabel="Devam Et"
-                        accessibilityHint="Kullanıcı sözleşmesi ekranına geç"
+                        accessibilityLabel={t('splash.continue')}
+                        accessibilityHint={t('splash.consentHint')}
                     />
 
                     <T
@@ -50,7 +52,7 @@ const InfoSplash: React.FC = () => {
                         color="#9CA3AF"
                         align="center"
                         style={{ marginTop: 10 * h1px }}>
-                        Devam ederek kullanım şartlarını kabul edeceksiniz
+                        {t('splash.consentHint')}
                     </T>
                 </View>
             </View>

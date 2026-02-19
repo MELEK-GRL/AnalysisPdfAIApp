@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import Button from '../Buttons/Button';
 import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 
 export type PopupType = 'info' | 'warning' | 'error' | 'success';
 
@@ -18,11 +20,11 @@ type Props = {
     onRightPress?: () => void;
 };
 
-const TYPE_CONFIG: Record<PopupType, { accent: string; defaultTitle: string }> = {
-    info: { accent: '#3B82F6', defaultTitle: 'Bilgi' },
-    warning: { accent: '#F59E0B', defaultTitle: 'Uyarı' },
-    error: { accent: '#EF4444', defaultTitle: 'Hata' },
-    success: { accent: '#10B981', defaultTitle: 'Tamam' },
+const TYPE_CONFIG: Record<PopupType, { accent: string; defaultTitle: string; icon: string }> = {
+    success: { accent: '#22C55E', defaultTitle: 'Tamam', icon: 'checkmark-circle' },
+    error: { accent: '#EF4444', defaultTitle: 'Hata', icon: 'close-circle' },
+    warning: { accent: '#EAB308', defaultTitle: 'Uyarı', icon: 'warning' },
+    info: { accent: '#3B82F6', defaultTitle: 'Bilgi', icon: 'information-circle' },
 };
 
 const PopupModal: React.FC<Props> = ({
@@ -61,11 +63,7 @@ const PopupModal: React.FC<Props> = ({
                     shadowRadius: 12,
                     elevation: 6,
                 },
-                accentBar: {
-                    width: 48 * w1px,
-                    height: 4 * h1px,
-                    borderRadius: 2,
-                    backgroundColor: config.accent,
+                iconWrap: {
                     marginBottom: 16 * h1px,
                 },
                 buttonRow: {
@@ -77,7 +75,7 @@ const PopupModal: React.FC<Props> = ({
                     paddingHorizontal: 4,
                 },
             }),
-        [w1px, h1px, config.accent],
+        [w1px, h1px],
     );
 
     if (!visible) {
@@ -90,7 +88,13 @@ const PopupModal: React.FC<Props> = ({
                 <View style={styles.overlay}>
                     <TouchableWithoutFeedback>
                         <View style={styles.box}>
-                            <View style={styles.accentBar} />
+                            <View style={styles.iconWrap}>
+                                <Ionicons
+                                    name={config.icon as any}
+                                    size={iconSize.xxl}
+                                    color={config.accent}
+                                />
+                            </View>
                             <T
                                 size={fontSize.title}
                                 weight="700"

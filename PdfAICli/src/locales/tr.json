@@ -18,6 +18,8 @@
     "title": "Ayarlar",
     "language": "Dil",
     "languageSub": "Türkçe / English",
+    "langTr": "Türkçe",
+    "langEn": "English",
     "logout": "Çıkış Yap",
     "privacyPolicy": "Gizlilik Politikası"
   },
@@ -78,7 +80,7 @@
     "uploadError": "PDF yüklenemedi."
   },
   "history": {
-    "emptyTitle": "Henüz analiz geçmişi yok",
+    "emptyTitle": "Veri bulunamadı",
     "emptySub": "PDF yükleyip analiz ettikçe geçmiş burada görünecek",
     "detailTitle": "Detay",
     "labValues": "TAHLİL DEĞERLERİ",
@@ -104,6 +106,14 @@
     "history": "Geçmiş"
   },
   "splash": {
+    "logoAlt": "Tahlil Analizi Logo",
+    "goToLoginHint": "Giriş ekranına geç",
+    "termsTitle": "Kullanıcı Sözleşmesi",
+    "termsIntro": "Bu uygulamayı kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız:",
+    "consentCheckbox": "Sözleşmeyi okudum ve kabul ediyorum.",
+    "saving": "Kaydediliyor…",
+    "continue": "Devam Et",
+    "consentHint": "Devam ederek kullanım şartlarını kabul edeceksiniz",
     "consentRequired": "Devam edebilmek için Kullanıcı Sözleşmesini onaylamalısınız.",
     "consentError": "Sözleşme onayı kaydedilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
     "info": "Bilgi"

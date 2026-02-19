@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
     View,
     StyleSheet,
@@ -11,7 +12,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
 import { getLabHistory, getLabHistoryItem, LabHistoryItem, LabHistoryDetail } from '../../server/api/Lab';
-import { useLocaleStore } from '../../store/useLocaleStore';
+import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
@@ -37,7 +38,8 @@ const History: React.FC = () => {
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [errorSource, setErrorSource] = useState<'fetch' | 'detail'>('fetch');
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
+    const locale = useLocaleStore((s) => s.locale);
     const { w1px, h1px, fs1px } = useResponsive();
 
     const fetchHistory = useCallback(async () => {
@@ -64,6 +66,12 @@ const History: React.FC = () => {
     useEffect(() => {
         fetchHistory();
     }, [fetchHistory]);
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchHistory();
+        }, [fetchHistory]),
+    );
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -94,7 +102,8 @@ const History: React.FC = () => {
 
     const formatDate = (s: string) => {
         const d = new Date(s);
-        return d.toLocaleDateString('tr-TR', {
+        const localeTag = locale === 'en' ? 'en-US' : 'tr-TR';
+        return d.toLocaleDateString(localeTag, {
             day: '2-digit',
             month: 'short',
             year: 'numeric',

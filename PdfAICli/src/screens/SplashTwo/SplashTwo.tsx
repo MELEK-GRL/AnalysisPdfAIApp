@@ -15,7 +15,7 @@ import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
 import { api } from '../../server/apiFetcher';
 import PopupModal from '../../components/Modals/PopupModal';
-import { useLocaleStore } from '../../store/useLocaleStore';
+import { useT } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
 import colors from '../../theme/colors';
@@ -30,7 +30,7 @@ const SplashTwo: React.FC = () => {
     const navigation = useNavigation<any>();
     useScreenTime('SplashTwo');
     const { w1px, h1px, fs1px } = useResponsive();
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
 
     const [accepted, setAccepted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -114,7 +114,7 @@ const SplashTwo: React.FC = () => {
                             source={require('../../assets/icons/test8.png')}
                             style={s.imageView}
                             accessible
-                            accessibilityLabel="Tahlil Analizi Logo"
+                            accessibilityLabel={t('splash.logoAlt')}
                         />
                     </View>
                 </View>
@@ -130,12 +130,11 @@ const SplashTwo: React.FC = () => {
                                 weight="700"
                                 color="#111827"
                                 style={{ marginBottom: 8 * h1px }}>
-                                Kullanıcı Sözleşmesi
+                                {t('splash.termsTitle')}
                             </T>
 
                             <T size={fontSize.bodyMedium} color="#374151">
-                                Bu uygulamayı kullanarak aşağıdaki koşulları kabul etmiş
-                                sayılırsınız:
+                                {t('splash.termsIntro')}
                             </T>
 
                             <View style={{ marginTop: 6 * h1px }}>
@@ -158,12 +157,12 @@ const SplashTwo: React.FC = () => {
                             size={fontSize.body}
                             color="#111"
                             style={{ marginLeft: 8 * w1px, flex: 1 }}>
-                            Sözleşmeyi okudum ve kabul ediyorum.
+                            {t('splash.consentCheckbox')}
                         </T>
                     </TouchableOpacity>
 
                     <Button
-                        buttonText={loading ? 'Kaydediliyor…' : 'Devam Et'}
+                        buttonText={loading ? t('splash.saving') : t('splash.continue')}
                         onPress={handleContinue}
                         width={h1px * 180}
                         disabled={!accepted || loading}
@@ -174,8 +173,8 @@ const SplashTwo: React.FC = () => {
                             shadowOffset: { width: 0, height: 6 },
                             elevation: 3,
                         }}
-                        accessibilityLabel="Devam Et"
-                        accessibilityHint="Giriş ekranına geç"
+                        accessibilityLabel={t('splash.continue')}
+                        accessibilityHint={t('splash.goToLoginHint')}
                     />
 
                     <PopupModal

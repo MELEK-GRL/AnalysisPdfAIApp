@@ -8,7 +8,7 @@ import { getInstallationId } from '../../utils/analytics/getInstallationId';
 import { trackEvent, trackButtonClick } from '../../server/api/Analytics';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useAuthStore } from '../../store/useAuthStore';
-import { useLocaleStore } from '../../store/useLocaleStore';
+import { useT } from '../../store/useLocaleStore';
 import { api } from '../../server/apiFetcher';
 
 import Button from '../../components/Buttons/Button';
@@ -28,7 +28,7 @@ import {
 const Login: React.FC = () => {
     const nav = useNavigation<any>();
     useScreenTime('Login');
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
     const { w1px, h1px, fs1px } = useResponsive();
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');

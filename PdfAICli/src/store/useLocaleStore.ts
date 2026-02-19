@@ -50,3 +50,9 @@ export const useLocaleStore = create<LocaleState>()(
         },
     ),
 );
+
+/** Locale değiştiğinde bile bileşenlerin yeniden render olması için locale'e abone olur */
+export function useT() {
+    useLocaleStore((s) => s.locale);
+    return useLocaleStore((s) => s.t);
+}

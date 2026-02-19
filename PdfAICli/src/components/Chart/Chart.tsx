@@ -2,11 +2,13 @@
 // Yaşlı dostu, şık tahlil sonucu gösterimi
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import type { LabItem } from '../../server/api/Lab';
 import { useResponsive } from '../../utils/deviceStore/device';
-import { useLocaleStore } from '../../store/useLocaleStore';
+import { useT } from '../../store/useLocaleStore';
 import T from '../../components/Text/T';
 import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 
 type Props = { items: LabItem[]; width?: number };
 
@@ -46,7 +48,7 @@ const hasRef = (it: LabItem) => {
 const BAR_HORIZONTAL_PADDING = 0;
 
 const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
     const { w1px, h1px } = useResponsive();
     const [barContainerWidth, setBarContainerWidth] = useState(0);
     const widthPx = barContainerWidth > 0
@@ -90,6 +92,7 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
                     marginTop: 8 * h1px,
                     marginBottom: 10 * h1px,
                     paddingHorizontal: BAR_HORIZONTAL_PADDING * w1px,
+                    position: 'relative',
                 },
                 bar: {
                     height: 12 * h1px,
@@ -100,12 +103,11 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
                     flexDirection: 'row',
                 },
                 seg: { height: '100%' },
-                marker: {
+                markerWrap: {
                     position: 'absolute',
-                    top: -2 * h1px,
-                    width: 4 * w1px,
-                    height: 16 * h1px,
-                    borderRadius: 2,
+                    top: -10 * h1px,
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 },
                 statusPillWrapper: {
                     width: '100%',
@@ -206,21 +208,21 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
                     </T>
                 </View>
 
-                {/* Normal aralık */}
-                <View style={s.rangeRow}>
-                    <T size={fontSize.body} color="#6B7280">
-                        {t('history.normalRange')}:
-                    </T>
-                    <T
-                        size={fontSize.body}
-                        weight="600"
-                        color="#374151"
-                        style={{ marginLeft: 4 }}>
-                        {_hasRef
-                            ? `${fmtNum(refLow)} – ${fmtNum(refHigh)}${unitStr}`
-                            : t('history.notSpecified')}
-                    </T>
-                </View>
+                {/* Normal aralık – sadece belirtilmişse göster */}
+                {_hasRef && (
+                    <View style={s.rangeRow}>
+                        <T size={fontSize.body} color="#6B7280">
+                            {t('history.normalRange')}:
+                        </T>
+                        <T
+                            size={fontSize.body}
+                            weight="600"
+                            color="#374151"
+                            style={{ marginLeft: 4 }}>
+                            {`${fmtNum(refLow)} – ${fmtNum(refHigh)}${unitStr}`}
+                        </T>
+                    </View>
+                )}
 
                 {/* Görsel ölçek çubuğu */}
                 <View
@@ -251,17 +253,24 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
                     ) : (
                         <View style={[s.seg, { width: widthPx, backgroundColor: GRAY }]} />
                     )}
-                    <View
-                        style={[
-                            s.marker,
-                            {
-                                left: Math.max(
-                                    0,
-                                    Math.min(widthPx - 4 * w1px, markerLeft - 2 * w1px),
+                </View>
+                <View
+                    style={[
+                        s.markerWrap,
+                        {
+                            left: (barContainerWidth - widthPx) / 2 + Math.max(
+                                0,
+                                Math.min(
+                                    widthPx - iconSize.large * w1px,
+                                    markerLeft - (iconSize.large / 2) * Math.min(w1px, h1px),
                                 ),
-                                backgroundColor: flagColor,
-                            },
-                        ]}
+                            ),
+                        },
+                    ]}>
+                    <Ionicons
+                        name="heart"
+                        size={iconSize.large * Math.min(w1px, h1px)}
+                        color={flagColor}
                     />
                 </View>
                 </View>

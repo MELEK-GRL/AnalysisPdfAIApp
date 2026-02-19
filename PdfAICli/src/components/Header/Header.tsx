@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useResponsive } from '../../utils/deviceStore/device';
-import { useLocaleStore } from '../../store/useLocaleStore';
+import { useT } from '../../store/useLocaleStore';
 import T from '../Text/T';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
@@ -15,7 +15,7 @@ type Props = {
 
 const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
     const nav = useNavigation<any>();
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
     const { w1px, h1px, fs1px } = useResponsive();
 
     const styles = StyleSheet.create({
@@ -41,8 +41,8 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
         },
         settingsView: {
             alignSelf: 'center',
-            width: iconSize.large * w1px,
-            height: iconSize.large * h1px,
+            width: iconSize.xl * w1px,
+            height: iconSize.xl * h1px,
             resizeMode: 'contain',
         },
     });

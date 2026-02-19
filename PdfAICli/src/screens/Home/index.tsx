@@ -17,7 +17,8 @@ import { useNavigation } from '@react-navigation/native';
 import { uploadPdf, LabItem } from '../../server/api/Lab';
 import Chart from '../../components/Chart/Chart';
 import { useAuthStore } from '../../store/useAuthStore';
-import { useLocaleStore } from '../../store/useLocaleStore';
+import { useT } from '../../store/useLocaleStore';
+import { useAnalizResetStore } from '../../store/useAnalizResetStore';
 import { trackButtonClick } from '../../server/api/Analytics';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import Button from '../../components/Buttons/Button';
@@ -53,8 +54,26 @@ const Home: React.FC = () => {
     const [uploadErrorVisible, setUploadErrorVisible] = useState(false);
     const [uploadErrorMessage, setUploadErrorMessage] = useState<string>('');
     const [rateLimitModalVisible, setRateLimitModalVisible] = useState(false);
-    const t = useLocaleStore((s) => s.t);
+    const t = useT();
+    const resetTrigger = useAnalizResetStore((s) => s.resetTrigger);
     const { w1px, h1px, fs1px } = useResponsive();
+
+    const resetAnalizScreen = useCallback(() => {
+        setPhase('idle');
+        setFileName(null);
+        setPickedFile(null);
+        setItems([]);
+        setAnalysis('');
+        setSelectErrorVisible(false);
+        setUploadSuccessVisible(false);
+        setNotLabVisible(false);
+        setUploadErrorVisible(false);
+        setRateLimitModalVisible(false);
+    }, []);
+
+    useEffect(() => {
+        if (resetTrigger > 0) resetAnalizScreen();
+    }, [resetTrigger, resetAnalizScreen]);
 
     const styles = useMemo(
         () =>

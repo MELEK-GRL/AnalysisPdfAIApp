@@ -33,19 +33,47 @@ const Settings: React.FC = () => {
                     alignItems: 'center',
                     marginBottom: 24 * h1px,
                 },
-                backBtn: {
-                    padding: 8 * w1px,
+                backBtnWrap: {
+                    width: 38 * w1px,
+                    height: 38 * w1px,
+                    borderRadius: 19 * w1px,
+                    backgroundColor: colors.backgroundPurpleSoft,
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     marginRight: 12 * w1px,
+                    borderWidth: 1,
+                    borderColor: 'rgba(116, 83, 224, 0.2)',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 3,
+                    elevation: 2,
                 },
-                title: {
+                headerCenter: {
                     flex: 1,
+                },
+                logoutBtn: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8 * w1px,
+                },
+                logoutIconWrap: {
+                    width: 34 * w1px,
+                    height: 34 * w1px,
+                    borderRadius: 17 * w1px,
+                    backgroundColor: '#FEE2E2',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
+                pageTitle: {
+                    marginBottom: 20 * h1px,
                 },
                 section: {
                     marginBottom: 24 * h1px,
                 },
                 sectionTitle: {
                     marginBottom: 12 * h1px,
-                    color: '#6B7280',
+                    color: '#1F2937',
                 },
                 row: {
                     flexDirection: 'row',
@@ -79,17 +107,6 @@ const Settings: React.FC = () => {
                     borderRadius: 6,
                     backgroundColor: colors.backgroundPurple,
                 },
-                logoutRow: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: '#FEF2F2',
-                    borderRadius: 12 * w1px,
-                    paddingVertical: 16 * h1px,
-                    paddingHorizontal: 16 * w1px,
-                    marginTop: 20 * h1px,
-                    borderWidth: 1,
-                    borderColor: '#FECACA',
-                },
             }),
         [w1px, h1px, fs1px],
     );
@@ -109,18 +126,33 @@ const Settings: React.FC = () => {
             <View style={styles.container}>
                 <View style={styles.headerRow}>
                     <TouchableOpacity
-                        style={styles.backBtn}
+                        style={styles.backBtnWrap}
                         onPress={() => nav.goBack()}
                         activeOpacity={0.8}>
-                        <Ionicons name="arrow-back" size={iconSize.xl} color="#111827" />
+                        <Ionicons name="arrow-back" size={iconSize.medium} color={colors.backgroundPurple} />
                     </TouchableOpacity>
-                    <T size={fontSize.display} weight="700" color="#111827" style={styles.title}>
-                        {t('settings.title')}
+                    <T size={fontSize.subtitleLarge} weight="600" color="#1F2937" style={styles.headerCenter}>
+                        {t('common.back')}
                     </T>
+                    <TouchableOpacity
+                        style={styles.logoutBtn}
+                        onPress={() => setLogoutModalVisible(true)}
+                        activeOpacity={0.8}>
+                        <View style={styles.logoutIconWrap}>
+                            <Ionicons name="exit-outline" size={iconSize.medium} color="#DC2626" />
+                        </View>
+                        <T size={fontSize.subtitleLarge} weight="600" color="#B91C1C">
+                            {t('settings.logout')}
+                        </T>
+                    </TouchableOpacity>
                 </View>
 
+                <T size={fontSize.titleXl} weight="700" color="#374151" style={styles.pageTitle}>
+                    {t('settings.title')}
+                </T>
+
                 <View style={styles.section}>
-                    <T size={fontSize.body} color="#6B7280" style={styles.sectionTitle}>
+                    <T size={fontSize.subtitle} weight="600" color="#1F2937" style={styles.sectionTitle}>
                         {t('settings.language')}
                     </T>
 
@@ -133,7 +165,7 @@ const Settings: React.FC = () => {
                                 {locale === 'tr' && <View style={styles.radioInner} />}
                             </View>
                             <T size={fontSize.subtitle} weight="500" color="#111827">
-                                Türkçe
+                                {t('settings.langTr')}
                             </T>
                         </View>
                     </TouchableOpacity>
@@ -147,20 +179,11 @@ const Settings: React.FC = () => {
                                 {locale === 'en' && <View style={styles.radioInner} />}
                             </View>
                             <T size={fontSize.subtitle} weight="500" color="#111827">
-                                English
+                                {t('settings.langEn')}
                             </T>
                         </View>
                     </TouchableOpacity>
                 </View>
-
-                <TouchableOpacity
-                    style={styles.logoutRow}
-                    onPress={() => setLogoutModalVisible(true)}
-                    activeOpacity={0.8}>
-                    <T size={fontSize.subtitle} weight="600" color="#DC2626">
-                        {t('settings.logout')}
-                    </T>
-                </TouchableOpacity>
             </View>
 
             <PopupModal

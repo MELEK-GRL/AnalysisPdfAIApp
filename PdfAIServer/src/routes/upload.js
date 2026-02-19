@@ -33,9 +33,10 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'PDF gerekli' });
 
-        // 0.5) Rate limit: 24h/2 analiz (dev ortamında devre dışı)
-        const isDev = process.env.NODE_ENV === 'development';
-        if (!isDev) {
+        // 0.5) Rate limit: 24h/2 analiz – dev ortamında devre dışı, UAT/Prod'da geçerli
+        const rateLimitDisabled = process.env.NODE_ENV === 'development' ||
+            process.env.DISABLE_RATE_LIMIT === 'true' || process.env.DISABLE_RATE_LIMIT === '1';
+        if (!rateLimitDisabled) {
             const since = new Date(Date.now() - RATE_LIMIT_ANALYSIS_WINDOW_MS);
             const count = await LabHistory.countDocuments({
                 user: req.user._id,

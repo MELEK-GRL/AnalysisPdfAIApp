@@ -2,7 +2,8 @@
   "name": "PdfAIServer",
   "packageManager": "yarn@4.9.2",
   "scripts": {
-    "dev": "nodemon src/index.js",
+    "dev": "NODE_ENV=development nodemon src/index.js",
+    "start:dev": "NODE_ENV=development node src/index.js",
     "start": "node src/index.js",
     "test": "jest"
   },

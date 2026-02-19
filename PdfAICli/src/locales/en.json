@@ -66,7 +66,7 @@
     "selected": "Selected",
     "pdfHint": "Only PDF accepted. Max ~10MB recommended.",
     "analysisResult": "Analysis Result",
-    "interpretButton": "Interpret My Results",
+    "interpretButton": "Interpret Lab Result",
     "analysisTitle": "Lab Results Analysis",
     "success": "Lab data extracted.",
     "notLab": "This PDF does not appear to be a lab report.",

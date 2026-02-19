@@ -6,10 +6,15 @@ const mongoose = require('mongoose');
 const app = require('./app');
 const { DEFAULT_PORT, DEFAULT_DB_NAME } = require('./constants');
 
+const rateLimitDisabled = process.env.NODE_ENV === 'development' ||
+    process.env.DISABLE_RATE_LIMIT === 'true' || process.env.DISABLE_RATE_LIMIT === '1';
+
 console.log('BOOT', {
     cwd: process.cwd(),
     file: __filename,
     startedAt: new Date().toISOString(),
+    NODE_ENV: process.env.NODE_ENV || '(yok)',
+    'Rate limit (24h/2)': rateLimitDisabled ? 'KAPALI (dev)' : 'AÇIK',
 });
 
 const PORT = Number(process.env.PORT || DEFAULT_PORT);

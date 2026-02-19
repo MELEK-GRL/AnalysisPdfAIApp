@@ -333,25 +333,53 @@ const Home: React.FC = () => {
                                         {t('home.analysisResult')}
                                     </T>
 
+                                    {items.length > 0 && (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                trackButtonClick('interpret_result', {
+                                                    screen: 'Home',
+                                                });
+                                                setCommentModal(true);
+                                            }}
+                                            activeOpacity={0.7}
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                alignSelf: 'flex-start',
+                                                gap: 8 * w1px,
+                                                marginBottom: 12 * h1px,
+                                                backgroundColor: colors.backgroundPurpleSoft,
+                                                paddingVertical: 10 * h1px,
+                                                paddingHorizontal: 14 * w1px,
+                                                borderRadius: 12 * w1px,
+                                                borderWidth: 1,
+                                                borderColor: colors.backgroundPurple + '30',
+                                            }}>
+                                            <Ionicons
+                                                name="document-text-outline"
+                                                size={iconSize.medium}
+                                                color={colors.backgroundPurple}
+                                            />
+                                            <T
+                                                size={fontSize.body}
+                                                weight="600"
+                                                color={colors.backgroundPurple}>
+                                                {t('home.interpretButton')}
+                                            </T>
+                                            <Ionicons
+                                                name="chevron-forward"
+                                                size={iconSize.small}
+                                                color={colors.backgroundPurple}
+                                            />
+                                        </TouchableOpacity>
+                                    )}
+
                                     <View>
                                         <Chart items={items} />
                                     </View>
                                 </View>
                             </View>
                         </View>
-
-                        {items.length > 0 && (
-                            <View style={styles.buttonView}>
-                                <Button
-                                    buttonText={t('home.interpretButton')}
-                                    onPress={() => {
-                                        trackButtonClick('interpret_result', { screen: 'Home' });
-                                        setCommentModal(true);
-                                    }}
-                                    width="100%"
-                                />
-                            </View>
-                        )}
                     </View>
 
                     {/* ANALİZ MODALI */}

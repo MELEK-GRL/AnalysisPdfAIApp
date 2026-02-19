@@ -113,7 +113,9 @@ Kullanım: `yarn env:dev && yarn start` (veya env:uat / env:prod)
 **Backend:**
 ```bash
 cd PdfAIServer
-# .env içinde NODE_ENV=development olmalı (rate limit kapalı)
+# .env içinde mutlaka olmalı (rate limit kapalı):
+#   NODE_ENV=development
+#   veya  DISABLE_RATE_LIMIT=true
 yarn start
 ```
 

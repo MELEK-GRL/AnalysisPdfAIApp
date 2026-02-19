@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { Text, TextStyle, StyleSheet, TextProps } from 'react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
+import { fontSize } from '../../constants/typography';
 
 type Props = TextProps & {
     children: React.ReactNode;
@@ -22,8 +23,8 @@ type Props = TextProps & {
 
 const T: React.FC<Props> = ({
     children,
-    size = 14,
-    weight = 'semibold',
+    size = fontSize.body,
+    weight = '600',
     color = '#111827',
     align = 'left',
     style,

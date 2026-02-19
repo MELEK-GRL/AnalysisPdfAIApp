@@ -5,6 +5,8 @@ import { useResponsive } from '../../utils/deviceStore/device';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import T from '../Text/T';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 
 type Props = {
     title?: string;
@@ -39,8 +41,8 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
         },
         settingsView: {
             alignSelf: 'center',
-            width: 27 * w1px,
-            height: 27 * w1px,
+            width: iconSize.large * w1px,
+            height: iconSize.large * h1px,
             resizeMode: 'contain',
         },
     });
@@ -48,12 +50,12 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
     return (
         <View style={styles.header}>
             <View style={styles.headerTitle}>
-                <T size={20} weight="700" color={colors.textWhite}>
+                <T size={fontSize.titleLarge} weight="700" color={colors.textWhite}>
                     {t('header.welcome')},
                 </T>
                 {title ? (
                     <View style={styles.title}>
-                        <T size={20} weight="600" color={colors.textWhite}>
+                        <T size={fontSize.titleLarge} weight="600" color={colors.textWhite}>
                             {title.charAt(0).toUpperCase() + title.slice(1)}
                         </T>
                     </View>

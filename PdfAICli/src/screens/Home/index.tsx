@@ -26,6 +26,8 @@ import PopupModal from '../../components/Modals/PopupModal';
 import PageLayout from '../../components/Layout/PageLayout';
 import T from '../../components/Text/T';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 import DetailModal from '../../components/Modals/DetailModal';
 import Header from '../../components/Header/Header';
 
@@ -139,8 +141,8 @@ const Home: React.FC = () => {
                 },
                 settingsView: {
                     alignSelf: 'center',
-                    width: 30 * w1px,
-                    height: 30 * h1px,
+                    width: iconSize.large * w1px,
+                    height: iconSize.large * h1px,
                     resizeMode: 'contain',
                 },
                 buttonView: { paddingTop: h1px * 18, paddingBottom: h1px * 16 },
@@ -253,7 +255,7 @@ const Home: React.FC = () => {
                                     activeOpacity={0.8}
                                     style={styles.uploadCard}>
                                     <T
-                                        size={14}
+                                        size={fontSize.body}
                                         color="#6B7280"
                                         style={styles.uploadCardTop}>
                                         {t('home.dragOrSelect')}
@@ -262,19 +264,19 @@ const Home: React.FC = () => {
                                         <View style={styles.uploadIconWrap}>
                                             <Ionicons
                                                 name="cloud-upload"
-                                                size={48}
+                                                size={iconSize.xxl}
                                                 color={colors.backgroundPurple}
                                             />
                                         </View>
                                         <View style={styles.uploadTextWrap}>
                                             <T
-                                                size={16}
+                                                size={fontSize.subtitle}
                                                 weight="700"
                                                 color="#111827"
                                                 style={{ marginBottom: 4 }}>
                                                 {t('home.uploadPdf')}
                                             </T>
-                                            <T size={13} color="#9CA3AF">
+                                            <T size={fontSize.bodySmall} color="#9CA3AF">
                                                 {t('home.pdfHint')}
                                             </T>
                                         </View>
@@ -293,18 +295,18 @@ const Home: React.FC = () => {
 
                                 <View style={styles.fileView}>
                                     {fileName && (
-                                        <T size={16} color="#232426ff">
+                                        <T size={fontSize.subtitle} color="#232426ff">
                                             {t('home.selected')}: {fileName}
                                         </T>
                                     )}
-                                    <T size={14} color="#232426ff">
+                                    <T size={fontSize.body} color="#232426ff">
                                         {t('home.pdfHint')}
                                     </T>
                                 </View>
 
                                 <View style={styles.resultCard}>
                                     <T
-                                        size={18}
+                                        size={fontSize.title}
                                         weight="700"
                                         color={colors.backgroundPurpleDark}
                                         style={{ marginBottom: 8 * h1px }}>
@@ -345,7 +347,7 @@ const Home: React.FC = () => {
                             <Pressable>
                                 <View>
                                     <View style={styles.pill}>
-                                        <T size={12} weight="700" color="#065F46">
+                                        <T size={fontSize.label} weight="700" color="#065F46">
                                             ANALİZ
                                         </T>
                                     </View>
@@ -354,7 +356,7 @@ const Home: React.FC = () => {
                                         analysis.split(/\n+/).map((line, idx) => (
                                             <T
                                                 key={idx}
-                                                size={14}
+                                                size={fontSize.body}
                                                 color="#111827"
                                                 style={{ marginBottom: 6 * h1px }}>
                                                 {line}
@@ -362,7 +364,7 @@ const Home: React.FC = () => {
                                         ))
                                     ) : (
                                         <>
-                                            <T size={14} color="#111827">
+                                            <T size={fontSize.body} color="#111827">
                                                 {t('home.noAnalysis')}
                                             </T>
                                         </>
@@ -370,20 +372,20 @@ const Home: React.FC = () => {
 
                                     <View style={styles.sectionGap} />
                                     <View style={styles.pill}>
-                                        <T size={12} weight="700" color="#065F46">
+                                        <T size={fontSize.label} weight="700" color="#065F46">
                                             {t('home.suggestions')}
                                         </T>
                                     </View>
-                                    <T size={14} color="#111827">
+                                    <T size={fontSize.body} color="#111827">
                                         {t('home.suggestionsText')}
                                     </T>
                                     <View style={styles.sectionGap} />
                                     <View style={[styles.pill, { backgroundColor: '#FEF2F2' }]}>
-                                        <T size={12} weight="700" color="#991B1B">
+                                        <T size={fontSize.label} weight="700" color="#991B1B">
                                             {t('home.importantWarning')}
                                         </T>
                                     </View>
-                                    <T size={14} color="#991B1B">
+                                    <T size={fontSize.body} color="#991B1B">
                                         {t('home.disclaimer')}
                                     </T>
                                 </View>

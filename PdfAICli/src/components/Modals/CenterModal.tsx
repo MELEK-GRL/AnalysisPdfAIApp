@@ -3,6 +3,7 @@ import { View, StyleSheet, Modal } from 'react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import Button from '../Buttons/Button';
+import { fontSize } from '../../constants/typography';
 
 type Props = {
     visible: boolean;
@@ -77,7 +78,7 @@ const CenterModal: React.FC<Props> = ({
             <View style={styles.overlay}>
                 <View style={styles.box}>
                         <T
-                            size={18}
+                            size={fontSize.title}
                             weight="700"
                             align="center"
                             style={{ marginBottom: 10 * h1px }}>
@@ -88,7 +89,7 @@ const CenterModal: React.FC<Props> = ({
                             {children ? (
                                 children
                             ) : (
-                                <T size={14} color="#374151" align="center">
+                                <T size={fontSize.body} color="#374151" align="center">
                                     {message}
                                 </T>
                             )}

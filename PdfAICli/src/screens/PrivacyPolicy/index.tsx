@@ -11,6 +11,7 @@ import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { PRIVACY_POLICY_CONTENT } from '../../content/privacyPolicyContent';
 
@@ -70,7 +71,7 @@ const PrivacyPolicy: React.FC = () => {
                         style={styles.backBtn}
                         onPress={() => nav.goBack()}
                         activeOpacity={0.8}>
-                        <T size={16} weight="600" color="#6B7280">
+                        <T size={fontSize.subtitle} weight="600" color="#6B7280">
                             ← {t('common.back')}
                         </T>
                     </TouchableOpacity>
@@ -86,16 +87,16 @@ const PrivacyPolicy: React.FC = () => {
                     contentContainerStyle={{ paddingBottom: 40 }}>
                     {content.sections.map((sec, idx) => (
                         <View key={idx} style={styles.section}>
-                            <T size={16} weight="700" style={styles.sectionTitle}>
+                            <T size={fontSize.subtitle} weight="700" style={styles.sectionTitle}>
                                 {sec.title}
                             </T>
                             {sec.paragraphs?.map((p, i) => (
-                                <T key={i} size={14} color="#4B5563" style={{ marginBottom: 6 }}>
+                                <T key={i} size={fontSize.body} color="#4B5563" style={{ marginBottom: 6 }}>
                                     {p}
                                 </T>
                             ))}
                             {sec.bullets?.map((b, i) => (
-                                <T key={i} size={14} color="#4B5563" style={styles.bullet}>
+                                <T key={i} size={fontSize.body} color="#4B5563" style={styles.bullet}>
                                     • {b}
                                 </T>
                             ))}

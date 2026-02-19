@@ -17,6 +17,7 @@ import PopupModal from '../../components/Modals/PopupModal';
 import { useResponsive } from '../../utils/deviceStore/device';
 import TextInputComponent from '../../components/Inputs/TextInputComponent';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import {
     LAST_CONSENT_ID,
@@ -144,7 +145,7 @@ const Login: React.FC = () => {
                 style={s.container}>
                 <View style={s.card}>
                     <T
-                        size={24}
+                        size={fontSize.display}
                         weight="900"
                         color={colors.backgroundPurple}
                         style={{ marginBottom: 24 * h1px, textAlign: 'center' }}>
@@ -187,12 +188,12 @@ const Login: React.FC = () => {
                     />
 
                     <View style={s.textStyle}>
-                        <T size={17} color={colors.textDark}>
+                        <T size={fontSize.subtitleLarge} color={colors.textDark}>
                             {t('login.noAccount')}
                         </T>
                         <View style={s.textStyleLeft}>
                             <T
-                                size={17}
+                                size={fontSize.subtitleLarge}
                                 weight="800"
                                 color={colors.backgroundPurple}
                                 onPress={() => nav.navigate('Register')}>

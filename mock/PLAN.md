@@ -45,7 +45,7 @@
 
 ## Fazlar
 
-**Durum:** Faz 8 tamamlandı. Play Store hazırlık ertelendi.
+**Durum:** Faz 9 tamamlandı.
 
 | Faz | İçerik | Durum |
 |-----|--------|-------|
@@ -57,6 +57,7 @@
 | 5 | Clean code refaktör | ✓ |
 | 6 | **Geliştirme tamamlama** – bug fix, stabilite, temizlik | ✓ |
 | 8 | **Hata düzeltmeleri / İyileştirmeler** – Geçmiş API hataları, UX | ✓ |
+| **9** | **Tipografi, ikon standardizasyonu, bottom menü** – Text/Title tek yerden, ikonlar standart, tab bar şık tasarım ve tıklanma alanları | ✓ |
 | **7 (Son Faz)** | **Play Store / Canlı yayın hazırlığı** – ertelendi, canlıya alınacak zaman | ertelendi |
 
 ---

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { fontSize } from '../../constants/typography';
 import {
     View,
     Text,
@@ -104,6 +105,6 @@ const styles = StyleSheet.create({
     },
     btnText: { color: '#fff', fontWeight: '600' },
     info: { alignItems: 'center', maxWidth: '90%' },
-    name: { fontSize: 14, color: '#111', maxWidth: 280 },
-    meta: { fontSize: 12, color: '#6b7280' },
+    name: { fontSize: fontSize.body, color: '#111', maxWidth: 280 },
+    meta: { fontSize: fontSize.label, color: '#6b7280' },
 });

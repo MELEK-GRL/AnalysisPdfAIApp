@@ -295,6 +295,56 @@
 
 ---
 
+## FAZ 9 – Tipografi ve İkon Standardizasyonu
+
+**Hedef:** Proje genelinde text, title ve diğer yazı boyutları app standartlarında, tek yerden kontrol edilecek şekilde revize edilecek. İkonlar yazı boyutlarına göre standardize edilecek. Bottom menü tasarımı daha şık hale getirilecek, kullanıcı tıklanma alanları yeterli olacak (min. 44pt iOS / 48dp Android).
+
+### Sprint 9.1 – Tipografi constants (tek yerden kontrol) ✓ Tamamlandı
+- [x] `constants/typography.ts` oluştur: `fontSize` değerleri (titleLarge, title, subtitle, body, bodySmall, caption, label vb.)
+- [x] App standartlarına uygun skala belirle (örn. 10–12 caption, 14 body, 16 subtitle, 18–20 title, 24 titleLarge)
+- [x] T bileşeni ve diğer text kullanımları bu constants’tan beslenecek
+- [x] `constants/icons.ts` oluşturuldu; typography tüm projede kullanılıyor
+
+**→ Tamamlandıktan sonra izin al, Sprint 9.2'ye geç**
+
+---
+
+### Sprint 9.2 – Proje genelinde text boyutları revize ✓ Tamamlandı
+- [x] Header, Home, Settings, History, Login, Register, SplashTwo, PrivacyPolicy
+- [x] Modaller (PopupModal, CenterModal, DetailModal), Chart, Button, TextInputComponent, Pdf
+- [x] Tüm hardcoded `size={…}` değerleri typography constants ile değiştir
+- [x] AppNavigator tabBarLabelStyle typography ile uyumlu
+
+**→ Tamamlandıktan sonra izin al, Sprint 9.3'e geç**
+
+---
+
+### Sprint 9.3 – İkon boyutları standardizasyonu ✓ Tamamlandı
+- [x] `constants/icons.ts` ikon boyutları: iconSmall (16), iconMedium (20), iconLarge (24), iconXl (28), iconXxl (48)
+- [x] Ionicons ve Image ikonları standart boyutlara çek
+- [x] Header settings, tab bar, Settings arrow-back, History detay ikonları, Home ikonları
+- [x] İkon boyutları text scale ile orantılı
+
+**→ Tamamlandıktan sonra izin al, sonraki sprinte geç**
+
+---
+
+### Sprint 9.4 – Bottom menü tasarımı ve tıklanma alanları ✓ Tamamlandı
+- [x] Tab bar tasarımı: arka plan, gölge, border, aktif/pasif durumların görsel ayrımı
+- [x] Aktif sekmede belirgin vurgu (#7453E0), pasif durumda dengeli görünüm
+- [x] Tıklanma alanları: tabBarItemStyle minHeight: 48
+- [x] tabBarStyle (gölge, border), tabBarItemStyle ile alan genişletme
+- [x] İkon ve label typography/icon constants ile uyumlu
+
+**→ Tamamlandıktan sonra izin al, sonraki sprinte geç**
+
+---
+
+### Sprint 9.5 – *(opsiyonel, gerekirse eklenebilir)*
+- [ ] *(madde)*
+
+---
+
 ## FAZ 7 – Play Store Hazırlık *(ertelendi – canlıya alınacak zaman)*
 
 ### Sprint 7.1 – Teknik hazırlık

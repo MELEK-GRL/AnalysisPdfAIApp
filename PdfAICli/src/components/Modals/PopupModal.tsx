@@ -3,6 +3,7 @@ import { View, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native'
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import Button from '../Buttons/Button';
+import { fontSize } from '../../constants/typography';
 
 export type PopupType = 'info' | 'warning' | 'error' | 'success';
 
@@ -91,7 +92,7 @@ const PopupModal: React.FC<Props> = ({
                         <View style={styles.box}>
                             <View style={styles.accentBar} />
                             <T
-                                size={18}
+                                size={fontSize.title}
                                 weight="700"
                                 align="center"
                                 color="#111827"
@@ -100,7 +101,7 @@ const PopupModal: React.FC<Props> = ({
                             </T>
 
                             <T
-                                size={15}
+                                size={fontSize.bodyMedium}
                                 color="#4B5563"
                                 align="center"
                                 style={{ lineHeight: 22 }}>

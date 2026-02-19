@@ -9,6 +9,7 @@ import {
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
 
 type Props = TextInputProps & {
     label?: string;
@@ -39,7 +40,7 @@ const TextInputComponent: React.FC<Props> = ({
                     borderRadius: 8 * w1px,
                     paddingVertical: 14 * h1px,
                     paddingHorizontal: 12 * w1px,
-                    fontSize: 14 * fs1px,
+                    fontSize: fontSize.body * fs1px,
                     color: '#111827',
                 },
                 errorText: {
@@ -53,7 +54,7 @@ const TextInputComponent: React.FC<Props> = ({
         <View style={[styles.container, containerStyle]}>
             {label && (
                 <T
-                    size={18}
+                    size={fontSize.title}
                     weight="700"
                     color={colors.textGraySoft}
                     style={styles.label}>
@@ -68,7 +69,7 @@ const TextInputComponent: React.FC<Props> = ({
             />
 
             {error && (
-                <T size={16} color="#ef4444" style={styles.errorText}>
+                <T size={fontSize.subtitle} color="#ef4444" style={styles.errorText}>
                     {error}
                 </T>
             )}

@@ -19,6 +19,8 @@ import Header from '../../components/Header/Header';
 import PageLayout from '../../components/Layout/PageLayout';
 import T from '../../components/Text/T';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 import CenterModal from '../../components/Modals/CenterModal';
 import PopupModal from '../../components/Modals/PopupModal';
 import Chart from '../../components/Chart/Chart';
@@ -166,14 +168,14 @@ const History: React.FC = () => {
             activeOpacity={0.7}>
             <View style={styles.cardContent}>
                 <View style={styles.cardTitle}>
-                    <T size={15} weight="600" color="#111827" numberOfLines={1} style={{ flex: 1 }}>
+                    <T size={fontSize.bodyMedium} weight="600" color="#111827" numberOfLines={1} style={{ flex: 1 }}>
                         {item.pdfName || t('history.labReport')}
                     </T>
-                    <T size={11} color="#9CA3AF" style={{ marginLeft: 8 }}>
+                    <T size={fontSize.captionLarge} color="#9CA3AF" style={{ marginLeft: 8 }}>
                         {formatDate(item.createdAt)}
                     </T>
                 </View>
-                <T size={13} color="#6B7280">
+                <T size={fontSize.bodySmall} color="#6B7280">
                     {item.itemCount > 0
                         ? `${item.itemCount} ${t('history.paramCount')}`
                         : t('history.notLabReport')}
@@ -181,7 +183,7 @@ const History: React.FC = () => {
             </View>
             <Ionicons
                 name="chevron-forward"
-                size={20}
+                size={iconSize.medium}
                 color={colors.backgroundPurple}
                 style={styles.cardChevron}
             />
@@ -196,16 +198,16 @@ const History: React.FC = () => {
                     {loading ? (
                         <View style={styles.empty}>
                             <ActivityIndicator size="large" color={colors.backgroundPurple} />
-                            <T size={14} color="#6B7280" style={{ marginTop: 12 }}>
+                            <T size={fontSize.body} color="#6B7280" style={{ marginTop: 12 }}>
                                 {t('common.loading')}
                             </T>
                         </View>
                     ) : items.length === 0 ? (
                         <View style={styles.empty}>
-                            <T size={16} weight="600" color="#6B7280">
+                            <T size={fontSize.subtitle} weight="600" color="#6B7280">
                                 {t('history.emptyTitle')}
                             </T>
-                            <T size={14} color="#9CA3AF" style={{ marginTop: 8 }}>
+                            <T size={fontSize.body} color="#9CA3AF" style={{ marginTop: 8 }}>
                                 {t('history.emptySub')}
                             </T>
                         </View>
@@ -243,13 +245,13 @@ const History: React.FC = () => {
                         <ActivityIndicator style={{ marginTop: 40 }} />
                     ) : selectedDetail ? (
                         <>
-                            <T size={12} color="#6B7280" style={{ marginBottom: 8 }}>
+                            <T size={fontSize.label} color="#6B7280" style={{ marginBottom: 8 }}>
                                 {formatDate(selectedDetail.createdAt)}
                             </T>
                             {selectedDetail.items.length > 0 ? (
                                 <>
                                     <View style={styles.pill}>
-                                        <T size={12} weight="700" color="#065F46">
+                                        <T size={fontSize.label} weight="700" color="#065F46">
                                             {t('history.labValues')}
                                         </T>
                                     </View>
@@ -260,7 +262,7 @@ const History: React.FC = () => {
                             {selectedDetail.analysis ? (
                                 <>
                                     <View style={styles.pill}>
-                                        <T size={12} weight="700" color="#065F46">
+                                        <T size={fontSize.label} weight="700" color="#065F46">
                                             {t('history.analysis')}
                                         </T>
                                     </View>
@@ -269,7 +271,7 @@ const History: React.FC = () => {
                                         .map((line, idx) => (
                                             <T
                                                 key={idx}
-                                                size={14}
+                                                size={fontSize.body}
                                                 color="#111827"
                                                 style={{ marginBottom: 6 }}>
                                                 {line}
@@ -277,7 +279,7 @@ const History: React.FC = () => {
                                         ))}
                                 </>
                             ) : (
-                                <T size={14} color="#6B7280">
+                                <T size={fontSize.body} color="#6B7280">
                                     {t('history.noRecord')}
                                 </T>
                             )}

@@ -7,6 +7,8 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
+import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 import PopupModal from '../../components/Modals/PopupModal';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
@@ -64,7 +66,7 @@ const Settings: React.FC = () => {
                 },
                 radio: {
                     width: 22 * w1px,
-                    height: 22 * w1px,
+                    height: 22 * h1px,
                     borderRadius: 11 * w1px,
                     borderWidth: 2,
                     borderColor: colors.backgroundPurple,
@@ -73,7 +75,7 @@ const Settings: React.FC = () => {
                 },
                 radioInner: {
                     width: 12 * w1px,
-                    height: 12 * w1px,
+                    height: 12 * h1px,
                     borderRadius: 6,
                     backgroundColor: colors.backgroundPurple,
                 },
@@ -110,15 +112,15 @@ const Settings: React.FC = () => {
                         style={styles.backBtn}
                         onPress={() => nav.goBack()}
                         activeOpacity={0.8}>
-                        <Ionicons name="arrow-back" size={28} color="#111827" />
+                        <Ionicons name="arrow-back" size={iconSize.xl} color="#111827" />
                     </TouchableOpacity>
-                    <T size={24} weight="700" color="#111827" style={styles.title}>
+                    <T size={fontSize.display} weight="700" color="#111827" style={styles.title}>
                         {t('settings.title')}
                     </T>
                 </View>
 
                 <View style={styles.section}>
-                    <T size={14} color="#6B7280" style={styles.sectionTitle}>
+                    <T size={fontSize.body} color="#6B7280" style={styles.sectionTitle}>
                         {t('settings.language')}
                     </T>
 
@@ -130,7 +132,7 @@ const Settings: React.FC = () => {
                             <View style={styles.radio}>
                                 {locale === 'tr' && <View style={styles.radioInner} />}
                             </View>
-                            <T size={16} weight="500" color="#111827">
+                            <T size={fontSize.subtitle} weight="500" color="#111827">
                                 Türkçe
                             </T>
                         </View>
@@ -144,7 +146,7 @@ const Settings: React.FC = () => {
                             <View style={styles.radio}>
                                 {locale === 'en' && <View style={styles.radioInner} />}
                             </View>
-                            <T size={16} weight="500" color="#111827">
+                            <T size={fontSize.subtitle} weight="500" color="#111827">
                                 English
                             </T>
                         </View>
@@ -155,7 +157,7 @@ const Settings: React.FC = () => {
                     style={styles.logoutRow}
                     onPress={() => setLogoutModalVisible(true)}
                     activeOpacity={0.8}>
-                    <T size={16} weight="600" color="#DC2626">
+                    <T size={fontSize.subtitle} weight="600" color="#DC2626">
                         {t('settings.logout')}
                     </T>
                 </TouchableOpacity>

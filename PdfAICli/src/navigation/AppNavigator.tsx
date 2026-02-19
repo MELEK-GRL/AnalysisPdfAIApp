@@ -7,6 +7,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfile } from '../server/api/User';
+import { fontSize } from '../constants/typography';
+import { iconSize } from '../constants/icons';
 import { AUTH_TOKEN, CONSENT_GIVEN_ONCE } from '../constants/storageKeys';
 
 import Home from '../screens/Home';
@@ -33,25 +35,40 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
+const MIN_TAP_HEIGHT = 48; // 48dp Android / 44pt+ iOS accessibility
 const MainTabs = () => {
     const t = useLocaleStore((s) => s.t);
     return (
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: '#6D28D9',
+                tabBarActiveTintColor: '#7453E0',
                 tabBarInactiveTintColor: '#9CA3AF',
-                tabBarLabelStyle: { fontSize: 12 },
+                tabBarLabelStyle: { fontSize: fontSize.label },
+                tabBarStyle: {
+                    backgroundColor: '#fff',
+                    borderTopWidth: 1,
+                    borderTopColor: '#E5E7EB',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: -2 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 8,
+                    elevation: 8,
+                },
+                tabBarItemStyle: {
+                    minHeight: MIN_TAP_HEIGHT,
+                    paddingTop: 6,
+                },
             }}>
             <Tab.Screen
                 name="Analiz"
                 component={Home}
                 options={{
                     title: t('tabs.analysis'),
-                    tabBarIcon: ({ focused, color, size }) => (
+                    tabBarIcon: ({ focused, color }) => (
                         <Ionicons
                             name={focused ? 'document-text' : 'document-text-outline'}
-                            size={size}
+                            size={iconSize.large}
                             color={color}
                         />
                     ),
@@ -62,10 +79,10 @@ const MainTabs = () => {
                 component={History}
                 options={{
                     title: t('tabs.history'),
-                    tabBarIcon: ({ focused, color, size }) => (
+                    tabBarIcon: ({ focused, color }) => (
                         <Ionicons
                             name={focused ? 'time' : 'time-outline'}
-                            size={size}
+                            size={iconSize.large}
                             color={color}
                         />
                     ),

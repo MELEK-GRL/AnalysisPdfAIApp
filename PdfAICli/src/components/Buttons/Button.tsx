@@ -11,6 +11,7 @@ import { useResponsive } from '../../utils/deviceStore/device';
 import LoadingModal from '../Modals/LoadingModal';
 import T from '../Text/T';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
 
 type Props = {
     buttonText: string;
@@ -70,7 +71,7 @@ const Button: React.FC<Props> = ({
                     {activityIndicatorLoading && (
                         <ActivityIndicator size="small" color="#fff" />
                     )}
-                    <T size={16} weight="600" color="#fff">
+                    <T size={fontSize.subtitle} weight="600" color="#fff">
                         {buttonText}
                     </T>
                 </TouchableOpacity>

@@ -19,6 +19,7 @@ import { useLocaleStore } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { getInstallationId } from '../../utils/analytics/getInstallationId';
 import { LAST_CONSENT_ID } from '../../constants/storageKeys';
@@ -49,7 +50,7 @@ const SplashTwo: React.FC = () => {
             <View
                 key={`c-${cIdx}`}
                 style={{ marginTop: 4 * h1px, paddingLeft: 16 * w1px }}>
-                <T size={13 * fs1px} color="#4B5563">
+                <T size={fontSize.bodySmall} color="#4B5563">
                     • {child.text}
                 </T>
             </View>
@@ -60,7 +61,7 @@ const SplashTwo: React.FC = () => {
     const renderTermItem = useCallback(
         (item: any, idx: number) => (
             <View key={idx} style={{ marginTop: 8 * h1px }}>
-                <T size={15 * fs1px} color="#374151">
+                <T size={fontSize.bodyMedium} color="#374151">
                     {idx + 1}. {item.text}
                 </T>
                 {item.children?.length ? item.children.map(renderChild) : null}
@@ -125,14 +126,14 @@ const SplashTwo: React.FC = () => {
                             showsHorizontalScrollIndicator={false}
                             style={s.scrollView}>
                             <T
-                                size={18 * fs1px}
+                                size={fontSize.title}
                                 weight="700"
                                 color="#111827"
                                 style={{ marginBottom: 8 * h1px }}>
                                 Kullanıcı Sözleşmesi
                             </T>
 
-                            <T size={15 * fs1px} color="#374151">
+                            <T size={fontSize.bodyMedium} color="#374151">
                                 Bu uygulamayı kullanarak aşağıdaki koşulları kabul etmiş
                                 sayılırsınız:
                             </T>
@@ -154,7 +155,7 @@ const SplashTwo: React.FC = () => {
                             ]}
                         />
                         <T
-                            size={14 * fs1px}
+                            size={fontSize.body}
                             color="#111"
                             style={{ marginLeft: 8 * w1px, flex: 1 }}>
                             Sözleşmeyi okudum ve kabul ediyorum.

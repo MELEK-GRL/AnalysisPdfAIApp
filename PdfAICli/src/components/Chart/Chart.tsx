@@ -4,6 +4,7 @@ import { View, StyleSheet, Image } from 'react-native';
 import type { LabItem } from '../../server/api/Lab';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
+import { fontSize } from '../../constants/typography';
 
 type Props = { items: LabItem[]; width?: number };
 
@@ -127,7 +128,7 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
                     source={require('../../assets/icons/noData.png')}
                     style={s.imageView}
                 />
-                <T size={16 * fs1px} weight="700" color="#6B7280">
+                <T size={fontSize.subtitle} weight="700" color="#6B7280">
                     Veri Bulunmamaktadır
                 </T>
             </View>
@@ -166,14 +167,14 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
             <View style={s.wrap}>
                 <View style={s.top}>
                     <T
-                        size={14}
+                        size={fontSize.body}
                         weight="600"
                         color="#111827"
                         numberOfLines={1}
                         style={{ flex: 1, paddingRight: 8 * w1px }}>
                         {item.label || item.test}
                     </T>
-                    <T size={14} weight="700" color={flagColor}>
+                    <T size={fontSize.body} weight="700" color={flagColor}>
                         {fmtNum(v)}
                         {item.unit ? ` ${item.unit}` : ''}
                     </T>
@@ -237,7 +238,7 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
 
                 {/* Alt etiketler */}
                 <View style={[s.labelsWrap, { width: widthPx }]}>
-                    <T size={14} color="#6B7280" style={{ position: 'absolute', left: 0 }}>
+                    <T size={fontSize.body} color="#6B7280" style={{ position: 'absolute', left: 0 }}>
                         {fmtNum(scaleMin)}
                     </T>
                     {_hasRef && (
@@ -271,11 +272,11 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
                 </View>
 
                 <View style={s.bottom}>
-                    <T size={14} color="#6B7280">
+                    <T size={fontSize.body} color="#6B7280">
                         Ref: {_hasRef ? `${fmtNum(refLow)}–${fmtNum(refHigh)}` : '—'}
                         {item.unit ? ` ${item.unit}` : ''}
                     </T>
-                    <T size={14} weight="700" color={flagColor}>
+                    <T size={fontSize.body} weight="700" color={flagColor}>
                         {flagText}
                     </T>
                 </View>

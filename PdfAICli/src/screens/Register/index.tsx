@@ -19,6 +19,7 @@ import PopupModal from '../../components/Modals/PopupModal';
 import TextInputComponent from '../../components/Inputs/TextInputComponent';
 import { useResponsive } from '../../utils/deviceStore/device';
 import colors from '../../theme/colors';
+import { fontSize } from '../../constants/typography';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useLocaleStore } from '../../store/useLocaleStore';
@@ -239,7 +240,7 @@ const Register: React.FC = () => {
                     style={s.container}>
                     <View style={s.card}>
                         <T
-                            size={24}
+                            size={fontSize.display}
                             weight="900"
                             color={colors.backgroundPurple}
                             style={{ marginBottom: 28 * h1px, textAlign: 'center' }}>
@@ -295,13 +296,13 @@ const Register: React.FC = () => {
                         />
 
                         <View style={s.textStyle}>
-                            <T size={17} color={colors.textDark}>
+                            <T size={fontSize.subtitleLarge} color={colors.textDark}>
                                 {t('register.hasAccount')}
                             </T>
                             <View style={s.textStyleLeft}>
                                 <T
-                                    size={17}
-                                    weight="800"
+size={fontSize.subtitleLarge}
+                                weight="800"
                                     color={colors.backgroundPurple}
                                     onPress={() => nav.goBack()}>
                                     {t('register.login')}

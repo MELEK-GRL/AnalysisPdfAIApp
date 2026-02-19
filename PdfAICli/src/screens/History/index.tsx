@@ -17,6 +17,7 @@ import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
 import Header from '../../components/Header/Header';
+import TitleHeader from '../../components/TitleHeader/TitleHeader';
 import PageLayout from '../../components/Layout/PageLayout';
 import T from '../../components/Text/T';
 import colors from '../../theme/colors';
@@ -204,6 +205,7 @@ const History: React.FC = () => {
         <View style={styles.contentView}>
             <Header title={displayName} />
             <PageLayout paddingHorizontal={10}>
+                <TitleHeader title={t('tabs.history')} />
                 <View style={styles.scrollView}>
                     {loading ? (
                         <View style={styles.empty}>

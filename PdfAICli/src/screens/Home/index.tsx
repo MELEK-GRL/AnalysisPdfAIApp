@@ -31,6 +31,7 @@ import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
 import { useAnalysisModalStore } from '../../store/useAnalysisModalStore';
 import Header from '../../components/Header/Header';
+import TitleHeader from '../../components/TitleHeader/TitleHeader';
 
 type Phase = 'idle' | 'loading' | 'result';
 
@@ -263,9 +264,10 @@ const Home: React.FC = () => {
         <View style={styles.contentView}>
             <Header title={displayName} />
             <PageLayout>
+                <TitleHeader title={t('tabs.analysis')} />
                 <ScrollView
                     style={styles.scrollView}
-                    contentContainerStyle={{ flexGrow: 1, paddingTop: 16, paddingBottom: 24 }}
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
                     showsVerticalScrollIndicator={false}
                     bounces={true}>
                     <View style={styles.cardContainer}>

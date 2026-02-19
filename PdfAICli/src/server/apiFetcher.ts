@@ -93,7 +93,14 @@ api.interceptors.response.use(
     },
     async error => {
         if (__DEV__) {
-            console.warn('[API ERR]', error?.message, error?.response?.status, error?.config?.url);
+            const msg = error?.message || 'Unknown error';
+            const status = error?.response?.status;
+            const url = error?.config?.url || '';
+            const code = (error as any)?.code;
+            const detail = [msg, code, status ? `HTTP ${status}` : null, url]
+                .filter(Boolean)
+                .join(' | ');
+            console.warn('[API ERR]', detail);
         }
         return Promise.reject(error);
     },

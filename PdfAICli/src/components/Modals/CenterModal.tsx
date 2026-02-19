@@ -1,10 +1,5 @@
 import React, { useMemo, ReactNode } from 'react';
-import {
-    View,
-    StyleSheet,
-    Modal,
-    TouchableWithoutFeedback,
-} from 'react-native';
+import { View, StyleSheet, Modal } from 'react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import Button from '../Buttons/Button';
@@ -45,6 +40,7 @@ const CenterModal: React.FC<Props> = ({
                 box: {
                     width: hasChildren ? '95%' : 320 * w1px,
                     maxWidth: 400,
+                    maxHeight: '85%',
                     backgroundColor: '#fff',
                     borderRadius: 8 * w1px,
                     paddingVertical: 20 * h1px,
@@ -54,6 +50,7 @@ const CenterModal: React.FC<Props> = ({
                     shadowOpacity: 0.15,
                     shadowRadius: 10 * w1px,
                     elevation: 5,
+                    overflow: 'hidden',
                 },
                 buttonRow: {
                     flexDirection: 'row',
@@ -77,9 +74,8 @@ const CenterModal: React.FC<Props> = ({
 
     return (
         <Modal visible={visible} transparent animationType="fade">
-            <TouchableWithoutFeedback>
-                <View style={styles.overlay}>
-                    <View style={styles.box}>
+            <View style={styles.overlay}>
+                <View style={styles.box}>
                         <T
                             size={18}
                             weight="700"
@@ -117,9 +113,8 @@ const CenterModal: React.FC<Props> = ({
                                 )}
                             </View>
                         )}
-                    </View>
                 </View>
-            </TouchableWithoutFeedback>
+            </View>
         </Modal>
     );
 };

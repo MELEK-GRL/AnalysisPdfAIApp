@@ -58,6 +58,7 @@
     "error": "Kayıt başarısız. Lütfen tekrar deneyin."
   },
   "home": {
+    "dragOrSelect": "Sürükle veya Seç",
     "uploadPdf": "Tahlil Raporunu Yükle",
     "send": "Gönder",
     "selected": "Seçilen",

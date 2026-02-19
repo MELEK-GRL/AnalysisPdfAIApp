@@ -1,6 +1,6 @@
 // src/components/Chart.tsx
 import React, { useMemo } from 'react';
-import { View, StyleSheet, FlatList, Image } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import type { LabItem } from '../../server/api/Lab';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
@@ -287,15 +287,16 @@ const Chart: React.FC<Props> = ({ items = [], width = 280 }) => {
         return <RangeRow item={filtered[0]} />;
     }
 
+    // FlatList yerine map kullan: ScrollView içinde FlatList "VirtualizedLists should never be nested" hatası verir
     return (
-        <FlatList
-            data={filtered}
-            keyExtractor={(it, idx) => `${it.test}-${idx}`}
-            renderItem={({ item }) => <RangeRow item={item} />}
-            ItemSeparatorComponent={() => <View style={{ height: 10 * h1px }} />}
-            contentContainerStyle={{ paddingVertical: 4 * h1px }}
-            showsVerticalScrollIndicator={false}
-        />
+        <View style={{ paddingVertical: 4 * h1px }}>
+            {filtered.map((item, idx) => (
+                <View key={`${item.test}-${idx}`}>
+                    {idx > 0 && <View style={{ height: 10 * h1px }} />}
+                    <RangeRow item={item} />
+                </View>
+            ))}
+        </View>
     );
 };
 

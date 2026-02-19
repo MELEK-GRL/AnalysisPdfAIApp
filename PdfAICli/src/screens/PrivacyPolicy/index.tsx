@@ -82,6 +82,7 @@ const PrivacyPolicy: React.FC = () => {
                 <ScrollView
                     style={styles.scroll}
                     showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 40 }}>
                     {content.sections.map((sec, idx) => (
                         <View key={idx} style={styles.section}>

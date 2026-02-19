@@ -23,16 +23,9 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const handleAppStateChange = async (nextState: AppStateStatus) => {
-      if (
-        appState.current.match(/active|inactive/) &&
-        nextState === 'background'
-      ) {
-        await useAuthStore.getState().logout();
-      }
+    const handleAppStateChange = (nextState: AppStateStatus) => {
       appState.current = nextState;
     };
-
     const stateSub = AppState.addEventListener('change', handleAppStateChange);
     return () => stateSub.remove();
   }, []);

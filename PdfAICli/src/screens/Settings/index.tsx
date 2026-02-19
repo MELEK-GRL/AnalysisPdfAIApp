@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -25,8 +26,17 @@ const Settings: React.FC = () => {
                     flex: 1,
                     padding: 20 * w1px,
                 },
-                title: {
+                headerRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
                     marginBottom: 24 * h1px,
+                },
+                backBtn: {
+                    padding: 8 * w1px,
+                    marginRight: 12 * w1px,
+                },
+                title: {
+                    flex: 1,
                 },
                 section: {
                     marginBottom: 24 * h1px,
@@ -95,9 +105,17 @@ const Settings: React.FC = () => {
     return (
         <GradientLayout>
             <View style={styles.container}>
-                <T size={24} weight="700" color="#111827" style={styles.title}>
-                    {t('settings.title')}
-                </T>
+                <View style={styles.headerRow}>
+                    <TouchableOpacity
+                        style={styles.backBtn}
+                        onPress={() => nav.goBack()}
+                        activeOpacity={0.8}>
+                        <Ionicons name="arrow-back" size={28} color="#111827" />
+                    </TouchableOpacity>
+                    <T size={24} weight="700" color="#111827" style={styles.title}>
+                        {t('settings.title')}
+                    </T>
+                </View>
 
                 <View style={styles.section}>
                     <T size={14} color="#6B7280" style={styles.sectionTitle}>

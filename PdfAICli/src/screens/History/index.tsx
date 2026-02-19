@@ -8,6 +8,7 @@ import {
     RefreshControl,
     ScrollView,
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
 import { getLabHistory, getLabHistoryItem, LabHistoryItem, LabHistoryDetail } from '../../server/api/Lab';
 import { useLocaleStore } from '../../store/useLocaleStore';
@@ -112,21 +113,33 @@ const History: React.FC = () => {
                     paddingVertical: 40 * h1px,
                 },
                 card: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
                     backgroundColor: colors.white,
                     borderRadius: 12 * w1px,
-                    padding: 16 * w1px,
-                    marginHorizontal: 16 * w1px,
-                    marginBottom: 12 * h1px,
+                    paddingVertical: 12 * h1px,
+                    paddingHorizontal: 12 * w1px,
+                    marginHorizontal: 8 * w1px,
+                    marginBottom: 10 * h1px,
                     shadowColor: '#000',
-                    shadowOpacity: 0.06,
-                    shadowRadius: 8,
-                    elevation: 3,
+                    shadowOpacity: 0.05,
+                    shadowRadius: 6,
+                    elevation: 2,
+                    borderWidth: 1,
+                    borderColor: '#F3F4F6',
+                },
+                cardContent: {
+                    flex: 1,
+                    minWidth: 0,
                 },
                 cardTitle: {
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: 6 * h1px,
+                    marginBottom: 4 * h1px,
+                },
+                cardChevron: {
+                    marginLeft: 8 * w1px,
                 },
                 detailModalView: {
                     height: h1px * 500,
@@ -150,27 +163,35 @@ const History: React.FC = () => {
         <TouchableOpacity
             style={styles.card}
             onPress={() => handleItemPress(item.id)}
-            activeOpacity={0.8}>
-            <View style={styles.cardTitle}>
-                <T size={16} weight="600" color="#111827" numberOfLines={1}>
-                    {item.pdfName || t('history.labReport')}
-                </T>
-                <T size={12} color="#6B7280">
-                    {formatDate(item.createdAt)}
+            activeOpacity={0.7}>
+            <View style={styles.cardContent}>
+                <View style={styles.cardTitle}>
+                    <T size={15} weight="600" color="#111827" numberOfLines={1} style={{ flex: 1 }}>
+                        {item.pdfName || t('history.labReport')}
+                    </T>
+                    <T size={11} color="#9CA3AF" style={{ marginLeft: 8 }}>
+                        {formatDate(item.createdAt)}
+                    </T>
+                </View>
+                <T size={13} color="#6B7280">
+                    {item.itemCount > 0
+                        ? `${item.itemCount} ${t('history.paramCount')}`
+                        : t('history.notLabReport')}
                 </T>
             </View>
-            <T size={14} color="#6B7280">
-                {item.itemCount > 0
-                    ? `${item.itemCount} ${t('history.paramCount')}`
-                    : t('history.notLabReport')}
-            </T>
+            <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={colors.backgroundPurple}
+                style={styles.cardChevron}
+            />
         </TouchableOpacity>
     );
 
     return (
         <View style={styles.contentView}>
             <Header title={displayName} />
-            <PageLayout>
+            <PageLayout paddingHorizontal={10}>
                 <View style={styles.scrollView}>
                     {loading ? (
                         <View style={styles.empty}>
@@ -193,7 +214,9 @@ const History: React.FC = () => {
                             data={items}
                             keyExtractor={(it) => it.id}
                             renderItem={renderItem}
-                            contentContainerStyle={{ paddingVertical: 16 }}
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{ paddingVertical: 12 }}
                             refreshControl={
                                 <RefreshControl
                                     refreshing={refreshing}
@@ -210,7 +233,12 @@ const History: React.FC = () => {
                 title={selectedDetail?.pdfName || t('history.detailTitle')}
                 rightButtonText={t('common.close')}
                 onRightPress={() => setDetailModal(false)}>
-                <ScrollView style={styles.detailModalView}>
+                <ScrollView
+                    style={styles.detailModalView}
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 24 }}>
                     {detailLoading ? (
                         <ActivityIndicator style={{ marginTop: 40 }} />
                     ) : selectedDetail ? (

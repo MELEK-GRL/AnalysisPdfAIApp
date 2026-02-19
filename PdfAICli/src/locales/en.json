@@ -58,6 +58,7 @@
     "error": "Registration failed. Please try again."
   },
   "home": {
+    "dragOrSelect": "Drag or Select",
     "uploadPdf": "Upload Lab Report",
     "send": "Send",
     "selected": "Selected",

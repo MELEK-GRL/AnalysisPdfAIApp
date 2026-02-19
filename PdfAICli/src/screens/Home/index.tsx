@@ -3,10 +3,10 @@ import {
     View,
     StyleSheet,
     TouchableOpacity,
-    Image,
     ScrollView,
     Pressable,
 } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import DocumentPicker, {
     type DocumentPickerResponse,
@@ -109,15 +109,33 @@ const Home: React.FC = () => {
                     gap: h1px * 4,
                 },
                 resultCard: {},
-                pdfView: {
-                    alignItems: 'center',
+                uploadCard: {
+                    backgroundColor: '#F9FAFB',
+                    borderRadius: 16 * w1px,
+                    borderWidth: 2,
+                    borderColor: '#E5E7EB',
+                    borderStyle: 'dashed',
+                    paddingVertical: 24 * h1px,
+                    paddingHorizontal: 20 * w1px,
                     marginTop: h1px * 16,
                 },
-                imageView: {
+                uploadCardTop: {
                     alignSelf: 'center',
-                    width: 80 * w1px,
-                    height: 80 * h1px,
-                    resizeMode: 'contain',
+                    marginBottom: 16 * h1px,
+                },
+                uploadCardContent: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 16 * w1px,
+                },
+                uploadIconWrap: {
+                    width: 56 * w1px,
+                    height: 56 * h1px,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
+                uploadTextWrap: {
+                    flex: 1,
                 },
                 settingsView: {
                     alignSelf: 'center',
@@ -233,14 +251,34 @@ const Home: React.FC = () => {
                                     }}
                                     disabled={phase === 'loading'}
                                     activeOpacity={0.8}
-                                    style={styles.pdfView}>
-                                    <Image
-                                        source={require('../../assets/icons/pdf.png')}
-                                        style={styles.imageView}
-                                    />
-                                    <T size={14} weight="800" color={colors.backgroundPurple}>
-                                        {t('home.uploadPdf')}
+                                    style={styles.uploadCard}>
+                                    <T
+                                        size={14}
+                                        color="#6B7280"
+                                        style={styles.uploadCardTop}>
+                                        {t('home.dragOrSelect')}
                                     </T>
+                                    <View style={styles.uploadCardContent}>
+                                        <View style={styles.uploadIconWrap}>
+                                            <Ionicons
+                                                name="cloud-upload"
+                                                size={48}
+                                                color={colors.backgroundPurple}
+                                            />
+                                        </View>
+                                        <View style={styles.uploadTextWrap}>
+                                            <T
+                                                size={16}
+                                                weight="700"
+                                                color="#111827"
+                                                style={{ marginBottom: 4 }}>
+                                                {t('home.uploadPdf')}
+                                            </T>
+                                            <T size={13} color="#9CA3AF">
+                                                {t('home.pdfHint')}
+                                            </T>
+                                        </View>
+                                    </View>
                                 </TouchableOpacity>
 
                                 <Button
@@ -300,7 +338,10 @@ const Home: React.FC = () => {
                         title={t('home.analysisTitle')}
                         rightButtonText={t('common.close')}
                         onRightPress={() => setCommentModal(false)}>
-                        <ScrollView style={styles.detailModalView}>
+                        <ScrollView
+                            style={styles.detailModalView}
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}>
                             <Pressable>
                                 <View>
                                     <View style={styles.pill}>

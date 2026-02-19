@@ -122,6 +122,7 @@ const SplashTwo: React.FC = () => {
                     <View style={s.scrollContainer}>
                         <ScrollView
                             showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
                             style={s.scrollView}>
                             <T
                                 size={18 * fs1px}

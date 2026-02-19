@@ -49,7 +49,7 @@ const PopupModal: React.FC<Props> = ({
                 },
                 box: {
                     width: 320 * w1px,
-                    maxWidth: 340,
+                    maxWidth: '90%',
                     backgroundColor: '#fff',
                     borderRadius: 12 * w1px,
                     paddingVertical: 24 * h1px,
@@ -73,6 +73,7 @@ const PopupModal: React.FC<Props> = ({
                     width: '100%',
                     gap: 12 * w1px,
                     marginTop: 20 * h1px,
+                    paddingHorizontal: 4,
                 },
             }),
         [w1px, h1px, config.accent],
@@ -109,19 +110,23 @@ const PopupModal: React.FC<Props> = ({
                             {(leftButtonText || rightButtonText) && (
                                 <View style={styles.buttonRow}>
                                     {leftButtonText && (
-                                        <Button
-                                            buttonText={leftButtonText}
-                                            onPress={onLeftPress}
-                                            width={h1px * 120}
-                                            backgroundColor="#94A3B8"
-                                        />
+                                        <View style={{ flex: 1 }}>
+                                            <Button
+                                                buttonText={leftButtonText}
+                                                onPress={onLeftPress}
+                                                width="100%"
+                                                backgroundColor="#94A3B8"
+                                            />
+                                        </View>
                                     )}
                                     {rightButtonText && (
-                                        <Button
-                                            buttonText={rightButtonText}
-                                            onPress={onRightPress}
-                                            width={h1px * 120}
-                                        />
+                                        <View style={{ flex: 1 }}>
+                                            <Button
+                                                buttonText={rightButtonText}
+                                                onPress={onRightPress}
+                                                width="100%"
+                                            />
+                                        </View>
                                     )}
                                 </View>
                             )}

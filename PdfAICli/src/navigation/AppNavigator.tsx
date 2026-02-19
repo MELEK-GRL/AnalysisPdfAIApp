@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { useLocaleStore } from '../store/useLocaleStore';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api } from '../server/apiFetcher';
+import { getProfile } from '../server/api/User';
+import { AUTH_TOKEN, CONSENT_GIVEN_ONCE } from '../constants/storageKeys';
 
 import Home from '../screens/Home';
+import History from '../screens/History';
+import Settings from '../screens/Settings';
+import PrivacyPolicy from '../screens/PrivacyPolicy';
 import Register from '../screens/Register';
 import Login from '../screens/Login';
 import InfoSplash from '../screens/Splashs/InfoSplash';
@@ -17,11 +23,38 @@ export type RootStackParamList = {
     SplashTwo: undefined;
     Login: undefined;
     Register: undefined;
-    Home: undefined;
+    MainTabs: undefined;
+    Settings: undefined;
+    PrivacyPolicy: undefined;
     Logout: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator();
+
+const MainTabs = () => {
+    const t = useLocaleStore((s) => s.t);
+    return (
+        <Tab.Navigator
+            screenOptions={{
+                headerShown: false,
+                tabBarActiveTintColor: '#6D28D9',
+                tabBarInactiveTintColor: '#9CA3AF',
+                tabBarLabelStyle: { fontSize: 12 },
+            }}>
+            <Tab.Screen
+                name="Analiz"
+                component={Home}
+                options={{ title: t('tabs.analysis') }}
+            />
+            <Tab.Screen
+                name="Geçmiş"
+                component={History}
+                options={{ title: t('tabs.history') }}
+            />
+        </Tab.Navigator>
+    );
+};
 
 const Loader = () => (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -37,19 +70,19 @@ const AppNavigator = () => {
     useEffect(() => {
         (async () => {
             try {
-                const consent = await AsyncStorage.getItem('consent_given_once');
+                const consent = await AsyncStorage.getItem(CONSENT_GIVEN_ONCE);
                 setHasConsentOnce(consent === '1');
 
-                const token = await AsyncStorage.getItem('@auth_token');
+                const token = await AsyncStorage.getItem(AUTH_TOKEN);
                 if (!token) {
                     setHasToken(false);
                     return;
                 }
                 try {
-                    await api.get('/auth/me');
+                    await getProfile();
                     setHasToken(true);
                 } catch {
-                    await AsyncStorage.removeItem('@auth_token');
+                    await AsyncStorage.removeItem(AUTH_TOKEN);
                     setHasToken(false);
                 }
             } finally {
@@ -63,7 +96,7 @@ const AppNavigator = () => {
     }
     const initialRouteName: keyof RootStackParamList = hasConsentOnce
         ? hasToken
-            ? 'Home'
+            ? 'MainTabs'
             : 'Login'
         : 'InfoSplash';
     const showInfoSplash = !hasConsentOnce;
@@ -83,7 +116,9 @@ const AppNavigator = () => {
 
                 <Stack.Screen name="Login" component={Login} />
                 <Stack.Screen name="Register" component={Register} />
-                <Stack.Screen name="Home" component={Home} />
+                <Stack.Screen name="MainTabs" component={MainTabs} />
+                <Stack.Screen name="Settings" component={Settings} />
+                <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
                 <Stack.Screen name="Logout" component={Logout} />
             </Stack.Navigator>
         </NavigationContainer>

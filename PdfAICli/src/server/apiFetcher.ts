@@ -1,12 +1,12 @@
 import axios, { AxiosError, AxiosRequestConfig, Method } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@env';
-
-const TOKEN_KEY = '@auth_token';
+import { AUTH_TOKEN } from '../constants/storageKeys';
+import { API_TIMEOUT_MS } from '../constants/api';
 
 export const api = axios.create({
     baseURL: `${API_BASE_URL}/api`,
-    timeout: 15000,
+    timeout: API_TIMEOUT_MS,
 });
 
 const d = api.defaults.headers as any;
@@ -31,20 +31,20 @@ export function setAuthHeader(token?: string | null) {
 }
 
 export async function setToken(token: string) {
-    await AsyncStorage.setItem(TOKEN_KEY, token);
+    await AsyncStorage.setItem(AUTH_TOKEN, token);
     setAuthHeader(token);
 }
 export async function clearToken() {
-    await AsyncStorage.removeItem(TOKEN_KEY);
+    await AsyncStorage.removeItem(AUTH_TOKEN);
     setAuthHeader(null);
 }
-export const getToken = () => AsyncStorage.getItem(TOKEN_KEY);
+export const getToken = () => AsyncStorage.getItem(AUTH_TOKEN);
 
 api.interceptors.request.use(async config => {
     const h: Record<string, any> = (config.headers as any) || {};
 
     if (!h.Authorization) {
-        const token = await AsyncStorage.getItem(TOKEN_KEY);
+        const token = await AsyncStorage.getItem(AUTH_TOKEN);
         if (token) {
             h.Authorization = `Bearer ${token}`;
         }
@@ -74,33 +74,27 @@ api.interceptors.request.use(async config => {
         (config as any).headers = h;
     }
 
-    console.log(
-        '[REQ]',
-        config.method?.toUpperCase(),
-        (config.baseURL || '') + (config.url || ''),
-        'Auth:',
-        h.Authorization ? String(h.Authorization).slice(0, 20) + '…' : 'NONE',
-        'CT:',
-        h['Content-Type'] || h['content-type'] || 'auto',
-    );
+    if (__DEV__) {
+        console.log(
+            '[REQ]',
+            config.method?.toUpperCase(),
+            (config.baseURL || '') + (config.url || ''),
+        );
+    }
     return config;
 });
 
 api.interceptors.response.use(
     res => {
-        console.log('[RES]', res.status, res.config.url);
+        if (__DEV__) {
+            console.log('[RES]', res.status, res.config.url);
+        }
         return res;
     },
     async error => {
-        console.log('[API ERR]', {
-            message: error?.message,
-            code: error?.code,
-            status: error?.response?.status,
-            data: error?.response?.data,
-            url: error?.config?.url,
-            timeout: error?.config?.timeout,
-            reqHeaders: error?.config?.headers,
-        });
+        if (__DEV__) {
+            console.warn('[API ERR]', error?.message, error?.response?.status, error?.config?.url);
+        }
         return Promise.reject(error);
     },
 );

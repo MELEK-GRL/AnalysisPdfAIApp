@@ -17,9 +17,12 @@ import { useNavigation } from '@react-navigation/native';
 import { uploadPdf, LabItem } from '../../server/api/Lab';
 import Chart from '../../components/Chart/Chart';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useLocaleStore } from '../../store/useLocaleStore';
+import { trackButtonClick } from '../../server/api/Analytics';
+import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import Button from '../../components/Buttons/Button';
 import LoadingModal from '../../components/Modals/LoadingModal';
-import CenterModal from '../../components/Modals/CenterModal';
+import PopupModal from '../../components/Modals/PopupModal';
 import PageLayout from '../../components/Layout/PageLayout';
 import T from '../../components/Text/T';
 import colors from '../../theme/colors';
@@ -30,6 +33,7 @@ type Phase = 'idle' | 'loading' | 'result';
 
 const Home: React.FC = () => {
     const nav = useNavigation<any>();
+    useScreenTime('Home');
     const [phase, setPhase] = useState<Phase>('idle');
     const [fileName, setFileName] = useState<string | null>(null);
     const [commentModal, setCommentModal] = useState<boolean>(false);
@@ -46,6 +50,8 @@ const Home: React.FC = () => {
     const [notLabVisible, setNotLabVisible] = useState(false);
     const [uploadErrorVisible, setUploadErrorVisible] = useState(false);
     const [uploadErrorMessage, setUploadErrorMessage] = useState<string>('');
+    const [rateLimitModalVisible, setRateLimitModalVisible] = useState(false);
+    const t = useLocaleStore((s) => s.t);
     const { w1px, h1px, fs1px } = useResponsive();
 
     const styles = useMemo(
@@ -61,7 +67,7 @@ const Home: React.FC = () => {
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    backgroundColor: colors.backgroundPrupleDark,
+                    backgroundColor: colors.backgroundPurpleDark,
                     height: h1px * 90,
                     borderBottomRightRadius: fs1px * 14,
                     borderBottomLeftRadius: fs1px * 14,
@@ -197,8 +203,12 @@ const Home: React.FC = () => {
                 setNotLabVisible(true);
             }
         } catch (err: any) {
-            setUploadErrorMessage(err?.message || 'PDF yüklenemedi.');
-            setUploadErrorVisible(true);
+            if (err?.isRateLimit) {
+                setRateLimitModalVisible(true);
+            } else {
+                setUploadErrorMessage(err?.message || 'PDF yüklenemedi.');
+                setUploadErrorVisible(true);
+            }
             setPhase('idle');
         } finally {
             setPickedFile(null);
@@ -215,7 +225,10 @@ const Home: React.FC = () => {
                         <View style={styles.cardView}>
                             <View style={styles.card}>
                                 <TouchableOpacity
-                                    onPress={handleSelectPdf}
+                                    onPress={() => {
+                                        trackButtonClick('select_pdf', { screen: 'Home' });
+                                        handleSelectPdf();
+                                    }}
                                     disabled={phase === 'loading'}
                                     activeOpacity={0.8}
                                     style={styles.pdfView}>
@@ -223,14 +236,17 @@ const Home: React.FC = () => {
                                         source={require('../../assets/icons/pdf.png')}
                                         style={styles.imageView}
                                     />
-                                    <T size={14} weight="800" color={colors.backgroundPruple}>
-                                        Tahlil Raporunu Yükle
+                                    <T size={14} weight="800" color={colors.backgroundPurple}>
+                                        {t('home.uploadPdf')}
                                     </T>
                                 </TouchableOpacity>
 
                                 <Button
-                                    buttonText="Gönder"
-                                    onPress={handleSendPdf}
+                                    buttonText={t('home.send')}
+                                    onPress={() => {
+                                        trackButtonClick('send_pdf', { screen: 'Home' });
+                                        handleSendPdf();
+                                    }}
                                     disabled={!pickedFile || phase === 'loading'}
                                     width={h1px * 200}
                                 />
@@ -238,11 +254,11 @@ const Home: React.FC = () => {
                                 <View style={styles.fileView}>
                                     {fileName && (
                                         <T size={16} color="#232426ff">
-                                            Seçilen: {fileName}
+                                            {t('home.selected')}: {fileName}
                                         </T>
                                     )}
                                     <T size={14} color="#232426ff">
-                                        Sadece PDF kabul edilir. Max ~10MB önerilir.
+                                        {t('home.pdfHint')}
                                     </T>
                                 </View>
 
@@ -250,9 +266,9 @@ const Home: React.FC = () => {
                                     <T
                                         size={18}
                                         weight="700"
-                                        color={colors.backgroundPrupleDark}
+                                        color={colors.backgroundPurpleDark}
                                         style={{ marginBottom: 8 * h1px }}>
-                                        Analiz Sonucu
+                                        {t('home.analysisResult')}
                                     </T>
 
                                     <View style={{ height: '78%' }}>
@@ -265,8 +281,11 @@ const Home: React.FC = () => {
                         {items.length > 0 && (
                             <View style={styles.buttonView}>
                                 <Button
-                                    buttonText="Tahlil Sonuçlarımı Yorumla"
-                                    onPress={() => setCommentModal(true)}
+                                    buttonText={t('home.interpretButton')}
+                                    onPress={() => {
+                                        trackButtonClick('interpret_result', { screen: 'Home' });
+                                        setCommentModal(true);
+                                    }}
                                     width={h1px * 240}
                                 />
                             </View>
@@ -276,8 +295,8 @@ const Home: React.FC = () => {
                     {/* ANALİZ MODALI */}
                     <DetailModal
                         visible={commentModal}
-                        title="Tahlil Sonuçları Analizi"
-                        rightButtonText="Kapat"
+                        title={t('home.analysisTitle')}
+                        rightButtonText={t('common.close')}
                         onRightPress={() => setCommentModal(false)}>
                         <ScrollView style={styles.detailModalView}>
                             <Pressable>
@@ -301,8 +320,7 @@ const Home: React.FC = () => {
                                     ) : (
                                         <>
                                             <T size={14} color="#111827">
-                                                Analiz metni bulunamadı. Lütfen tahlil değerlerinizi
-                                                tekrar yüklemeyi deneyin.
+                                                {t('home.noAnalysis')}
                                             </T>
                                         </>
                                     )}
@@ -310,59 +328,68 @@ const Home: React.FC = () => {
                                     <View style={styles.sectionGap} />
                                     <View style={styles.pill}>
                                         <T size={12} weight="700" color="#065F46">
-                                            ÖNERİLER
+                                            {t('home.suggestions')}
                                         </T>
                                     </View>
                                     <T size={14} color="#111827">
-                                        Günlük yaşam ve hidrasyon, düzenli uyku ve dengeli beslenme
-                                        çoğu parametre için destekleyicidir. Spesifik bir ilaç veya
-                                        takviye önerisi **doktor kontrolü** dışında yapılmamalıdır.
+                                        {t('home.suggestionsText')}
                                     </T>
                                     <View style={styles.sectionGap} />
                                     <View style={[styles.pill, { backgroundColor: '#FEF2F2' }]}>
                                         <T size={12} weight="700" color="#991B1B">
-                                            ÖNEMLİ UYARI
+                                            {t('home.importantWarning')}
                                         </T>
                                     </View>
                                     <T size={14} color="#991B1B">
-                                        Bu içerik bilgilendirme amaçlıdır ve tıbbi tavsiye değildir.
-                                        Nihai yorum ve tedavi planı için lütfen **doktorunuza
-                                        danışın**.
+                                        {t('home.disclaimer')}
                                     </T>
                                 </View>
                             </Pressable>
                         </ScrollView>
                     </DetailModal>
 
-                    <CenterModal
+                    <PopupModal
                         visible={selectErrorVisible}
-                        title="Hata"
+                        title={t('common.error')}
                         message={selectErrorMessage}
-                        rightButtonText="Tamam"
+                        type="error"
+                        rightButtonText={t('common.ok')}
                         onRightPress={() => setSelectErrorVisible(false)}
                     />
 
-                    <CenterModal
+                    <PopupModal
                         visible={uploadSuccessVisible}
-                        title="Tamam"
-                        message="Tahlil verileri çıkarıldı."
-                        rightButtonText="Kapat"
+                        title={t('common.ok')}
+                        message={t('home.success')}
+                        type="success"
+                        rightButtonText={t('common.close')}
                         onRightPress={() => setUploadSuccessVisible(false)}
                     />
 
-                    <CenterModal
+                    <PopupModal
                         visible={notLabVisible}
-                        title="Uyarı"
-                        message="Bu PDF tahlil raporu değil gibi görünüyor."
-                        rightButtonText="Anladım"
+                        title={t('common.warning')}
+                        message={t('home.notLab')}
+                        type="warning"
+                        rightButtonText={t('common.understand')}
                         onRightPress={() => setNotLabVisible(false)}
                     />
 
-                    <CenterModal
+                    <PopupModal
+                        visible={rateLimitModalVisible}
+                        title={t('home.rateLimitTitle')}
+                        message={t('home.rateLimitMessage')}
+                        type="warning"
+                        rightButtonText={t('common.understand')}
+                        onRightPress={() => setRateLimitModalVisible(false)}
+                    />
+
+                    <PopupModal
                         visible={uploadErrorVisible}
-                        title="Hata"
-                        message={uploadErrorMessage || 'PDF yüklenemedi.'}
-                        rightButtonText="Tamam"
+                        title={t('common.error')}
+                        message={uploadErrorMessage || t('home.uploadError')}
+                        type="error"
+                        rightButtonText={t('common.ok')}
                         onRightPress={() => setUploadErrorVisible(false)}
                     />
                 </View>

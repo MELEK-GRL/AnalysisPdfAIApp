@@ -4,39 +4,40 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { login } from '../../server/api/User';
+import { getInstallationId } from '../../utils/analytics/getInstallationId';
+import { trackEvent, trackButtonClick } from '../../server/api/Analytics';
+import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useLocaleStore } from '../../store/useLocaleStore';
 import { api } from '../../server/apiFetcher';
 
 import Button from '../../components/Buttons/Button';
 import T from '../../components/Text/T';
-import CenterModal from '../../components/Modals/CenterModal';
+import PopupModal from '../../components/Modals/PopupModal';
 import { useResponsive } from '../../utils/deviceStore/device';
 import TextInputComponent from '../../components/Inputs/TextInputComponent';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
-
-async function getInstallationId() {
-    let id = await AsyncStorage.getItem('installation_id');
-    if (!id) {
-        id = `${Platform.OS}-${Date.now()}-${Math.random()
-            .toString(36)
-            .slice(2, 10)}`;
-        await AsyncStorage.setItem('installation_id', id);
-    }
-    return id;
-}
+import {
+    LAST_CONSENT_ID,
+    CONSENT_GIVEN_ONCE,
+    HAS_EVER_LOGGED_IN,
+} from '../../constants/storageKeys';
 
 const Login: React.FC = () => {
     const nav = useNavigation<any>();
+    useScreenTime('Login');
+    const t = useLocaleStore((s) => s.t);
     const { w1px, h1px, fs1px } = useResponsive();
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [modal, setModal] = useState({
-        visible: false,
-        title: '',
-        message: '',
-    });
+    const [modal, setModal] = useState<{
+        visible: boolean;
+        title: string;
+        message: string;
+        type?: 'error' | 'warning';
+    }>({ visible: false, title: '', message: '' });
 
     const setUserAndToken = useAuthStore(s => s.setUserAndToken);
     const s = useMemo(
@@ -73,8 +74,9 @@ const Login: React.FC = () => {
         if (!identifier || !password) {
             setModal({
                 visible: true,
-                title: 'Uyarı',
-                message: 'Lütfen e-posta/kullanıcı adı ve şifreyi girin.',
+                title: t('common.warning'),
+                message: t('login.warnEmpty'),
+                type: 'warning',
             });
             return;
         }
@@ -93,11 +95,11 @@ const Login: React.FC = () => {
             try {
                 const installationId = await getInstallationId();
                 const headers = { headers: { Authorization: `Bearer ${token}` } };
-                const consentId = await AsyncStorage.getItem('last_consent_id');
+                const consentId = await AsyncStorage.getItem(LAST_CONSENT_ID);
 
                 if (consentId) {
                     await api.post(`/consents/${consentId}/attach`, {}, headers);
-                    await AsyncStorage.setItem('consent_given_once', '1');
+                    await AsyncStorage.setItem(CONSENT_GIVEN_ONCE, '1');
                 } else {
                     const r = await api.post(
                         '/consents/attach-by-installation',
@@ -105,7 +107,7 @@ const Login: React.FC = () => {
                         headers,
                     );
                     if (r?.data?.ok) {
-                        await AsyncStorage.setItem('consent_given_once', '1');
+                        await AsyncStorage.setItem(CONSENT_GIVEN_ONCE, '1');
                     }
                 }
                 await api.post(
@@ -117,14 +119,16 @@ const Login: React.FC = () => {
                 console.warn('Post-login attach/session failed:', e?.message || e);
             }
             await setUserAndToken(res.user, token);
-            await AsyncStorage.setItem('has_ever_logged_in', '1');
+            await AsyncStorage.setItem(HAS_EVER_LOGGED_IN, '1');
+            trackEvent('login', { screen: 'Login' });
 
-            nav.replace('Home');
+            nav.replace('MainTabs');
         } catch (e: any) {
             setModal({
                 visible: true,
-                title: 'Giriş Hatası',
-                message: e?.message || 'Bir hata oluştu.',
+                title: t('login.errorTitle'),
+                message: e?.message || t('common.genericError'),
+                type: 'error',
             });
         } finally {
             setLoading(false);
@@ -140,14 +144,14 @@ const Login: React.FC = () => {
                     <T
                         size={24}
                         weight="900"
-                        color={colors.backgroundPruple}
+                        color={colors.backgroundPurple}
                         style={{ marginBottom: 24 * h1px, textAlign: 'center' }}>
-                        Giriş Yap
+                        {t('login.title')}
                     </T>
 
                     <TextInputComponent
-                        label="E-posta veya Kullanıcı Adı"
-                        placeholder="E-posta veya kullanıcı adı"
+                        label={t('login.emailPlaceholder')}
+                        placeholder={t('login.emailPlaceholder')}
                         value={identifier}
                         onChangeText={setIdentifier}
                         autoCapitalize="none"
@@ -157,8 +161,8 @@ const Login: React.FC = () => {
                     />
 
                     <TextInputComponent
-                        label="Şifre"
-                        placeholder="Şifre"
+                        label={t('login.passwordPlaceholder')}
+                        placeholder={t('login.passwordPlaceholder')}
                         value={password}
                         onChangeText={setPassword}
                         autoCapitalize="none"
@@ -169,8 +173,11 @@ const Login: React.FC = () => {
                     />
 
                     <Button
-                        buttonText="Giriş"
-                        onPress={handleLogin}
+                        buttonText={t('login.button')}
+                        onPress={() => {
+                            trackButtonClick('login_submit', { screen: 'Login' });
+                            handleLogin();
+                        }}
                         activityIndicatorLoading={loading}
                         disabled={loading || !identifier || !password}
                         style={{ marginTop: 4 * h1px }}
@@ -179,26 +186,27 @@ const Login: React.FC = () => {
 
                     <View style={s.textStyle}>
                         <T size={17} color={colors.textDark}>
-                            Hesabın yok mu?
+                            {t('login.noAccount')}
                         </T>
                         <View style={s.textStyleLeft}>
                             <T
                                 size={17}
                                 weight="800"
-                                color={colors.backgroundPruple}
+                                color={colors.backgroundPurple}
                                 onPress={() => nav.navigate('Register')}>
-                                Kayıt ol
+                                {t('login.register')}
                             </T>
                         </View>
                     </View>
                 </View>
             </KeyboardAvoidingView>
 
-            <CenterModal
+            <PopupModal
                 visible={modal.visible}
                 title={modal.title}
                 message={modal.message}
-                rightButtonText="Tamam"
+                type={modal.type ?? 'warning'}
+                rightButtonText={t('common.ok')}
                 onRightPress={() => setModal({ visible: false, title: '', message: '' })}
             />
         </GradientLayout>

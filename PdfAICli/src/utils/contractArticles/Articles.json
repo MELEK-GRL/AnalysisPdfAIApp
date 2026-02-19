@@ -1,45 +1,23 @@
 [
-    {
-        "text": "Bu uygulama yalnızca bilgilendirme ve genel farkındalık sağlama amacıyla hazırlanmıştır. Tıbbi tanı, teşhis veya tedavi hizmeti sunmaz."
-    },
-    {
-        "text": "Uygulamada sunulan veriler, analizler ve yapay zekâ çıktıları tavsiye niteliğinde değildir. Kullanıcı, elde ettiği bilgileri kendi takdirinde değerlendirir ve buna göre hareket eder."
-    },
-    {
-        "text": "Kullanıcı, uygulama üzerinden elde ettiği bilgi veya yönlendirmelere dayanarak verdiği kararların tüm sorumluluğunu kendisinin taşıdığını kabul eder.",
-        "children": [
-            {
-                "text": "Uygulama geliştiricisi, bu bilgilerden kaynaklanabilecek doğrudan veya dolaylı hiçbir zarardan sorumlu tutulamaz."
-            },
-            {
-                "text": "Uygulama, sağlık profesyonellerinin görüş ve teşhisinin yerini alamaz."
-            }
-        ]
-    },
-    {
-        "text": "Kullanıcı, uygulamaya yüklediği veya paylaştığı verilerin doğruluğundan ve gizliliğinden kendisi sorumludur."
-    },
-    {
-        "text": "Uygulamada kullanılan yapay zekâ servisleri (örneğin OpenAI, Google veya benzeri üçüncü taraf hizmetler), verileri anonimleştirerek işleyebilir. Kullanıcı bu hizmetlerin kullanımına açık onay vermiş sayılır."
-    },
-    {
-        "text": "Uygulama geliştiricisi, kullanıcı tarafından sağlanan verilerin güvenliği için makul teknik önlemler alır; ancak verilerin üçüncü taraflarca yetkisiz erişiminden doğabilecek zararlardan sorumlu değildir."
-    },
-    {
-        "text": "Uygulama, teknik nedenlerle (bakım, güncelleme, sunucu arızası vb.) geçici olarak hizmet dışı kalabilir. Kullanıcı, bu tür kesintilerden dolayı herhangi bir hak veya tazminat talebinde bulunamaz."
-    },
-    {
-        "text": "Uygulamanın içeriğinde, analiz algoritmalarında veya hizmet koşullarında değişiklik yapılabilir. Bu değişiklikler kullanıcının onayına sunularak yürürlüğe girer."
-    },
-    {
-        "text": "Kullanıcı, uygulamayı yalnızca yasal amaçlarla ve kendi kişisel kullanımı için kullanmayı taahhüt eder. Başkalarının haklarını ihlal edecek şekilde kullanılamaz."
-    },
-    {
-        "text": "“Kabul Ediyorum” seçeneğini işaretleyen kullanıcı, yukarıdaki tüm koşulları okuduğunu, anladığını ve bu koşullar altında uygulamayı kendi sorumluluğunda kullanmayı kabul ettiğini beyan eder.",
-        "children": [
-            {
-                "text": "Kullanıcı, bu sözleşmeyi kabul ederek geliştiriciye karşı herhangi bir zarar, kayıp, iddia veya dava hakkından feragat etmiş olur."
-            }
-        ]
-    }
+  {"text": "Bu uygulama yalnızca bilgilendirme ve genel farkındalık sağlama amacıyla hazırlanmıştır. Tıbbi tanı, teşhis veya tedavi hizmeti sunmaz."},
+  {"text": "Uygulamada sunulan veriler, analizler ve yapay zekâ çıktıları tavsiye niteliğinde değildir. Kullanıcı, elde ettiği bilgileri kendi takdirinde değerlendirir ve buna göre hareket eder."},
+  {"text": "Kullanıcı, uygulama üzerinden elde ettiği bilgi veya yönlendirmelere dayanarak verdiği kararların tüm sorumluluğunu kendisinin taşıdığını kabul eder.", "children": [
+    {"text": "Uygulama geliştiricisi, bu bilgilerden kaynaklanabilecek doğrudan veya dolaylı hiçbir zarardan sorumlu tutulamaz."},
+    {"text": "Uygulama, sağlık profesyonellerinin görüş ve teşhisinin yerini alamaz."}
+  ]},
+  {"text": "Sağlık verisi işleme (KVKK md. 6): Yüklediğiniz tahlil/laboratuvar PDF dosyaları özel nitelikli kişisel veri (sağlık verisi) kapsamındadır. Bu veriler, açık rızanız ile işlenmektedir. Veriler, analiz hizmetinin sunulması amacıyla sunucularımızda işlenir ve üçüncü taraf yapay zekâ hizmetlerine aktarılır.", "children": [
+    {"text": "Veri saklama süresi: Analiz geçmişiniz, hizmet sunumu amacıyla saklanır. Hesabınızı sildiğinizde veya talep ettiğinizde silinir."},
+    {"text": "Veri sorumlusu: Uygulama verilerinin sorumlusu uygulama geliştiricisidir. KVKK kapsamındaki haklarınızı kullanmak için uygulama içi ayarlar üzerinden iletişime geçebilirsiniz."}
+  ]},
+  {"text": "OpenAI veri aktarımı: Tahlil raporlarınızdan çıkarılan metin, analiz hizmetinin sunulması amacıyla ABD merkezli OpenAI Inc. (ChatGPT) hizmetlerine gönderilmektedir. Bu aktarım, açık rızanız dahilindedir. OpenAI'in gizlilik politikası ve veri işleme koşulları kendi sitesinden incelenebilir."},
+  {"text": "Üçüncü taraf veri işleme: Verileriniz, yapay zekâ analizi için üçüncü taraf hizmet sağlayıcılara (OpenAI) aktarılır. Bu aktarım yalnızca hizmet sunumu amacıyla yapılır. Kullanıcı, sözleşmeyi kabul ederek bu aktarıma açık onay vermiş sayılır."},
+  {"text": "KVKK md. 11 hakları: Kişisel verilerinizle ilgili bilgi talep etme, düzeltme, silme, itiraz etme ve şikâyet başvurusu haklarınız vardır. Başvurularınızı veri sorumlusuna yazılı olarak iletebilirsiniz. Başvuru sonucuna itiraz halinde Kişisel Verileri Koruma Kurumuna şikayette bulunabilirsiniz."},
+  {"text": "Kullanıcı, uygulamaya yüklediği veya paylaştığı verilerin doğruluğundan ve gizliliğinden kendisi sorumludur."},
+  {"text": "Uygulama geliştiricisi, kullanıcı tarafından sağlanan verilerin güvenliği için makul teknik önlemler alır; ancak verilerin üçüncü taraflarca yetkisiz erişiminden doğabilecek zararlardan sorumlu değildir."},
+  {"text": "Uygulama, teknik nedenlerle (bakım, güncelleme, sunucu arızası vb.) geçici olarak hizmet dışı kalabilir. Kullanıcı, bu tür kesintilerden dolayı herhangi bir hak veya tazminat talebinde bulunamaz."},
+  {"text": "Uygulamanın içeriğinde, analiz algoritmalarında veya hizmet koşullarında değişiklik yapılabilir. Bu değişiklikler kullanıcının onayına sunularak yürürlüğe girer."},
+  {"text": "Kullanıcı, uygulamayı yalnızca yasal amaçlarla ve kendi kişisel kullanımı için kullanmayı taahhüt eder. Başkalarının haklarını ihlal edecek şekilde kullanılamaz."},
+  {"text": "\"Kabul Ediyorum\" seçeneğini işaretleyen kullanıcı, yukarıdaki tüm koşulları okuduğunu, anladığını ve bu koşullar altında uygulamayı kendi sorumluluğunda kullanmayı kabul ettiğini beyan eder.", "children": [
+    {"text": "Kullanıcı, bu sözleşmeyi kabul ederek geliştiriciye karşı herhangi bir zarar, kayıp, iddia veya dava hakkından feragat etmiş olur."}
+  ]}
 ]

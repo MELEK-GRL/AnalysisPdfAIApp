@@ -1,0 +1,100 @@
+{
+  "common": {
+    "ok": "Tamam",
+    "genericError": "Bir hata oluştu",
+    "cancel": "İptal",
+    "close": "Kapat",
+    "understand": "Anladım",
+    "error": "Hata",
+    "warning": "Uyarı",
+    "loading": "Yükleniyor...",
+    "back": "Geri"
+  },
+  "header": {
+    "welcome": "Hoş geldin"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "language": "Dil",
+    "languageSub": "Türkçe / English",
+    "logout": "Çıkış Yap",
+    "privacyPolicy": "Gizlilik Politikası"
+  },
+  "logout": {
+    "title": "Oturumu kapatmak istiyor musun?",
+    "confirm": "Evet, Çıkış Yap",
+    "cancel": "Vazgeç",
+    "error": "Çıkış yapılamadı."
+  },
+  "login": {
+    "title": "Giriş Yap",
+    "emailPlaceholder": "E-posta veya kullanıcı adı",
+    "passwordPlaceholder": "Şifre",
+    "button": "Giriş",
+    "noAccount": "Hesabın yok mu?",
+    "register": "Kayıt ol",
+    "warnEmpty": "Lütfen e-posta/kullanıcı adı ve şifreyi girin.",
+    "errorTitle": "Giriş Hatası"
+  },
+  "register": {
+    "title": "Kayıt Ol",
+    "namePlaceholder": "Ad Soyad",
+    "emailPlaceholder": "E-posta",
+    "passwordPlaceholder": "Şifre",
+    "confirmPlaceholder": "Şifre tekrar",
+    "button": "Kayıt Ol",
+    "hasAccount": "Hesabın var mı?",
+    "login": "Giriş yap",
+    "warnName": "Ad Soyad gerekli.",
+    "warnEmail": "E-posta gerekli.",
+    "warnPassword": "Şifre gerekli.",
+    "warnConfirm": "Şifre tekrar gerekli.",
+    "warnValidEmail": "Geçerli e-posta girin.",
+    "warnPasswordLength": "Şifre en az 6 karakter olmalıdır.",
+    "warnPasswordMatch": "Şifreler eşleşmiyor.",
+    "successTitle": "Başarılı",
+    "success": "Kayıt tamamlandı.",
+    "error": "Kayıt başarısız. Lütfen tekrar deneyin."
+  },
+  "home": {
+    "uploadPdf": "Tahlil Raporunu Yükle",
+    "send": "Gönder",
+    "selected": "Seçilen",
+    "pdfHint": "Sadece PDF kabul edilir. Max ~10MB önerilir.",
+    "analysisResult": "Analiz Sonucu",
+    "interpretButton": "Tahlil Sonuçlarımı Yorumla",
+    "analysisTitle": "Tahlil Sonuçları Analizi",
+    "success": "Tahlil verileri çıkarıldı.",
+    "notLab": "Bu PDF tahlil raporu değil gibi görünüyor.",
+    "noAnalysis": "Analiz metni bulunamadı. Lütfen tahlil değerlerinizi tekrar yüklemeyi deneyin.",
+    "suggestions": "ÖNERİLER",
+    "suggestionsText": "Günlük yaşam ve hidrasyon, düzenli uyku ve dengeli beslenme çoğu parametre için destekleyicidir. Spesifik bir ilaç veya takviye önerisi **doktor kontrolü** dışında yapılmamalıdır.",
+    "importantWarning": "ÖNEMLİ UYARI",
+    "disclaimer": "Bu içerik bilgilendirme amaçlıdır ve tıbbi tavsiye değildir. Nihai yorum ve tedavi planı için lütfen **doktorunuza danışın**.",
+    "rateLimitTitle": "Analiz Hakkı Doldu",
+    "rateLimitMessage": "Günlük analiz hakkınız doldu. 24 saat içinde en fazla 2 kez PDF analizi yapabilirsiniz. Lütfen yarın tekrar deneyin.",
+    "uploadError": "PDF yüklenemedi."
+  },
+  "history": {
+    "emptyTitle": "Henüz analiz geçmişi yok",
+    "emptySub": "PDF yükleyip analiz ettikçe geçmiş burada görünecek",
+    "detailTitle": "Detay",
+    "labValues": "TAHLİL DEĞERLERİ",
+    "analysis": "ANALİZ",
+    "noRecord": "Bu kayıt tahlil raporu değil veya analiz bulunamadı.",
+    "paramCount": "parametre",
+    "labReport": "Tahlil raporu",
+    "notLabReport": "Tahlil raporu değil",
+    "fetchError": "Geçmiş yüklenemedi. Lütfen tekrar deneyin.",
+    "detailError": "Detay alınamadı."
+  },
+  "tabs": {
+    "analysis": "Analiz",
+    "history": "Geçmiş"
+  },
+  "splash": {
+    "consentRequired": "Devam edebilmek için Kullanıcı Sözleşmesini onaylamalısınız.",
+    "consentError": "Sözleşme onayı kaydedilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
+    "info": "Bilgi"
+  }
+}

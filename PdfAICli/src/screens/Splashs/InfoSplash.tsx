@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import Button from '../../components/Buttons/Button';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
@@ -10,6 +11,7 @@ import GradientLayout from '../../components/Layout/GradientLayout';
 
 const InfoSplash: React.FC = () => {
     const navigation = useNavigation<any>();
+    useScreenTime('InfoSplash');
     const animRef = useRef<LottieView>(null);
     const { w1px, h1px, fs1px } = useResponsive();
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useResponsive } from '../../utils/deviceStore/device';
+import { useLocaleStore } from '../../store/useLocaleStore';
 import T from '../Text/T';
 import colors from '../../theme/colors';
 
@@ -12,6 +13,7 @@ type Props = {
 
 const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
     const nav = useNavigation<any>();
+    const t = useLocaleStore((s) => s.t);
     const { w1px, h1px, fs1px } = useResponsive();
 
     const styles = StyleSheet.create({
@@ -21,7 +23,7 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            backgroundColor: colors.backgroundPrupleDark,
+            backgroundColor: colors.backgroundPurpleDark,
             height: h1px * 90,
             borderBottomRightRadius: fs1px * 14,
             borderBottomLeftRadius: fs1px * 14,
@@ -47,7 +49,7 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
         <View style={styles.header}>
             <View style={styles.headerTitle}>
                 <T size={20} weight="700" color={colors.textWhite}>
-                    Hoş geldin,
+                    {t('header.welcome')},
                 </T>
                 {title ? (
                     <View style={styles.title}>
@@ -59,7 +61,7 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
             </View>
 
             <TouchableOpacity
-                onPress={onSettingsPress ?? (() => nav.navigate('Logout'))}
+                onPress={onSettingsPress ?? (() => nav.navigate('Settings'))}
                 activeOpacity={0.8}>
                 <Image
                     source={require('../../assets/icons/settings2.png')}

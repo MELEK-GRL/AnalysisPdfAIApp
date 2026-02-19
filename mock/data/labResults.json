@@ -1,0 +1,18 @@
+[
+  {
+    "test": "Glukoz",
+    "value": 95,
+    "unit": "mg/dl",
+    "refLow": 70,
+    "refHigh": 100,
+    "flag": "N"
+  },
+  {
+    "test": "Hemoglobin",
+    "value": 14.2,
+    "unit": "g/dl",
+    "refLow": 12,
+    "refHigh": 16,
+    "flag": "N"
+  }
+]

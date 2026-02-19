@@ -31,7 +31,7 @@ const Button: React.FC<Props> = ({
     activityIndicatorLoading = false,
     style,
     width = '100%',
-    backgroundColor = colors.backgroundPruple,
+    backgroundColor = colors.backgroundPurple,
 }) => {
     const { w1px, h1px } = useResponsive();
 

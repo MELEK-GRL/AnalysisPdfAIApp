@@ -36,5 +36,6 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
 }
 
 export async function getProfile(): Promise<User> {
-    return get<User>(endpoints.me);
+    const { user } = await get<{ user: User }>(endpoints.me);
+    return user;
 }

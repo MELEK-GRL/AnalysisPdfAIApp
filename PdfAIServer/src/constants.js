@@ -1,0 +1,44 @@
+const path = require('path');
+
+/** 24 saatlik pencerede kullanıcı başına maksimum PDF analizi */
+const RATE_LIMIT_ANALYSIS_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+/** 24 saatte izin verilen analiz sayısı */
+const RATE_LIMIT_ANALYSIS_MAX = 2;
+
+/** Geçici dosyalar için dizin */
+const TMP_DIR = path.join(__dirname, '..', 'tmp');
+
+/** Varsayılan server portu */
+const DEFAULT_PORT = 4000;
+
+/** Varsayılan MongoDB veritabanı adı */
+const DEFAULT_DB_NAME = 'analysispdf';
+
+/** JWT token süresi */
+const JWT_EXPIRES_IN = '7d';
+
+/** bcrypt hash rounds */
+const BCRYPT_ROUNDS = 10;
+
+/** Maksimum yükleme boyutu (15 MB) */
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+
+/** Geçerli analytics event tipleri */
+const VALID_ANALYTICS_TYPES = ['screen_view', 'button_click', 'login', 'event'];
+
+/** Health check yanıtı */
+const EARLY_OK = 'EARLY_OK';
+
+module.exports = {
+    RATE_LIMIT_ANALYSIS_WINDOW_MS,
+    RATE_LIMIT_ANALYSIS_MAX,
+    TMP_DIR,
+    DEFAULT_PORT,
+    DEFAULT_DB_NAME,
+    JWT_EXPIRES_IN,
+    BCRYPT_ROUNDS,
+    MAX_UPLOAD_BYTES,
+    VALID_ANALYTICS_TYPES,
+    EARLY_OK,
+};

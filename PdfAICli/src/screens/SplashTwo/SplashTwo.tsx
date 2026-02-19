@@ -14,28 +14,22 @@ import Button from '../../components/Buttons/Button';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
 import { api } from '../../server/apiFetcher';
-import CenterModal from '../../components/Modals/CenterModal';
+import PopupModal from '../../components/Modals/PopupModal';
+import { useLocaleStore } from '../../store/useLocaleStore';
+import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
-console.log('--->api', api);
-const TERMS_VERSION = 'v1.0.0';
+import { getInstallationId } from '../../utils/analytics/getInstallationId';
+import { LAST_CONSENT_ID } from '../../constants/storageKeys';
 
-async function getInstallationId(): Promise<string> {
-    const KEY = 'installation_id';
-    let id = await AsyncStorage.getItem(KEY);
-    if (!id) {
-        id = `inst_${Date.now().toString(36)}_${Math.random()
-            .toString(36)
-            .slice(2, 10)}`;
-        await AsyncStorage.setItem(KEY, id);
-    }
-    return id;
-}
+const TERMS_VERSION = 'v2.0.0';
 
 const SplashTwo: React.FC = () => {
     const navigation = useNavigation<any>();
+    useScreenTime('SplashTwo');
     const { w1px, h1px, fs1px } = useResponsive();
+    const t = useLocaleStore((s) => s.t);
 
     const [accepted, setAccepted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -76,9 +70,8 @@ const SplashTwo: React.FC = () => {
     );
 
     const handleContinue = async () => {
-        console.log('--->handleContinue girdi');
         if (!accepted) {
-            openModal('Devam edebilmek için Kullanıcı Sözleşmesini onaylamalısınız.');
+            openModal(t('splash.consentRequired'));
             return;
         }
         try {
@@ -95,15 +88,12 @@ const SplashTwo: React.FC = () => {
             });
 
             if (data?.id) {
-                await AsyncStorage.setItem('last_consent_id', String(data.id));
+                await AsyncStorage.setItem(LAST_CONSENT_ID, String(data.id));
             }
-            console.log('--->data', JSON.stringify(data, null, 2));
             navigation.navigate('Login');
         } catch (e: any) {
             console.error('CONSENT ERR:', e?.message || e);
-            openModal(
-                'Sözleşme onayı kaydedilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.',
-            );
+            openModal(t('splash.consentError'));
         } finally {
             setLoading(false);
         }
@@ -157,7 +147,7 @@ const SplashTwo: React.FC = () => {
                         <View
                             style={[
                                 s.checkbox,
-                                { backgroundColor: accepted ? colors.backgroundPruple : '#fff' },
+                                { backgroundColor: accepted ? colors.backgroundPurple : '#fff' },
                             ]}
                         />
                         <T
@@ -184,11 +174,12 @@ const SplashTwo: React.FC = () => {
                         accessibilityHint="Giriş ekranına geç"
                     />
 
-                    <CenterModal
+                    <PopupModal
                         visible={modalVisible}
-                        title="Bilgi"
+                        title={t('splash.info')}
                         message={modalMessage}
-                        rightButtonText="Tamam"
+                        type="info"
+                        rightButtonText={t('common.ok')}
                         onRightPress={closeModal}
                     />
                 </View>
@@ -254,7 +245,7 @@ const styles = (w1px: number, h1px: number, fs1px: number) =>
             width: 22 * w1px,
             height: 22 * h1px,
             borderWidth: 2,
-            borderColor: colors.backgroundPruple,
+            borderColor: colors.backgroundPurple,
             borderRadius: 4 * w1px,
         },
     });

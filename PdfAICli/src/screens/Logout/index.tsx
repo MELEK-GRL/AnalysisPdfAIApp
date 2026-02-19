@@ -2,6 +2,8 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useLocaleStore } from '../../store/useLocaleStore';
+import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import Button from '../../components/Buttons/Button';
 import T from '../../components/Text/T';
 import { useResponsive } from '../../utils/deviceStore/device';
@@ -10,6 +12,8 @@ import GradientLayout from '../../components/Layout/GradientLayout';
 
 const Logout: React.FC = () => {
     const nav = useNavigation<any>();
+    useScreenTime('Logout');
+    const t = useLocaleStore((s) => s.t);
     const [loading, setLoading] = useState(false);
     const logout = useAuthStore(s => s.logout);
     const { w1px, h1px, fs1px } = useResponsive();
@@ -55,7 +59,7 @@ const Logout: React.FC = () => {
             await logout();
             nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
         } catch (e: any) {
-            Alert.alert('Hata', e?.message || 'Çıkış yapılamadı.');
+            Alert.alert(t('common.error'), e?.message || t('logout.error'));
             setLoading(false);
         }
     }, [loading, logout, nav]);
@@ -66,20 +70,20 @@ const Logout: React.FC = () => {
                 <View style={s.card}>
                     <View style={s.titleWrap}>
                         <T size={20 * fs1px} weight="700" color="#111827" align="center">
-                            Oturumu kapatmak istiyor musun?
+                            {t('logout.title')}
                         </T>
                     </View>
 
                     <View style={s.buttonContainer}>
                         <Button
-                            buttonText="Evet, Çıkış Yap"
+                            buttonText={t('logout.confirm')}
                             onPress={handleLogout}
                             activityIndicatorLoading={loading}
                             disabled={loading}
                             width={w1px * 250}
                         />
                         <Button
-                            buttonText="Vazgeç"
+                            buttonText={t('logout.cancel')}
                             onPress={() => nav.goBack()}
                             activityIndicatorLoading={loading}
                             disabled={loading}

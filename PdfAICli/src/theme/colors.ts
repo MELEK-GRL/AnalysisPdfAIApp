@@ -10,18 +10,18 @@ const colors = {
     inputBorder: '#ddd',
 
     backgroundLight: '#f9fafd',
-    // backgroundPruple: '#4941B3',
-    // backgroundPrupleDark: '#3A3496',
-    backgroundPruple: '#7453E0',
-    backgroundPrupleDark: '#7453E0',
-    buttonPruple: '#4941B3',
+    // backgroundPurple: '#4941B3',
+    // backgroundPurpleDark: '#3A3496',
+    backgroundPurple: '#7453E0',
+    backgroundPurpleDark: '#7453E0',
+    buttonPurple: '#4941B3',
     buttonGray: '#A6A6A6',
-    textPruple: '7067F0',
+    textPurple: '#7067F0',
     textGray: '#333',
     textGraySoft: '#4B5563',
     textWhite: '#ffffff',
     textInput: '#f1f3f6',
-    backgroundPrupleSoft: '#ECEBFD',
+    backgroundPurpleSoft: '#ECEBFD',
     backgroundPinkSoft: '#F8E8F0',
     // backgroundPrupleGradient: ['#7067F0', '#837BFA', '#5E55DB'] as [string, string, string],
     // backgroundPrupleGradient: [
@@ -50,7 +50,7 @@ const colors = {
     //     '#847DFA', // doygun mor
     // ] as [string, string, string, string, string, string],
 
-    backgroundPrupleGradient: [
+    backgroundPurpleGradient: [
         '#4E45C4', // daha yoğun mor
         '#5B51D2', // geçiş
         '#665CDD', // stabil mor

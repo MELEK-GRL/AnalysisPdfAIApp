@@ -1,12 +1,9 @@
-console.log('>>> CONSENTS ROUTER LOADED');
-
 const express = require('express');
 const router = express.Router();
 const Consent = require('../models/Consent');
 const requireAuth = require('../middleware/requireAuth');
 
 router.get('/ping', (_req, res) => {
-    console.log('PING endpoint hit');
     res.json({ ok: true, from: 'router' });
 });
 

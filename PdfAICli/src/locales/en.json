@@ -1,0 +1,100 @@
+{
+  "common": {
+    "ok": "OK",
+    "genericError": "An error occurred",
+    "cancel": "Cancel",
+    "close": "Close",
+    "understand": "Got it",
+    "error": "Error",
+    "warning": "Warning",
+    "loading": "Loading...",
+    "back": "Back"
+  },
+  "header": {
+    "welcome": "Welcome"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageSub": "Turkish / English",
+    "logout": "Logout",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "logout": {
+    "title": "Do you want to sign out?",
+    "confirm": "Yes, Sign Out",
+    "cancel": "Cancel",
+    "error": "Could not sign out."
+  },
+  "login": {
+    "title": "Sign In",
+    "emailPlaceholder": "Email or username",
+    "passwordPlaceholder": "Password",
+    "button": "Sign In",
+    "noAccount": "Don't have an account?",
+    "register": "Sign Up",
+    "warnEmpty": "Please enter email/username and password.",
+    "errorTitle": "Sign In Error"
+  },
+  "register": {
+    "title": "Sign Up",
+    "namePlaceholder": "Full Name",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "confirmPlaceholder": "Confirm password",
+    "button": "Sign Up",
+    "hasAccount": "Already have an account?",
+    "login": "Sign In",
+    "warnName": "Full name is required.",
+    "warnEmail": "Email is required.",
+    "warnPassword": "Password is required.",
+    "warnConfirm": "Confirm password is required.",
+    "warnValidEmail": "Please enter a valid email.",
+    "warnPasswordLength": "Password must be at least 6 characters.",
+    "warnPasswordMatch": "Passwords do not match.",
+    "successTitle": "Success",
+    "success": "Registration completed.",
+    "error": "Registration failed. Please try again."
+  },
+  "home": {
+    "uploadPdf": "Upload Lab Report",
+    "send": "Send",
+    "selected": "Selected",
+    "pdfHint": "Only PDF accepted. Max ~10MB recommended.",
+    "analysisResult": "Analysis Result",
+    "interpretButton": "Interpret My Results",
+    "analysisTitle": "Lab Results Analysis",
+    "success": "Lab data extracted.",
+    "notLab": "This PDF does not appear to be a lab report.",
+    "noAnalysis": "No analysis text found. Please try uploading your lab values again.",
+    "suggestions": "SUGGESTIONS",
+    "suggestionsText": "Daily lifestyle and hydration, regular sleep and balanced nutrition support most parameters. Specific medication or supplement recommendations should not be made outside of **doctor supervision**.",
+    "importantWarning": "IMPORTANT WARNING",
+    "disclaimer": "This content is for informational purposes and is not medical advice. Please **consult your doctor** for final interpretation and treatment plan.",
+    "rateLimitTitle": "Analysis Limit Reached",
+    "rateLimitMessage": "You have reached your daily analysis limit. You can analyze up to 2 PDFs every 24 hours. Please try again tomorrow.",
+    "uploadError": "Could not upload PDF."
+  },
+  "history": {
+    "emptyTitle": "No analysis history yet",
+    "emptySub": "Your history will appear here as you upload and analyze PDFs",
+    "detailTitle": "Detail",
+    "labValues": "LAB VALUES",
+    "analysis": "ANALYSIS",
+    "noRecord": "This record is not a lab report or analysis not found.",
+    "paramCount": "parameters",
+    "labReport": "Lab report",
+    "notLabReport": "Not a lab report",
+    "fetchError": "Could not load history. Please try again.",
+    "detailError": "Could not load detail."
+  },
+  "tabs": {
+    "analysis": "Analysis",
+    "history": "History"
+  },
+  "splash": {
+    "consentRequired": "You must accept the User Agreement to continue.",
+    "consentError": "Could not save consent. Please check your internet connection and try again.",
+    "info": "Info"
+  }
+}

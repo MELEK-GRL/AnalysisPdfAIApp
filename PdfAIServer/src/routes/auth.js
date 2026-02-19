@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const requireAuth = require('../middleware/requireAuth');
+const { JWT_EXPIRES_IN, BCRYPT_ROUNDS } = require('../constants');
 
 const signToken = (user) =>
-    jwt.sign({ sub: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    jwt.sign({ sub: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
 const toSafeUser = (u) => ({ _id: u._id, name: u.name, email: u.email });
 
@@ -23,7 +24,7 @@ router.post('/register', async (req, res) => {
         const exists = await User.findOne({ email }).lean();
         if (exists) return res.status(409).json({ message: 'Email in use' });
 
-        const hash = await bcrypt.hash(password, 10);
+        const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
         const user = await User.create({ name, email, password: hash });
 
         const token = signToken(user);

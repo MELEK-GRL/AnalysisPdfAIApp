@@ -1,0 +1,8 @@
+[
+  {
+    "summary": "Genel olarak tahlil sonuçlarınız referans aralığındadır.",
+    "findings": ["Öne çıkan anormal değer bulunmamaktadır."],
+    "advice": "Dengeli beslenme ve düzenli uyku önerilir.",
+    "disclaimer": "Bu içerik tıbbi tavsiye değildir. Doktorunuza danışın."
+  }
+]

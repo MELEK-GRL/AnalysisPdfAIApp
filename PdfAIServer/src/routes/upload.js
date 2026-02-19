@@ -1,15 +1,19 @@
-const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const multer = require('multer');
 const { classifyAndExtract } = require('../services/openai');
 const { extractTextFromPdf } = require('../services/pdf');
 const Lab = require('../models/LatestLabResult');
-const requireAuth = require('../middleware/requireAuth'); // koruma
+const LabHistory = require('../models/LabHistory');
+const requireAuth = require('../middleware/requireAuth');
+const {
+    RATE_LIMIT_ANALYSIS_WINDOW_MS,
+    RATE_LIMIT_ANALYSIS_MAX,
+    TMP_DIR,
+    MAX_UPLOAD_BYTES,
+} = require('../constants');
 
 const router = express.Router();
-
-const TMP_DIR = path.join(__dirname, '..', '..', 'tmp');
 
 const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, TMP_DIR),
@@ -21,30 +25,33 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage,
-    limits: { fileSize: 15 * 1024 * 1024 },
+    limits: { fileSize: MAX_UPLOAD_BYTES },
 });
 
 router.post('/', requireAuth, upload.single('file'), async (req, res) => {
     let tmpPath;
     try {
-        // 0) guard
-        if (!req.user?._id) return res.status(401).json({ message: 'Unauthorized' });
         if (!req.file) return res.status(400).json({ message: 'PDF gerekli' });
 
+        // 0.5) Rate limit: 24h/2 analiz
+        const since = new Date(Date.now() - RATE_LIMIT_ANALYSIS_WINDOW_MS);
+        const count = await LabHistory.countDocuments({
+            user: req.user._id,
+            createdAt: { $gte: since },
+        });
+        if (count >= RATE_LIMIT_ANALYSIS_MAX) {
+            return res.status(429).json({
+                message: 'Günlük analiz limitine ulaştınız. 24 saat içinde en fazla 2 PDF analiz edebilirsiniz.',
+                code: 'RATE_LIMIT_EXCEEDED',
+            });
+        }
+
         tmpPath = req.file.path;
-        console.log(
-            '[UPLOAD]',
-            'user=', String(req.user._id),
-            'file=', tmpPath,
-            'mime=', req.file.mimetype,
-            'size=', req.file.size
-        );
 
         // 1) PDF metni
         let text = '';
         try {
             text = await extractTextFromPdf(tmpPath);
-            console.log('[UPLOAD] textLength=', text?.length ?? 0);
         } catch (ex) {
             const msg = String(ex?.message || '');
             console.warn('PDF EXTRACT WARN:', msg);
@@ -64,33 +71,36 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
         let result;
         try {
             result = await classifyAndExtract(text || '');
-            console.log('[UPLOAD] classify=', {
-                isLab: result?.isLab,
-                confidence: result?.confidence,
-                items: result?.items?.length,
-                analysisLen: result?.analysis ? String(result.analysis).length : 0,
-            });
         } catch (ex) {
             const msg = String(ex?.message || '');
             console.error('OPENAI ERR:', msg);
             return res.status(502).json({ message: 'Analiz servisi hatası', detail: msg });
         }
 
-        // 3) DB yaz (sadece lab ise) — analysis'ı da kaydet
+        // 3) DB yaz — LatestLabResult (sadece lab), LabHistory (her analiz, rate limit için)
+        const pdfName = req.file?.originalname ? String(req.file.originalname).replace(/\s+/g, '_') : null;
+
         try {
             if (result?.isLab && Array.isArray(result.items)) {
                 await Lab.findOneAndUpdate(
-                    { user: req.user._id },                 // <-- userId DEĞİL, user
+                    { user: req.user._id },
                     {
                         $set: {
                             items: result.items,
                             analysis: result.analysis ?? null,
                         },
-                        $setOnInsert: { user: req.user._id }, // <-- insert alanı: user
+                        $setOnInsert: { user: req.user._id },
                     },
                     { upsert: true, new: true, setDefaultsOnInsert: true }
                 );
             }
+
+            await LabHistory.create({
+                user: req.user._id,
+                items: result?.items || [],
+                analysis: result?.analysis ?? null,
+                pdfName,
+            });
         } catch (ex) {
             console.error('DB ERR:', ex?.message || ex);
             // DB hatası olsa bile kullanıcıya yanıtı veriyoruz

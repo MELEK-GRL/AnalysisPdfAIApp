@@ -28,7 +28,9 @@ const App = () => {
         appState.current.match(/active|inactive/) &&
         nextState === 'background'
       ) {
-        console.log('📴 Uygulama kapatıldı, oturum siliniyor...');
+        if (__DEV__) {
+            console.log('📴 Uygulama kapatıldı, oturum siliniyor...');
+        }
         await AsyncStorage.multiRemove(['token', 'user']);
       }
       appState.current = nextState;

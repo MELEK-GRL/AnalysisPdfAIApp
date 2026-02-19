@@ -15,27 +15,22 @@ import {
 } from '../../server/api/User';
 import Button from '../../components/Buttons/Button';
 import T from '../../components/Text/T';
-import CenterModal from '../../components/Modals/CenterModal';
+import PopupModal from '../../components/Modals/PopupModal';
 import TextInputComponent from '../../components/Inputs/TextInputComponent';
 import { useResponsive } from '../../utils/deviceStore/device';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useLocaleStore } from '../../store/useLocaleStore';
+import { useScreenTime } from '../../utils/analytics/useScreenTime';
+import { getInstallationId } from '../../utils/analytics/getInstallationId';
 import { api } from '../../server/apiFetcher';
-
-async function getInstallationId() {
-    let id = await AsyncStorage.getItem('installation_id');
-    if (!id) {
-        id = `${Platform.OS}-${Date.now()}-${Math.random()
-            .toString(36)
-            .slice(2, 10)}`;
-        await AsyncStorage.setItem('installation_id', id);
-    }
-    return id;
-}
+import { LAST_CONSENT_ID } from '../../constants/storageKeys';
 
 const Register: React.FC = () => {
     const nav = useNavigation<any>();
+    useScreenTime('Register');
+    const t = useLocaleStore((s) => s.t);
     const { w1px, h1px, fs1px } = useResponsive();
     const setUserAndToken = useAuthStore(s => s.setUserAndToken);
 
@@ -95,29 +90,33 @@ const Register: React.FC = () => {
         if (!nameT) {
             return setModal({
                 visible: true,
-                title: 'Uyarı',
-                message: 'Ad Soyad gerekli.',
+                title: t('common.warning'),
+                message: t('register.warnName'),
+                type: 'warning',
             });
         }
         if (!emailT) {
             return setModal({
                 visible: true,
-                title: 'Uyarı',
-                message: 'E-posta gerekli.',
+                title: t('common.warning'),
+                message: t('register.warnEmail'),
+                type: 'warning',
             });
         }
         if (!passT) {
             return setModal({
                 visible: true,
-                title: 'Uyarı',
-                message: 'Şifre gerekli.',
+                title: t('common.warning'),
+                message: t('register.warnPassword'),
+                type: 'warning',
             });
         }
         if (!confT) {
             return setModal({
                 visible: true,
-                title: 'Uyarı',
-                message: 'Şifre tekrar gerekli.',
+                title: t('common.warning'),
+                message: t('register.warnConfirm'),
+                type: 'warning',
             });
         }
 
@@ -125,22 +124,25 @@ const Register: React.FC = () => {
         if (!emailOk) {
             return setModal({
                 visible: true,
-                title: 'Uyarı',
-                message: 'Geçerli e-posta girin.',
+                title: t('common.warning'),
+                message: t('register.warnValidEmail'),
+                type: 'warning',
             });
         }
         if (passT.length < 6) {
             return setModal({
                 visible: true,
-                title: 'Uyarı',
-                message: 'Şifre en az 6 karakter olmalıdır.',
+                title: t('common.warning'),
+                message: t('register.warnPasswordLength'),
+                type: 'warning',
             });
         }
         if (passT !== confT) {
             return setModal({
                 visible: true,
-                title: 'Uyarı',
-                message: 'Şifreler eşleşmiyor.',
+                title: t('common.warning'),
+                message: t('register.warnPasswordMatch'),
+                type: 'warning',
             });
         }
 
@@ -182,7 +184,7 @@ const Register: React.FC = () => {
                 const installationId = await getInstallationId();
                 const headers = { headers: { Authorization: `Bearer ${token}` } };
 
-                const consentId = await AsyncStorage.getItem('last_consent_id');
+                const consentId = await AsyncStorage.getItem(LAST_CONSENT_ID);
                 if (consentId) {
                     await api.post(`/consents/${consentId}/attach`, {}, headers);
                 } else {
@@ -206,17 +208,22 @@ const Register: React.FC = () => {
 
             setModal({
                 visible: true,
-                title: 'Başarılı',
-                message: 'Kayıt tamamlandı.',
+                title: t('register.successTitle'),
+                message: t('register.success'),
                 type: 'success',
             });
-            setTimeout(() => nav.replace('Home'), 600);
+            setTimeout(() => nav.replace('MainTabs'), 600);
         } catch (err: any) {
             const msg =
                 err?.response?.data?.message ||
                 err?.message ||
-                'Kayıt başarısız. Lütfen tekrar deneyin.';
-            setModal({ visible: true, title: 'Hata', message: msg, type: 'error' });
+                t('register.error');
+            setModal({
+                visible: true,
+                title: t('common.error'),
+                message: msg,
+                type: 'error',
+            });
         } finally {
             setLoading(false);
         }
@@ -232,14 +239,14 @@ const Register: React.FC = () => {
                         <T
                             size={24}
                             weight="900"
-                            color={colors.backgroundPruple}
+                            color={colors.backgroundPurple}
                             style={{ marginBottom: 28 * h1px, textAlign: 'center' }}>
-                            Kayıt Ol
+                            {t('register.title')}
                         </T>
 
                         <TextInputComponent
-                            label="Ad Soyad"
-                            placeholder="Ad Soyad"
+                            label={t('register.namePlaceholder')}
+                            placeholder={t('register.namePlaceholder')}
                             value={form.name}
                             onChangeText={v => handleChange('name', v)}
                             returnKeyType="next"
@@ -247,8 +254,8 @@ const Register: React.FC = () => {
                         />
 
                         <TextInputComponent
-                            label="E-posta"
-                            placeholder="E-posta adresiniz"
+                            label={t('register.emailPlaceholder')}
+                            placeholder={t('register.emailPlaceholder')}
                             value={form.email}
                             onChangeText={v => handleChange('email', v)}
                             autoCapitalize="none"
@@ -258,8 +265,8 @@ const Register: React.FC = () => {
                         />
 
                         <TextInputComponent
-                            label="Şifre"
-                            placeholder="Şifre"
+                            label={t('register.passwordPlaceholder')}
+                            placeholder={t('register.passwordPlaceholder')}
                             value={form.password}
                             onChangeText={v => handleChange('password', v)}
                             secureTextEntry
@@ -268,8 +275,8 @@ const Register: React.FC = () => {
                         />
 
                         <TextInputComponent
-                            label="Şifre Tekrar"
-                            placeholder="Şifre Tekrar"
+                            label={t('register.confirmPlaceholder')}
+                            placeholder={t('register.confirmPlaceholder')}
                             value={form.confirm}
                             onChangeText={v => handleChange('confirm', v)}
                             secureTextEntry
@@ -278,7 +285,7 @@ const Register: React.FC = () => {
                         />
 
                         <Button
-                            buttonText="Hesap Oluştur"
+                            buttonText={t('register.button')}
                             onPress={onRegister}
                             activityIndicatorLoading={loading}
                             style={{ marginTop: 12 * h1px }}
@@ -287,26 +294,27 @@ const Register: React.FC = () => {
 
                         <View style={s.textStyle}>
                             <T size={17} color={colors.textDark}>
-                                Zaten hesabın var mı?
+                                {t('register.hasAccount')}
                             </T>
                             <View style={s.textStyleLeft}>
                                 <T
                                     size={17}
                                     weight="800"
-                                    color={colors.backgroundPruple}
+                                    color={colors.backgroundPurple}
                                     onPress={() => nav.goBack()}>
-                                    Giriş yap
+                                    {t('register.login')}
                                 </T>
                             </View>
                         </View>
                     </View>
                 </KeyboardAvoidingView>
 
-                <CenterModal
+                <PopupModal
                     visible={modal.visible}
                     title={modal.title}
                     message={modal.message}
-                    rightButtonText="Tamam"
+                    type={modal.type === 'error' ? 'error' : modal.type === 'success' ? 'success' : 'warning'}
+                    rightButtonText={t('common.ok')}
                     onRightPress={() =>
                         setModal({ visible: false, title: '', message: '' })
                     }

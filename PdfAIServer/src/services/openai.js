@@ -322,8 +322,6 @@ async function classifyAndExtract(text) {
     const local0 = regexExtract(text || '');
     const regexLikely = (local0.items?.length || 0) >= 3;
 
-    console.log('[OPENAI] model=', MODEL, 'len=', clipped.length, 'dev=', DEV);
-
     try {
         const r1 = await callOpenAI({
             instructions: baseInstr,

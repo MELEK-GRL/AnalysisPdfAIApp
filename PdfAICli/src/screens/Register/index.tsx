@@ -201,7 +201,9 @@ const Register: React.FC = () => {
                     headers,
                 );
             } catch (e: any) {
-                console.warn('Post-register attach/session failed:', e?.message || e);
+                if (__DEV__) {
+                    console.warn('Post-register attach/session failed:', e?.message || e);
+                }
             }
 
             await useAuthStore.getState().setUserAndToken(user, token);

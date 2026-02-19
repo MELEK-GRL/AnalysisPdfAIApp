@@ -45,15 +45,18 @@
 
 ## Fazlar
 
-| Faz | İçerik |
-|-----|--------|
-| 0 | Mock klasör, planlama dokümanları |
-| 1 | Rate limit (24h/2), LabHistory, geçmiş endpoint |
-| 2 | KVKK sözleşme revizyonu, gizlilik politikası |
-| 3 | Analytics (tıklama, login, sayfa süresi) |
-| 4 | Backend + mobil testler |
-| 5 | Clean code refaktör |
-| 6 | Play Store hazırlık |
+**Durum:** Faz 6 tamamlandı. Play Store hazırlık ertelendi.
+
+| Faz | İçerik | Durum |
+|-----|--------|-------|
+| 0 | Mock klasör, planlama dokümanları | ✓ |
+| 1 | Rate limit (24h/2), LabHistory, geçmiş endpoint | ✓ |
+| 2 | KVKK sözleşme revizyonu, gizlilik politikası | ✓ |
+| 3 | Analytics (tıklama, login, sayfa süresi) | ✓ |
+| 4 | Backend + mobil testler | ✓ |
+| 5 | Clean code refaktör | ✓ |
+| 6 | **Geliştirme tamamlama** – bug fix, stabilite, temizlik | ✓ |
+| **7 (Son Faz)** | **Play Store / Canlı yayın hazırlığı** – ertelendi, canlıya alınacak zaman | ertelendi |
 
 ---
 
@@ -67,7 +70,9 @@
 - **Projeye uyum:** Parametre, değişken ve fonksiyon isimleri mevcut proje yapısına ve naming kurallarına uygun olacak
 - **Uyum ve senkronizasyon:** Backend–client, modeller–API, ekran–component arasında tutarlılık sağlanacak; API contract, response format ve veri akışı birbiriyle uyumlu olacak
 
-## Play Store Hazırlık
+## Play Store Hazırlık *(Son Faz – ertelendi)*
+
+**Not:** Geliştirme bitmedi, uygulama canlıya hazır değil. Bu maddeler son faza alındı.
 
 Yayın sırasında sorun yaşanmaması için:
 - Gizlilik politikası URL (zorunlu)

@@ -92,7 +92,9 @@ const SplashTwo: React.FC = () => {
             }
             navigation.navigate('Login');
         } catch (e: any) {
-            console.error('CONSENT ERR:', e?.message || e);
+            if (__DEV__) {
+                console.error('CONSENT ERR:', e?.message || e);
+            }
             openModal(t('splash.consentError'));
         } finally {
             setLoading(false);

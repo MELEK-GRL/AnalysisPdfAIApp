@@ -241,33 +241,43 @@
 - [ ] Gereksiz console.log temizliği
 - [ ] Kod tekrarlarının kaldırılması (DRY)
 
-**→ Tamamlandıktan sonra izin al, Faz 6'ya geç**
+**→ Tamamlandı. Faz 6 tamamlandı.**
 
 ---
 
-## FAZ 6 – Play Store Hazırlık
+## FAZ 6 – Geliştirme Tamamlama ✓
 
-### Sprint 6.1 – Teknik hazırlık
+### Yapılanlar
+- [x] console.log/error/warn __DEV__ ile sarıldı (production'da sessiz)
+- [x] App.tsx: Arka plana geçince session temizleme düzeltildi (logout kullanılıyor)
+- [x] App.tsx: Gereksiz yorum kaldırıldı
+- [x] Home.test.tsx eklendi
+
+---
+
+## FAZ 7 – Play Store Hazırlık *(ertelendi – canlıya alınacak zaman)*
+
+### Sprint 7.1 – Teknik hazırlık
 - [ ] versionCode, versionName
 - [ ] ProGuard/R8 release config
 - [ ] API_BASE_URL production
 - [ ] express-rate-limit production aktif
 
-**→ Tamamlandıktan sonra izin al, Sprint 6.2'ye geç**
+**→ Ertelemede**
 
 ---
 
-### Sprint 6.2 – Store materyalleri (Play Store + App Store)
+### Sprint 7.2 – Store materyalleri (Play Store + App Store)
 - [ ] Uygulama ikonu: Android adaptive, iOS gerekli boyutlar
 - [ ] Ekran görüntüleri
 - [ ] Store açıklamaları (Türkçe)
 - [ ] Gizlilik politikası URL
 
-**→ Tamamlandıktan sonra izin al, Sprint 6.3'e geç**
+**→ Ertelemede**
 
 ---
 
-### Sprint 6.3 – Yasal ve final kontrol (Yayın sorunsuz olsun)
+### Sprint 7.3 – Yasal ve final kontrol (Yayın sorunsuz olsun)
 - [ ] İçerik derecelendirmesi
 - [ ] Veri güvenliği formu (Play Console)
 - [ ] Gizlilik politikası URL erişilebilir
@@ -275,4 +285,4 @@
 - [ ] PLAYSTORE_CHECKLIST.md tüm maddeler tamamlandı
 - [ ] Yayın öncesi manuel akış testi
 
-**→ Faz 6 tamamlandı. Play Store yayınına hazır.**
+**→ Ertelemede. Canlıya alınacak zaman uygulanacak.**

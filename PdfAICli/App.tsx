@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
 import { Dimensions, AppState, AppStateStatus } from 'react-native';
 import useDeviceStore from './src/store/useDeviceStore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthStore } from './src/store/useAuthStore';
 const App = () => {
   const setDimensions = useDeviceStore(state => state.setDimensions);
   const appState = useRef(AppState.currentState);
@@ -28,10 +28,7 @@ const App = () => {
         appState.current.match(/active|inactive/) &&
         nextState === 'background'
       ) {
-        if (__DEV__) {
-            console.log('📴 Uygulama kapatıldı, oturum siliniyor...');
-        }
-        await AsyncStorage.multiRemove(['token', 'user']);
+        await useAuthStore.getState().logout();
       }
       appState.current = nextState;
     };
@@ -43,4 +40,3 @@ const App = () => {
 };
 
 export default App;
-//jlj

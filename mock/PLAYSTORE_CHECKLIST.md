@@ -1,5 +1,9 @@
 # Play Store Yayın Kontrol Listesi
 
+> **⚠️ ERTELENDİ – SON FAZA ALINDI**
+>
+> Geliştirme bitmedi. Uygulama canlıya hazır değil. Bu checklist, geliştirme tamamlanınca ve canlıya almaya karar verilince uygulanacak.
+
 **Hedef:** Yayın sırasında sorun yaşanmaması. Tüm maddeler yayın öncesi tamamlanacak.
 
 **Not:** Uygulama iOS ve Android için geliştirilir. Play Store (Android) ve App Store (iOS) yayını için her iki platform da hedeflenir.
@@ -65,7 +69,7 @@
 
 ---
 
-## Kalan İşler (Öncelik Sırası)
+## Kalan İşler *(Son faz – geliştirme bitince)*
 
 1. [ ] **Gizlilik politikası**: mock/PRIVACY_POLICY.md → GitHub Pages / hosting → `appUrls.ts` URL güncelle
 2. [ ] **Release signing**: Production keystore oluştur → `build.gradle`'de tanımla

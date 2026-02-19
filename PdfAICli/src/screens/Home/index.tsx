@@ -153,7 +153,9 @@ const Home: React.FC = () => {
                     setDisplayName(me.name);
                 }
             } catch (e) {
-                console.error('error:', e);
+                if (__DEV__) {
+                    console.error('getProfile error:', e);
+                }
             }
         })();
     }, []);

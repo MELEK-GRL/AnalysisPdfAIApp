@@ -116,7 +116,9 @@ const Login: React.FC = () => {
                     headers,
                 );
             } catch (e: any) {
-                console.warn('Post-login attach/session failed:', e?.message || e);
+                if (__DEV__) {
+                    console.warn('Post-login attach/session failed:', e?.message || e);
+                }
             }
             await setUserAndToken(res.user, token);
             await AsyncStorage.setItem(HAS_EVER_LOGGED_IN, '1');

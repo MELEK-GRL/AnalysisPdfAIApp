@@ -33,7 +33,9 @@ const Pdf: React.FC<Props> = ({ onPicked, onUpload, disableUploadButton }) => {
             if (DocumentPicker.isCancel(e)) {
                 return;
             }
-            console.warn('PDF seçilirken hata:', e);
+            if (__DEV__) {
+                console.warn('PDF seçilirken hata:', e);
+            }
         }
     };
 

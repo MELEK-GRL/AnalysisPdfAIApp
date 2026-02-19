@@ -153,7 +153,7 @@ const Home: React.FC = () => {
                 },
                 pill: {
                     alignSelf: 'flex-start',
-                    backgroundColor: '#ECFDF5',
+                    backgroundColor: '#F3F4F6',
                     borderRadius: 999,
                     paddingVertical: 4 * h1px,
                     paddingHorizontal: 10 * w1px,
@@ -242,7 +242,11 @@ const Home: React.FC = () => {
         <View style={styles.contentView}>
             <Header title={displayName} />
             <PageLayout>
-                <View style={styles.scrollView}>
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
+                    showsVerticalScrollIndicator={false}
+                    bounces={true}>
                     <View style={styles.cardContainer}>
                         <View style={styles.cardView}>
                             <View style={styles.card}>
@@ -313,7 +317,7 @@ const Home: React.FC = () => {
                                         {t('home.analysisResult')}
                                     </T>
 
-                                    <View style={{ height: '78%' }}>
+                                    <View>
                                         <Chart items={items} />
                                     </View>
                                 </View>
@@ -328,7 +332,7 @@ const Home: React.FC = () => {
                                         trackButtonClick('interpret_result', { screen: 'Home' });
                                         setCommentModal(true);
                                     }}
-                                    width={h1px * 240}
+                                    width="100%"
                                 />
                             </View>
                         )}
@@ -347,7 +351,7 @@ const Home: React.FC = () => {
                             <Pressable>
                                 <View>
                                     <View style={styles.pill}>
-                                        <T size={fontSize.label} weight="700" color="#065F46">
+                                        <T size={fontSize.label} weight="700" color="#111827">
                                             ANALİZ
                                         </T>
                                     </View>
@@ -372,7 +376,7 @@ const Home: React.FC = () => {
 
                                     <View style={styles.sectionGap} />
                                     <View style={styles.pill}>
-                                        <T size={fontSize.label} weight="700" color="#065F46">
+                                        <T size={fontSize.label} weight="700" color="#111827">
                                             {t('home.suggestions')}
                                         </T>
                                     </View>
@@ -437,7 +441,7 @@ const Home: React.FC = () => {
                         rightButtonText={t('common.ok')}
                         onRightPress={() => setUploadErrorVisible(false)}
                     />
-                </View>
+                </ScrollView>
             </PageLayout>
 
             <LoadingModal visible={phase === 'loading'} />

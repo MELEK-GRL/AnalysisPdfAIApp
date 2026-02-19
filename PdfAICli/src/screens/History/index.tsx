@@ -150,7 +150,7 @@ const History: React.FC = () => {
                 },
                 pill: {
                     alignSelf: 'flex-start',
-                    backgroundColor: '#ECFDF5',
+                    backgroundColor: '#F3F4F6',
                     borderRadius: 999,
                     paddingVertical: 4 * h1px,
                     paddingHorizontal: 10 * w1px,
@@ -251,7 +251,7 @@ const History: React.FC = () => {
                             {selectedDetail.items.length > 0 ? (
                                 <>
                                     <View style={styles.pill}>
-                                        <T size={fontSize.label} weight="700" color="#065F46">
+                                        <T size={fontSize.label} weight="700" color="#111827">
                                             {t('history.labValues')}
                                         </T>
                                     </View>
@@ -262,7 +262,7 @@ const History: React.FC = () => {
                             {selectedDetail.analysis ? (
                                 <>
                                     <View style={styles.pill}>
-                                        <T size={fontSize.label} weight="700" color="#065F46">
+                                        <T size={fontSize.label} weight="700" color="#111827">
                                             {t('history.analysis')}
                                         </T>
                                     </View>

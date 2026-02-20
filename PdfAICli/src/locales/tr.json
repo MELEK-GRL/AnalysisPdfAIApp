@@ -56,6 +56,9 @@
     "warnValidEmail": "Geçerli e-posta girin.",
     "warnPasswordLength": "Şifre en az 6 karakter olmalıdır.",
     "warnPasswordMatch": "Şifreler eşleşmiyor.",
+    "warnTerms": "Devam etmek için kullanıcı sözleşmesini kabul etmelisiniz.",
+    "termsCheckbox": "Sözleşmeyi okudum ve kabul ediyorum.",
+    "viewTerms": "Kullanıcı sözleşmesi",
     "successTitle": "Başarılı",
     "success": "Kayıt tamamlandı.",
     "error": "Kayıt başarısız. Lütfen tekrar deneyin."
@@ -118,6 +121,9 @@
     "consentHint": "Devam ederek kullanım şartlarını kabul edeceksiniz",
     "consentRequired": "Devam edebilmek için Kullanıcı Sözleşmesini onaylamalısınız.",
     "consentError": "Sözleşme onayı kaydedilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",
-    "info": "Bilgi"
+    "info": "Bilgi",
+    "splashTwoTitle": "Uygulama nasıl çalışır?",
+    "splashTwoDesc": "Tahlil PDF'lerinizdeki değerleri okuyor, size anlaşılır bir dille yorumluyoruz.",
+    "splashTwoDisclaimer": "Kesin teşhis ve tedavi için mutlaka doktorunuza başvurun. Bu uygulama tıbbi tavsiye yerine geçmez."
   }
 }

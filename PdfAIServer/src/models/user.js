@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
             required: true,
             minlength: 6,
         },
+        termsAcceptedAt: {
+            type: Date,
+            default: null,
+        },
     },
     { timestamps: true }
 );

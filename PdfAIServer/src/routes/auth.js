@@ -12,20 +12,29 @@ const toSafeUser = (u) => ({ _id: u._id, name: u.name, email: u.email });
 
 router.post('/register', async (req, res) => {
     try {
-        let { name, email, password } = req.body || {};
+        let { name, email, password, termsAccepted } = req.body || {};
         name = typeof name === 'string' ? name.trim() : '';
         email = typeof email === 'string' ? email.trim().toLowerCase() : '';
         password = typeof password === 'string' ? password : '';
+        const accepted = termsAccepted === true || termsAccepted === 'true';
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Missing fields' });
+        }
+        if (!accepted) {
+            return res.status(400).json({ message: 'Terms must be accepted' });
         }
 
         const exists = await User.findOne({ email }).lean();
         if (exists) return res.status(409).json({ message: 'Email in use' });
 
         const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-        const user = await User.create({ name, email, password: hash });
+        const user = await User.create({
+            name,
+            email,
+            password: hash,
+            termsAcceptedAt: new Date(),
+        });
 
         const token = signToken(user);
         return res.status(201).json({ token, user: toSafeUser(user) });

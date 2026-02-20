@@ -1,13 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
     View,
     StyleSheet,
     KeyboardAvoidingView,
     Platform,
     SafeAreaView,
+    TouchableOpacity,
+    Modal,
+    ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {
     register as registerApi,
@@ -20,6 +24,7 @@ import TextInputComponent from '../../components/Inputs/TextInputComponent';
 import { useResponsive } from '../../utils/deviceStore/device';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useT } from '../../store/useLocaleStore';
@@ -27,6 +32,7 @@ import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { getInstallationId } from '../../utils/analytics/getInstallationId';
 import { api } from '../../server/apiFetcher';
 import { LAST_CONSENT_ID } from '../../constants/storageKeys';
+import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
 
 const Register: React.FC = () => {
     const nav = useNavigation<any>();
@@ -41,6 +47,8 @@ const Register: React.FC = () => {
         password: '',
         confirm: '',
     });
+    const [termsAccepted, setTermsAccepted] = useState(false);
+    const [termsModalVisible, setTermsModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const [modal, setModal] = useState<{
@@ -53,7 +61,13 @@ const Register: React.FC = () => {
     const s = useMemo(
         () =>
             StyleSheet.create({
-                container: { flex: 1, padding: 16 * w1px, justifyContent: 'center' },
+                container: { flex: 1 },
+                scrollContent: {
+                    flexGrow: 1,
+                    padding: 16 * w1px,
+                    paddingBottom: 24 * h1px,
+                    justifyContent: 'center',
+                },
                 card: {
                     backgroundColor: '#fff',
                     borderRadius: 12 * w1px,
@@ -73,8 +87,56 @@ const Register: React.FC = () => {
                     justifyContent: 'center',
                 },
                 textStyleLeft: { marginLeft: w1px * 4 },
+                checkboxRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 16 * h1px,
+                    marginBottom: 14 * h1px,
+                    alignSelf: 'flex-start',
+                },
+                checkbox: {
+                    width: 18 * w1px,
+                    height: 18 * w1px,
+                    borderWidth: 2,
+                    borderColor: colors.backgroundPurple,
+                    borderRadius: 2,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
+                termsLinkRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 14 * h1px,
+                    paddingVertical: 6 * h1px,
+                    paddingRight: 8 * w1px,
+                },
             }),
         [w1px, h1px, fs1px],
+    );
+
+    const renderTermChild = useCallback(
+        (child: { text: string }, cIdx: number) => (
+            <View
+                key={`c-${cIdx}`}
+                style={{ marginTop: 4 * h1px, paddingLeft: 16 * w1px }}>
+                <T size={fontSize.bodySmall} color="#4B5563">
+                    • {child.text}
+                </T>
+            </View>
+        ),
+        [h1px, w1px],
+    );
+
+    const renderTermItem = useCallback(
+        (item: any, idx: number) => (
+            <View key={idx} style={{ marginTop: 8 * h1px }}>
+                <T size={fontSize.bodyMedium} color="#374151">
+                    {idx + 1}. {item.text}
+                </T>
+                {item.children?.length ? item.children.map(renderTermChild) : null}
+            </View>
+        ),
+        [renderTermChild],
     );
 
     const handleChange = (key: keyof typeof form, value: string) => {
@@ -146,6 +208,14 @@ const Register: React.FC = () => {
                 type: 'warning',
             });
         }
+        if (!termsAccepted) {
+            return setModal({
+                visible: true,
+                title: t('common.warning'),
+                message: t('register.warnTerms'),
+                type: 'warning',
+            });
+        }
 
         return true;
     };
@@ -164,6 +234,7 @@ const Register: React.FC = () => {
                 passwordConfirm: form.confirm.trim(),
                 confirmPassword: form.confirm.trim(),
                 password_confirmation: form.confirm.trim(),
+                termsAccepted: true,
             };
             const regRes = await registerApi(payload);
             let token = regRes?.token;
@@ -202,7 +273,8 @@ const Register: React.FC = () => {
                     headers,
                 );
             } catch (e: any) {
-                if (__DEV__) {
+                const status = e?.response?.status;
+                if (__DEV__ && status !== 404) {
                     console.warn('Post-register attach/session failed:', e?.message || e);
                 }
             }
@@ -238,8 +310,13 @@ const Register: React.FC = () => {
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                     style={s.container}>
-                    <View style={s.card}>
-                        <T
+                    <ScrollView
+                        style={s.container}
+                        contentContainerStyle={s.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled">
+                        <View style={s.card}>
+                            <T
                             size={fontSize.display}
                             weight="900"
                             color={colors.backgroundPurple}
@@ -287,11 +364,67 @@ const Register: React.FC = () => {
                             containerStyle={{ marginBottom: 4 * h1px }}
                         />
 
+                        <View style={{ height: 8 * h1px }} />
+
+                        <TouchableOpacity
+                            onPress={() => setTermsAccepted(!termsAccepted)}
+                            activeOpacity={0.8}
+                            style={s.checkboxRow}>
+                            <View
+                                style={[
+                                    s.checkbox,
+                                    {
+                                        backgroundColor: termsAccepted
+                                            ? colors.backgroundPurple
+                                            : '#fff',
+                                    },
+                                ]}>
+                                {termsAccepted && (
+                                    <Ionicons
+                                        name="checkmark"
+                                        size={13}
+                                        color="#fff"
+                                    />
+                                )}
+                            </View>
+                            <T
+                                size={fontSize.body}
+                                color="#111827"
+                                style={{ marginLeft: 8 * w1px, flex: 1 }}>
+                                {t('register.termsCheckbox')}
+                            </T>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => setTermsModalVisible(true)}
+                            activeOpacity={0.8}
+                            style={s.termsLinkRow}>
+                            <Ionicons
+                                name="document-text-outline"
+                                size={iconSize.medium}
+                                color={colors.backgroundPurple}
+                                style={{ marginRight: 6 * w1px }}
+                            />
+                            <T
+                                size={fontSize.body}
+                                weight="600"
+                                color={colors.backgroundPurple}>
+                                {t('register.viewTerms')}
+                            </T>
+                            <Ionicons
+                                name="open-outline"
+                                size={iconSize.small}
+                                color={colors.backgroundPurple}
+                                style={{ marginLeft: 4 * w1px }}
+                            />
+                        </TouchableOpacity>
+
                         <Button
                             buttonText={t('register.button')}
                             onPress={onRegister}
                             activityIndicatorLoading={loading}
-                            style={{ marginTop: 12 * h1px }}
+                            disabled={!termsAccepted}
+                            style={{ marginTop: 4 * h1px }}
                             width={h1px * 260}
                         />
 
@@ -309,7 +442,8 @@ size={fontSize.subtitleLarge}
                                 </T>
                             </View>
                         </View>
-                    </View>
+                        </View>
+                    </ScrollView>
                 </KeyboardAvoidingView>
 
                 <PopupModal
@@ -322,6 +456,47 @@ size={fontSize.subtitleLarge}
                         setModal({ visible: false, title: '', message: '' })
                     }
                 />
+
+                <Modal
+                    visible={termsModalVisible}
+                    transparent
+                    animationType="fade">
+                    <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: 'rgba(17,24,39,0.4)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: 20 * w1px,
+                        }}>
+                        <View
+                            style={{
+                                backgroundColor: '#fff',
+                                borderRadius: 12 * w1px,
+                                padding: 16 * w1px,
+                                maxHeight: '85%',
+                                width: '100%',
+                            }}>
+                            <T
+                                size={fontSize.title}
+                                weight="700"
+                                color="#111827"
+                                style={{ marginBottom: 12 * h1px }}>
+                                {t('splash.termsTitle')}
+                            </T>
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                                style={{ maxHeight: 400 * h1px }}>
+                                {TERMS_ITEMS.map(renderTermItem)}
+                            </ScrollView>
+                            <Button
+                                buttonText={t('common.close')}
+                                onPress={() => setTermsModalVisible(false)}
+                                style={{ marginTop: 16 * h1px }}
+                            />
+                        </View>
+                    </View>
+                </Modal>
             </SafeAreaView>
         </GradientLayout>
     );

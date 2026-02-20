@@ -44,11 +44,17 @@ const GradientLayout: React.FC<Props> = ({
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
             style={[s.gradient, style]}>
-            <View style={[s.blob, s.blobTop, { backgroundColor: topBlobColor }]} />
+            <View
+                style={[s.blob, s.blobTop, { backgroundColor: topBlobColor }]}
+                pointerEvents="none"
+            />
             <View
                 style={[s.blob, s.blobBottom, { backgroundColor: bottomBlobColor }]}
+                pointerEvents="none"
             />
-            <View style={s.inner}>{children}</View>
+            <View style={s.inner} pointerEvents="box-none">
+                {children}
+            </View>
         </LinearGradient>
     );
 };

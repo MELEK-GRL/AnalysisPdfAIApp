@@ -1,30 +1,23 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import {
     View,
     StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    Platform,
     Image,
+    TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import Button from '../../components/Buttons/Button';
+import { CONSENT_GIVEN_ONCE } from '../../constants/storageKeys';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
-import { api } from '../../server/apiFetcher';
-import PopupModal from '../../components/Modals/PopupModal';
+import colors from '../../theme/colors';
 import { useT } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
-import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
-import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 import GradientLayout from '../../components/Layout/GradientLayout';
-import { getInstallationId } from '../../utils/analytics/getInstallationId';
-import { LAST_CONSENT_ID } from '../../constants/storageKeys';
-
-const TERMS_VERSION = 'v2.0.0';
 
 const SplashTwo: React.FC = () => {
     const navigation = useNavigation<any>();
@@ -32,74 +25,9 @@ const SplashTwo: React.FC = () => {
     const { w1px, h1px, fs1px } = useResponsive();
     const t = useT();
 
-    const [accepted, setAccepted] = useState(false);
-    const [loading, setLoading] = useState(false);
-
-    // Modal state
-    const [modalVisible, setModalVisible] = useState(false);
-    const [modalMessage, setModalMessage] = useState('');
-
-    const openModal = (message: string) => {
-        setModalMessage(message);
-        setModalVisible(true);
-    };
-    const closeModal = () => setModalVisible(false);
-
-    const renderChild = useCallback(
-        (child: { text: string }, cIdx: number) => (
-            <View
-                key={`c-${cIdx}`}
-                style={{ marginTop: 4 * h1px, paddingLeft: 16 * w1px }}>
-                <T size={fontSize.bodySmall} color="#4B5563">
-                    • {child.text}
-                </T>
-            </View>
-        ),
-        [w1px, h1px, fs1px],
-    );
-
-    const renderTermItem = useCallback(
-        (item: any, idx: number) => (
-            <View key={idx} style={{ marginTop: 8 * h1px }}>
-                <T size={fontSize.bodyMedium} color="#374151">
-                    {idx + 1}. {item.text}
-                </T>
-                {item.children?.length ? item.children.map(renderChild) : null}
-            </View>
-        ),
-        [h1px, fs1px, renderChild],
-    );
-
     const handleContinue = async () => {
-        if (!accepted) {
-            openModal(t('splash.consentRequired'));
-            return;
-        }
-        try {
-            setLoading(true);
-
-            const installationId = await getInstallationId();
-            const device = { platform: Platform.OS };
-
-            const { data } = await api.post('/consents/accept', {
-                installationId,
-                termsVersion: TERMS_VERSION,
-                method: 'checkbox',
-                device,
-            });
-
-            if (data?.id) {
-                await AsyncStorage.setItem(LAST_CONSENT_ID, String(data.id));
-            }
-            navigation.navigate('Login');
-        } catch (e: any) {
-            if (__DEV__) {
-                console.error('CONSENT ERR:', e?.message || e);
-            }
-            openModal(t('splash.consentError'));
-        } finally {
-            setLoading(false);
-        }
+        await AsyncStorage.setItem(CONSENT_GIVEN_ONCE, '1');
+        navigation.replace('Login');
     };
 
     const s = styles(w1px, h1px, fs1px);
@@ -107,84 +35,64 @@ const SplashTwo: React.FC = () => {
     return (
         <GradientLayout>
             <View style={s.container}>
-                {/* Üst logo */}
-                <View style={s.logoContent}>
-                    <View style={s.logoImg}>
+                <View style={s.topBlock}>
+                    <View style={s.logoWrap}>
                         <Image
                             source={require('../../assets/icons/test8.png')}
-                            style={s.imageView}
+                            style={s.logo}
                             accessible
                             accessibilityLabel={t('splash.logoAlt')}
                         />
                     </View>
-                </View>
 
-                <View style={s.containerView}>
-                    <View style={s.scrollContainer}>
-                        <ScrollView
-                            showsVerticalScrollIndicator={false}
-                            showsHorizontalScrollIndicator={false}
-                            style={s.scrollView}>
+                    <View style={s.card}>
+                        <View style={s.cardHeader}>
+                            <View style={s.iconBadge}>
+                                <Ionicons
+                                    name="document-text"
+                                    size={iconSize.large}
+                                    color={colors.backgroundPurple}
+                                />
+                            </View>
                             <T
                                 size={fontSize.title}
                                 weight="700"
-                                color="#111827"
-                                style={{ marginBottom: 8 * h1px }}>
-                                {t('splash.termsTitle')}
+                                color="#374151"
+                                style={s.cardTitle}>
+                                {t('splash.splashTwoTitle')}
                             </T>
+                        </View>
 
-                            <T size={fontSize.bodyMedium} color="#374151">
-                                {t('splash.termsIntro')}
+                        <T size={fontSize.body} color="#6B7280" style={s.desc}>
+                            {t('splash.splashTwoDesc')}
+                        </T>
+
+                        <View style={s.disclaimerBox}>
+                            <Ionicons
+                                name="heart-outline"
+                                size={iconSize.medium}
+                                color="#B45309"
+                                style={s.disclaimerIcon}
+                            />
+                            <T
+                                size={fontSize.bodySmall}
+                                color="#92400E"
+                                style={s.disclaimerText}>
+                                {t('splash.splashTwoDisclaimer')}
                             </T>
-
-                            <View style={{ marginTop: 6 * h1px }}>
-                                {TERMS_ITEMS.map(renderTermItem)}
-                            </View>
-                        </ScrollView>
+                        </View>
                     </View>
+                </View>
 
+                <View style={s.buttonWrap}>
                     <TouchableOpacity
-                        onPress={() => setAccepted(!accepted)}
+                        onPress={handleContinue}
                         activeOpacity={0.8}
-                        style={s.checkboxRow}>
-                        <View
-                            style={[
-                                s.checkbox,
-                                { backgroundColor: accepted ? colors.backgroundPurple : '#fff' },
-                            ]}
-                        />
-                        <T
-                            size={fontSize.body}
-                            color="#111"
-                            style={{ marginLeft: 8 * w1px, flex: 1 }}>
-                            {t('splash.consentCheckbox')}
+                        style={s.continueButton}>
+                        <T size={fontSize.subtitle} weight="600" color="#fff">
+                            {t('splash.continue')}
                         </T>
                     </TouchableOpacity>
-
-                    <Button
-                        buttonText={loading ? t('splash.saving') : t('splash.continue')}
-                        onPress={handleContinue}
-                        width={h1px * 180}
-                        disabled={!accepted || loading}
-                        style={{
-                            shadowColor: '#5B21B6',
-                            shadowOpacity: 0.12,
-                            shadowRadius: 10 * w1px,
-                            shadowOffset: { width: 0, height: 6 },
-                            elevation: 3,
-                        }}
-                        accessibilityLabel={t('splash.continue')}
-                        accessibilityHint={t('splash.goToLoginHint')}
-                    />
-
-                    <PopupModal
-                        visible={modalVisible}
-                        title={t('splash.info')}
-                        message={modalMessage}
-                        type="info"
-                        rightButtonText={t('common.ok')}
-                        onRightPress={closeModal}
-                    />
                 </View>
             </View>
         </GradientLayout>
@@ -193,62 +101,94 @@ const SplashTwo: React.FC = () => {
 
 export default SplashTwo;
 
-const styles = (w1px: number, h1px: number, fs1px: number) =>
+const styles = (w1px: number, h1px: number, _fs1px: number) =>
     StyleSheet.create({
         container: {
             flex: 1,
             justifyContent: 'space-between',
-            paddingTop: 40 * h1px,
-            paddingBottom: 24 * h1px,
-            paddingHorizontal: 16 * w1px,
+            paddingTop: 24 * h1px,
+            paddingBottom: 40 * h1px,
+            paddingHorizontal: 20 * w1px,
         },
-        logoContent: {
-            flexDirection: 'row',
+        topBlock: {
+            flex: 1,
+        },
+        logoWrap: {
             alignItems: 'center',
-            justifyContent: 'center',
+            marginBottom: 16 * h1px,
         },
-        logoImg: { alignItems: 'center' },
-        imageView: {
-            alignSelf: 'center',
-            width: 220 * w1px,
-            height: 220 * h1px,
+        logo: {
+            width: 200 * w1px,
+            height: 200 * h1px,
             resizeMode: 'contain',
-            marginBottom: 8 * h1px,
         },
-        containerView: {
-            position: 'relative',
-            bottom: h1px * 10,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        scrollContainer: {
-            height: 400 * h1px,
-            width: '100%',
+        card: {
             backgroundColor: '#fff',
-            borderRadius: 12 * w1px,
-            paddingHorizontal: 14 * w1px,
-            paddingVertical: 10 * h1px,
+            borderRadius: 20 * w1px,
+            padding: 20 * w1px,
             borderWidth: 1,
-            borderColor: '#E5E7EB',
-            marginBottom: 20 * h1px,
-            shadowColor: '#000',
-            shadowOpacity: 0.05,
-            shadowRadius: 12 * w1px,
-            shadowOffset: { width: 0, height: 6 },
-            elevation: 2,
+            borderColor: 'rgba(139, 92, 246, 0.12)',
+            shadowColor: colors.backgroundPurple,
+            shadowOpacity: 0.06,
+            shadowRadius: 16 * w1px,
+            shadowOffset: { width: 0, height: 4 },
+            elevation: 3,
+            marginBottom: 24 * h1px,
         },
-        scrollView: { flexGrow: 0 },
-        checkboxRow: {
+        cardHeader: {
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 18 * h1px,
-            alignSelf: 'flex-start',
+            marginBottom: 12 * h1px,
         },
-        checkbox: {
-            width: 22 * w1px,
-            height: 22 * h1px,
-            borderWidth: 2,
-            borderColor: colors.backgroundPurple,
-            borderRadius: 4 * w1px,
+        iconBadge: {
+            width: 44 * w1px,
+            height: 44 * w1px,
+            borderRadius: 12 * w1px,
+            backgroundColor: colors.backgroundPurpleSoft,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 12 * w1px,
+        },
+        cardTitle: {
+            flex: 1,
+        },
+        desc: {
+            lineHeight: 22,
+            marginBottom: 16 * h1px,
+        },
+        disclaimerBox: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            backgroundColor: '#FFFBEB',
+            borderRadius: 12 * w1px,
+            padding: 12 * w1px,
+            borderWidth: 1,
+            borderColor: '#FDE68A',
+        },
+        disclaimerIcon: {
+            marginRight: 10 * w1px,
+            marginTop: 2,
+        },
+        disclaimerText: {
+            flex: 1,
+            lineHeight: 20,
+        },
+        buttonWrap: {
+            alignItems: 'center',
+            paddingTop: 16 * h1px,
+        },
+        continueButton: {
+            backgroundColor: colors.backgroundPurple,
+            borderRadius: 16 * w1px,
+            paddingVertical: 14 * h1px,
+            paddingHorizontal: 28 * w1px,
+            width: 220 * h1px,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#5B21B6',
+            shadowOpacity: 0.16,
+            shadowRadius: 10 * w1px,
+            shadowOffset: { width: 0, height: 6 },
+            elevation: 5,
         },
     });

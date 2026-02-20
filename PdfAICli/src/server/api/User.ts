@@ -8,6 +8,7 @@ export type RegisterPayload = {
     email: string;
     password: string;
     passwordConfirm: string;
+    termsAccepted?: boolean;
 };
 export type AuthResponse = { token: string; user: User };
 

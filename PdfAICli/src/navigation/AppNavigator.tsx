@@ -148,21 +148,14 @@ const AppNavigator = () => {
             ? 'MainTabs'
             : 'Login'
         : 'InfoSplash';
-    const showInfoSplash = !hasConsentOnce;
-    const showSplashTwo = !hasConsentOnce;
 
     return (
         <NavigationContainer>
             <Stack.Navigator
                 initialRouteName={initialRouteName}
                 screenOptions={{ headerShown: false }}>
-                {showInfoSplash && (
-                    <Stack.Screen name="InfoSplash" component={InfoSplash} />
-                )}
-                {showSplashTwo && (
-                    <Stack.Screen name="SplashTwo" component={SplashTwo} />
-                )}
-
+                <Stack.Screen name="InfoSplash" component={InfoSplash} />
+                <Stack.Screen name="SplashTwo" component={SplashTwo} />
                 <Stack.Screen name="Login" component={Login} />
                 <Stack.Screen name="Register" component={Register} />
                 <Stack.Screen name="MainTabs" component={MainTabs} />

@@ -56,6 +56,9 @@
     "warnValidEmail": "Please enter a valid email.",
     "warnPasswordLength": "Password must be at least 6 characters.",
     "warnPasswordMatch": "Passwords do not match.",
+    "warnTerms": "You must accept the user agreement to continue.",
+    "termsCheckbox": "I have read and accept the agreement.",
+    "viewTerms": "User agreement",
     "successTitle": "Success",
     "success": "Registration completed.",
     "error": "Registration failed. Please try again."
@@ -118,6 +121,9 @@
     "consentHint": "By continuing you accept the terms of use",
     "consentRequired": "You must accept the User Agreement to continue.",
     "consentError": "Could not save consent. Please check your internet connection and try again.",
-    "info": "Info"
+    "info": "Info",
+    "splashTwoTitle": "How does the app work?",
+    "splashTwoDesc": "We read the values from your lab PDFs and explain them in plain language.",
+    "splashTwoDisclaimer": "Always see your doctor for diagnosis and treatment. This app is not a substitute for medical advice."
   }
 }

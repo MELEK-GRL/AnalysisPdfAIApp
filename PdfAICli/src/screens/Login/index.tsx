@@ -117,7 +117,8 @@ const Login: React.FC = () => {
                     headers,
                 );
             } catch (e: any) {
-                if (__DEV__) {
+                const status = e?.response?.status;
+                if (__DEV__ && status !== 404) {
                     console.warn('Post-login attach/session failed:', e?.message || e);
                 }
             }

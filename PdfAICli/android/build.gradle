@@ -1,9 +1,9 @@
 buildscript {
     ext {
-        buildToolsVersion = "34.0.0"
+        buildToolsVersion = "35.0.0"
         minSdkVersion = 23
-        compileSdkVersion = 34
-        targetSdkVersion = 34  // 2025: Play Store için targetSdkVersion 35 gerekebilir; güncelle ve test et
+        compileSdkVersion = 35
+        targetSdkVersion = 35  // 2025 Play Store gereksinimi (Faz 12)
         ndkVersion = "26.1.10909125"
         kotlinVersion = "1.9.22"
     }

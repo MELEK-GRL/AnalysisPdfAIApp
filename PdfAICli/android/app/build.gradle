@@ -79,8 +79,8 @@ android {
         applicationId "com.pdfaicli"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1  // Her yayında artır (Play Store)
-        versionName "1.0"
+        versionCode 1   // Her Play Store yayınında artır (1, 2, 3...)
+        versionName "1.0.0"
     }
     signingConfigs {
         debug {
@@ -91,16 +91,23 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        // Play Store: Release build için production keystore (Faz 12).
+        // Keystore: android/app/ içinde keytool -genkeypair -v -storetype PKCS12 -keystore release.keystore -alias pdfai -keyalg RSA -keysize 2048 -validity 10000
+        // Ortam değişkenleri: PDFAI_RELEASE_STORE_PASSWORD, PDFAI_RELEASE_KEY_PASSWORD (şifreleri repoya koymayın)
+        release {
+            def storeFileStr = System.getenv("PDFAI_RELEASE_STORE_FILE") ?: project.findProperty("PDFAI_RELEASE_STORE_FILE") ?: "release.keystore"
+            storeFile file(storeFileStr)
+            storePassword System.getenv("PDFAI_RELEASE_STORE_PASSWORD") ?: project.findProperty("PDFAI_RELEASE_STORE_PASSWORD") ?: ""
+            keyAlias System.getenv("PDFAI_RELEASE_KEY_ALIAS") ?: project.findProperty("PDFAI_RELEASE_KEY_ALIAS") ?: "pdfai"
+            keyPassword System.getenv("PDFAI_RELEASE_KEY_PASSWORD") ?: project.findProperty("PDFAI_RELEASE_KEY_PASSWORD") ?: ""
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Play Store: Production keystore gerekli. signingConfigs.debug sadece test içindir.
-            // Keystore oluştur: keytool -genkeypair -v -storetype PKCS12 -keystore release.keystore ...
-            // see https://reactnative.dev/docs/signed-apk-android
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

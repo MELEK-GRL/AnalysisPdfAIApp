@@ -33,6 +33,8 @@ local.properties
 .cxx/
 *.keystore
 !debug.keystore
+# Release keystore (Faz 12) asla commit edilmez
+# android/app/release.keystore
 
 # node.js
 #

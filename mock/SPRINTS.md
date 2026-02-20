@@ -441,3 +441,48 @@
 - [ ] Yayın öncesi manuel akış testi
 
 **→ Ertelemede. Canlıya alınacak zaman uygulanacak.**
+
+---
+
+## FAZ 12 – Play Store Yayın Eksikleri
+
+> Bu faz **mock/EKSIKLER.md** listesine göre yapılır. Detay: **mock/PLAYSTORE_GELISTIRMELER.md**, **mock/PLAYSTORE_CHECKLIST.md**.
+
+### Sprint 12.1 – Zorunlu teknik (yayın için)
+- [ ] **Release keystore**: Production keystore oluştur, `android/app/build.gradle` içinde `signingConfigs.release` tanımla (release artık debug keystore kullanmasın)
+- [ ] **Gizlilik politikası URL**: mock/PRIVACY_POLICY.md’yi GitHub Pages veya hosting’de yayınla; `.env` ve env-examples’ta `PRIVACY_POLICY_URL` gerçek adres
+- [ ] **Production API**: Backend canlıya alındı; client `.env` / build’de `API_BASE_URL` canlı URL
+- [ ] **targetSdkVersion 35**: `android/build.gradle` – compileSdk ve targetSdk 35, test et (2025 Play Store gereksinimi)
+- [ ] **versionCode / versionName**: Her yayında versionCode artır; versionName güncel (örn. 1.0.1)
+
+**→ Tamamlandıktan sonra izin al, Sprint 12.2’ye geç**
+
+---
+
+### Sprint 12.2 – Store listesi (Play Console)
+- [ ] Uygulama adı ve açıklamalar: kısa (max 80 kr), uzun (max 4000 kr); tıbbi iddia yok, “bilgilendirme amaçlı” vurgusu
+- [ ] Uygulama ikonu 512x512 (Play Console’da yükle)
+- [ ] Feature graphic 1024x500 (Android)
+- [ ] Ekran görüntüleri: en az 2, farklı cihaz boyutları
+- [ ] Açıklama ile uygulamanın gerçek işlevi uyumlu (yanıltıcı değil)
+
+**→ Tamamlandıktan sonra izin al, Sprint 12.3’e geç**
+
+---
+
+### Sprint 12.3 – Yasal ve Play Console formları
+- [ ] **Veri güvenliği formu** (Play Console): toplanan veriler (hesap, sağlık verisi, analytics) beyanı
+- [ ] **İçerik derecelendirmesi**: anket doldurulup tamamlandı
+- [ ] Gizlilik politikası sayfasında sağlık verisi, OpenAI/üçüncü taraf açıklaması net
+
+**→ Tamamlandıktan sonra izin al, Sprint 12.4’e geç**
+
+---
+
+### Sprint 12.4 – Teknik doğrulama ve test
+- [ ] Release build: `./gradlew assembleRelease` veya `bundleRelease` başarılı ve test edildi
+- [ ] Production .env: backend (MONGODB_URI, JWT_SECRET, rate-limit); client (API_BASE_URL, PRIVACY_POLICY_URL)
+- [ ] İsteğe bağlı: Production’da API HTTPS ise `usesCleartextTraffic` false (AndroidManifest.xml)
+- [ ] Yayın öncesi akış: Login → Sözleşme → PDF yükle → Analiz → Geçmiş; Çıkış; Dil değişimi; farklı ekran boyutları
+
+**→ Tamamlandıktan sonra Faz 12 biter. Play Store yüklemesi yapılabilir.**

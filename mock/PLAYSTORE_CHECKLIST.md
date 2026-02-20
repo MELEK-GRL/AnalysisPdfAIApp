@@ -71,12 +71,15 @@
 
 ## Kalan İşler *(Son faz – geliştirme bitince)*
 
-1. [ ] **Gizlilik politikası**: mock/PRIVACY_POLICY.md → GitHub Pages / hosting → `appUrls.ts` URL güncelle
-2. [ ] **Release signing**: Production keystore oluştur → `build.gradle`'de tanımla
+1. [ ] **Gizlilik politikası**: mock/PRIVACY_POLICY.md → GitHub Pages / hosting → `appUrls.ts` / .env PRIVACY_POLICY_URL güncelle
+2. [ ] **Release signing**: Production keystore oluştur → `android/app/build.gradle`'de `signingConfigs.release` tanımla (şu an release de debug keystore kullanıyor)
 3. [ ] **API_BASE_URL**: `.env` içinde production URL ayarla
-4. [ ] **Release build**: `./gradlew assembleRelease` ile test et
-5. [ ] **Store listesi**: İsim, açıklama, ikon 512x512, feature graphic, ekran görüntüleri
-6. [ ] **Play Console**: Veri güvenliği formu doldur *(içerik derecelendirmesi beklemeye alındı)*
+4. [ ] **targetSdkVersion**: 2025 Play Store gereksinimi için 35’e çıkar (android/build.gradle), test et
+5. [ ] **Release build**: `./gradlew assembleRelease` veya `bundleRelease` ile test et
+6. [ ] **Store listesi**: İsim, açıklama, ikon 512x512, feature graphic, ekran görüntüleri
+7. [ ] **Play Console**: Veri güvenliği formu + içerik derecelendirmesi
+
+Detaylı adımlar: **mock/PLAYSTORE_GELISTIRMELER.md**
 
 ---
 

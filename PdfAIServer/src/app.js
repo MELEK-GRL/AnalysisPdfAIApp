@@ -64,7 +64,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/consents', consentRoutes);
 app.use('/api/upload', requireAuth, uploadRoutes);
 app.use('/api/labs', requireAuth, labsRoutes);
-app.use('/api/analytics', requireAuth, analyticsRateLimit, analyticsRoutes);
+app.use('/api/analytics', optionalAuth, analyticsRateLimit, analyticsRoutes);
 
 app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 

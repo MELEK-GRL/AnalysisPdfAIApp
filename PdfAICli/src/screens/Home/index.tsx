@@ -6,6 +6,7 @@ import DocumentPicker, {
 } from 'react-native-document-picker';
 import { useResponsive } from '../../utils/deviceStore/device';
 import { getProfile } from '../../server/api/User';
+import { getToken } from '../../server/apiFetcher';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { uploadPdf, LabItem } from '../../server/api/Lab';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -192,15 +193,13 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         (async () => {
+            const token = await getToken();
+            if (!token) return;
             try {
                 const me = await getProfile();
-                if (me?.name) {
-                    setDisplayName(me.name);
-                }
+                if (me?.name) setDisplayName(me.name);
             } catch (e) {
-                if (__DEV__) {
-                    console.error('getProfile error:', e);
-                }
+                if (__DEV__) console.error('getProfile error:', e);
             }
         })();
     }, []);

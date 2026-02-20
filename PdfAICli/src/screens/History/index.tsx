@@ -18,6 +18,7 @@ import { useSessionStore } from '../../store/useSessionStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
+import { getToken } from '../../server/apiFetcher';
 import Header from '../../components/Header/Header';
 import TitleHeader from '../../components/TitleHeader/TitleHeader';
 import PageLayout from '../../components/Layout/PageLayout';
@@ -52,9 +53,10 @@ const History: React.FC = () => {
 
     const fetchHistory = useCallback(async () => {
         try {
+            const token = await getToken();
             const [history, me] = await Promise.all([
                 getLabHistory(),
-                getProfile(),
+                token ? getProfile().catch(() => null) : Promise.resolve(null),
             ]);
             const onlyLabReports = (history ?? []).filter((it) => (it.itemCount ?? 0) > 0);
             const sorted = [...onlyLabReports].sort(

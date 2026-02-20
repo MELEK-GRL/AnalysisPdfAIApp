@@ -248,6 +248,9 @@ const Settings: React.FC = () => {
                 </View>
 
                 <View style={styles.section}>
+                    <T size={fontSize.subtitle} weight="600" color="#1F2937" style={styles.sectionTitle}>
+                        {t('settings.profileSettings')}
+                    </T>
                     <TouchableOpacity
                         style={styles.deleteRow}
                         onPress={() => setLogoutModalVisible(true)}

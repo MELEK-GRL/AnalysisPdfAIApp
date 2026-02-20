@@ -10,6 +10,7 @@ export type LabItem = {
     refLow?: number | null;
     refHigh?: number | null;
     flag?: 'L' | 'N' | 'H';
+    resultLabel?: string | null;
 };
 export type UploadResponse =
     | { type: 'lab'; confidence: number; items: LabItem[]; analysis?: string }

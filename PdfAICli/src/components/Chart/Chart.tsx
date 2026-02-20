@@ -16,7 +16,8 @@ type Props = { items: LabItem[]; width?: number };
 const YELLOW = '#EAB308'; // düşük – sarı
 const GREEN = '#22C55E'; // normal – yeşil
 const RED = '#DC2626'; // yüksek – kırmızı
-const GRAY = '#E5E7EB';
+const BAR_DEFAULT = '#E5E7EB'; // referans aralığı yok → bar varsayılan (gri)
+const HEART_PURPLE = '#9333EA'; // kalp ikonu her zaman mor
 
 const BG_YELLOW = '#FEFCE8';
 const BG_GREEN = '#F0FDF4';
@@ -38,12 +39,35 @@ const BLACKLIST = [
     /^analiz/i,
     /^ref/i,
     /^birim/i,
+    /^HPF$/i,
+    /^(Sayfa|Page)\s*\d*$/i,
+    /\.(gov|tr|com|net|org)(\s|$)/i,
+    /^https?:\/\//i,
+    /^www\./i,
 ];
 
 const hasRef = (it: LabItem) => {
     const lo = Number(it?.refLow);
     const hi = Number(it?.refHigh);
-    return Number.isFinite(lo) && Number.isFinite(hi) && lo < hi;
+    if (!Number.isFinite(lo) || !Number.isFinite(hi) || lo > hi) return false;
+    if (lo === 0 && hi === 0) return false;
+    return true;
+};
+
+/** Kartta gösterilecek test adı: (ACIL) kaldır; uzun büyük isimleri Potasyum/Amilaz yap, HGB/WBC kısaltmaları aynen. */
+const displayTestName = (test: string | null | undefined, label: string | null | undefined): string => {
+    const raw = (test || label || '').trim();
+    if (!raw) return '';
+    const s = raw
+        .replace(/\s*\((ACİL|ACIL)\)\s*$/gi, '')
+        .replace(/\s*\(CL\)\s*$/gi, '')
+        .replace(/\s*\(NA\)\s*$/gi, '')
+        .trim() || raw;
+    if (s.length <= 1) return s;
+    if (s.length <= 4 && s === s.toUpperCase()) return s;
+    if (s === s.toUpperCase() && /^[A-Za-zİıĞğÜüŞşÖöÇç\s]+$/.test(s))
+        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    return s;
 };
 
 const BAR_HORIZONTAL_PADDING = 0;
@@ -144,8 +168,10 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
     const RangeRow: React.FC<{ item: LabItem }> = ({ item }) => {
         const v = Number(item.value);
         const _hasRef = hasRef(item);
-        const refLow = _hasRef ? Number(item.refLow) : v;
-        const refHigh = _hasRef ? Number(item.refHigh) : v;
+        const rawLow = _hasRef ? Number(item.refLow) : v;
+        const rawHigh = _hasRef ? Number(item.refHigh) : v;
+        const refLow = Math.min(rawLow, rawHigh);
+        const refHigh = Math.max(rawLow, rawHigh);
 
         let scaleMin = _hasRef ? Math.min(refLow, v) : v - 1;
         let scaleMax = _hasRef ? Math.max(refHigh, v) : v + 1;
@@ -163,23 +189,62 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
         const rightW = _hasRef ? Math.max(0, widthPx - (leftW + midW)) : 0;
         const markerLeft = toPx(v);
 
+        // Aralık altı = sarı (L), aralık üstü = kırmızı (H), aralıkta = yeşil (N)
         const flag = v < refLow ? 'L' : v > refHigh ? 'H' : 'N';
-        const flagText = flag === 'L' ? t('history.statusLow') : flag === 'H' ? t('history.statusHigh') : t('history.statusNormal');
-        const flagColor = flag === 'H' ? RED : flag === 'L' ? YELLOW : GREEN;
-        const bgColor = flag === 'H' ? BG_RED : flag === 'L' ? BG_YELLOW : BG_GREEN;
+        const hasResultLabel = item.resultLabel && String(item.resultLabel).trim().length > 0;
+        const negatifLike = /^(Negatif|Negative)$/i.test(String(item.resultLabel || ''));
+        const pozitifLike = /^(Pozitif|Positive|Reaktif)$/i.test(String(item.resultLabel || ''));
+        const flagText = hasResultLabel
+            ? String(item.resultLabel).trim()
+            : flag === 'L'
+                ? t('history.statusLow')
+                : flag === 'H'
+                    ? t('history.statusHigh')
+                    : t('history.statusNormal');
+        const flagColor = hasResultLabel
+            ? negatifLike
+                ? GREEN
+                : pozitifLike
+                    ? RED
+                    : flag === 'H'
+                        ? RED
+                        : flag === 'L'
+                            ? YELLOW
+                            : GREEN
+            : flag === 'H'
+                ? RED
+                : flag === 'L'
+                    ? YELLOW
+                    : GREEN;
+        const bgColor = hasResultLabel
+            ? negatifLike
+                ? BG_GREEN
+                : pozitifLike
+                    ? BG_RED
+                    : flag === 'H'
+                        ? BG_RED
+                        : flag === 'L'
+                            ? BG_YELLOW
+                            : BG_GREEN
+            : flag === 'H'
+                ? BG_RED
+                : flag === 'L'
+                    ? BG_YELLOW
+                    : BG_GREEN;
 
-        const unitStr = item.unit ? ` ${item.unit}` : '';
+        const rawUnit = item.unit != null ? String(item.unit).trim() : '';
+        const unitStr = rawUnit && rawUnit !== 'null' && rawUnit.toLowerCase() !== 'undefined' ? ` ${rawUnit}` : '';
 
         return (
             <View style={s.card}>
-                {/* Test adı */}
+                {/* Test adı – Potasyum, Klor, Amilaz gibi okunaklı isim */}
                 <T
                     size={fontSize.subtitle}
                     weight="600"
                     color="#111827"
                     numberOfLines={2}
                     style={s.testName}>
-                    {item.label || item.test}
+                    {displayTestName(item.test, item.label)}
                 </T>
 
                 {/* Kullanıcının değeri – büyük, renkli */}
@@ -215,28 +280,14 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
                     onLayout={(e) => setBarContainerWidth(e.nativeEvent.layout.width)}>
                 <View style={[s.bar, { width: widthPx }]}>
                     {_hasRef ? (
-                        <>
-                            <View
-                                style={[
-                                    s.seg,
-                                    { width: Math.max(0, leftW), backgroundColor: YELLOW },
-                                ]}
-                            />
-                            <View
-                                style={[
-                                    s.seg,
-                                    { width: Math.max(0, midW), backgroundColor: GREEN },
-                                ]}
-                            />
-                            <View
-                                style={[
-                                    s.seg,
-                                    { width: Math.max(0, rightW), backgroundColor: RED },
-                                ]}
-                            />
-                        </>
+                        <View
+                            style={[
+                                s.seg,
+                                { width: widthPx, backgroundColor: flagColor },
+                            ]}
+                        />
                     ) : (
-                        <View style={[s.seg, { width: widthPx, backgroundColor: GRAY }]} />
+                        <View style={[s.seg, { width: widthPx, backgroundColor: BAR_DEFAULT }]} />
                     )}
                 </View>
                 <View
@@ -255,7 +306,7 @@ const Chart: React.FC<Props> = ({ items = [], width = 320 }) => {
                     <Ionicons
                         name="heart"
                         size={iconSize.large * Math.min(w1px, h1px)}
-                        color={flagColor}
+                        color={HEART_PURPLE}
                     />
                 </View>
                 </View>

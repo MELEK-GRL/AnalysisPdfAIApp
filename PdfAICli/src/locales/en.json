@@ -111,7 +111,8 @@
     "disclaimer": "This content is for informational purposes and is not medical advice. Please **consult your doctor** for final interpretation and treatment plan.",
     "rateLimitTitle": "Analysis Limit Reached",
     "rateLimitMessage": "You have reached your daily analysis limit. You can analyze up to 2 PDFs every 24 hours. Please try again tomorrow.",
-    "uploadError": "Could not upload PDF."
+    "uploadError": "Could not upload PDF.",
+    "pleaseUploadResult": "Please upload the analysis result."
   },
   "history": {
     "emptyTitle": "Data not found",
@@ -133,13 +134,20 @@
     "fetchError": "Could not load history. Please try again.",
     "fetchErrorNetwork": "Could not connect to server. Please check your internet connection and that the backend is running.",
     "fetchErrorServer": "Server error occurred. Please try again later.",
-    "detailError": "Could not load detail."
+    "detailError": "Could not load detail.",
+    "deleteConfirmMessage": "Are you sure you want to delete?",
+    "searchPlaceholder": "Search"
   },
   "tabs": {
     "analysis": "Analysis",
     "history": "History"
   },
   "splash": {
+    "infoTitle": "Understanding your lab results made easy",
+    "infoSubtitle": "Upload your lab report PDFs and we'll extract your values and explain them in plain language with AI.",
+    "infoStep1": "Upload PDF",
+    "infoStep2": "Instant analysis",
+    "infoStep3": "Clear interpretation",
     "logoAlt": "Lab Analysis Logo",
     "goToLoginHint": "Go to sign in screen",
     "termsTitle": "User Agreement",

@@ -8,6 +8,7 @@ const LabItemSchema = new mongoose.Schema({
     refLow: { type: Number, default: null },
     refHigh: { type: Number, default: null },
     flag: { type: String, enum: ['L', 'N', 'H'], default: 'N' },
+    resultLabel: { type: String, default: null },
 }, { _id: false });
 
 const LatestLabResultSchema = new mongoose.Schema(

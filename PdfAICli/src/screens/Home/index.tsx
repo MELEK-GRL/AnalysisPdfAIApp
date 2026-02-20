@@ -13,16 +13,16 @@ import DocumentPicker, {
 } from 'react-native-document-picker';
 import { useResponsive } from '../../utils/deviceStore/device';
 import { getProfile } from '../../server/api/User';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { uploadPdf, LabItem } from '../../server/api/Lab';
 import Chart from '../../components/Chart/Chart';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useT } from '../../store/useLocaleStore';
 import { useAnalizResetStore } from '../../store/useAnalizResetStore';
+import { useAnalysisLoadingStore } from '../../store/useAnalysisLoadingStore';
 import { trackButtonClick } from '../../server/api/Analytics';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import Button from '../../components/Buttons/Button';
-import LoadingModal from '../../components/Modals/LoadingModal';
 import PopupModal from '../../components/Modals/PopupModal';
 import PageLayout from '../../components/Layout/PageLayout';
 import T from '../../components/Text/T';
@@ -32,6 +32,7 @@ import { iconSize } from '../../constants/icons';
 import { useAnalysisModalStore } from '../../store/useAnalysisModalStore';
 import Header from '../../components/Header/Header';
 import TitleHeader from '../../components/TitleHeader/TitleHeader';
+import AnalysisContent from '../../components/AnalysisContent/AnalysisContent';
 
 type Phase = 'idle' | 'loading' | 'result';
 
@@ -55,6 +56,7 @@ const Home: React.FC = () => {
     const [uploadErrorMessage, setUploadErrorMessage] = useState<string>('');
     const [rateLimitModalVisible, setRateLimitModalVisible] = useState(false);
     const [showUploadArea, setShowUploadArea] = useState(true);
+    const [noPdfWarningVisible, setNoPdfWarningVisible] = useState(false);
     const t = useT();
     const resetTrigger = useAnalizResetStore((s) => s.resetTrigger);
     const { w1px, h1px, fs1px } = useResponsive();
@@ -76,6 +78,14 @@ const Home: React.FC = () => {
     useEffect(() => {
         if (resetTrigger > 0) resetAnalizScreen();
     }, [resetTrigger, resetAnalizScreen]);
+
+    useFocusEffect(
+        useCallback(() => {
+            setItems([]);
+            setAnalysis('');
+            setShowUploadArea(true);
+        }, []),
+    );
 
     const styles = useMemo(
         () =>
@@ -211,6 +221,9 @@ const Home: React.FC = () => {
             });
             setPickedFile(res);
             setFileName(res.name ?? 'document.pdf');
+            setItems([]);
+            setAnalysis('');
+            setShowUploadArea(true);
         } catch (err: any) {
             if (DocumentPicker.isCancel(err)) {
                 return;
@@ -224,7 +237,10 @@ const Home: React.FC = () => {
         if (!pickedFile) {
             return;
         }
+        setItems([]);
+        setAnalysis('');
         setPhase('loading');
+        useAnalysisLoadingStore.getState().setLoading(true);
         try {
             const form = new FormData();
             form.append('file', {
@@ -234,6 +250,10 @@ const Home: React.FC = () => {
             } as any);
 
             const data = await uploadPdf(form);
+            // TEST: PDF vs API karşılaştırması için — cevabı kopyalayıp paylaş
+            if (__DEV__) {
+                console.log('[PDF_TEST] upload response:', JSON.stringify(data, null, 2));
+            }
             if (data.type === 'lab') {
                 setItems(data.items || []);
                 setAnalysis(data.analysis || '');
@@ -253,10 +273,13 @@ const Home: React.FC = () => {
                 setUploadErrorMessage(err?.message || 'PDF yüklenemedi.');
                 setUploadErrorVisible(true);
             }
+            setItems([]);
+            setAnalysis('');
             setPhase('idle');
         } finally {
             setPickedFile(null);
             setFileName(null);
+            useAnalysisLoadingStore.getState().setLoading(false);
         }
     }, [pickedFile]);
 
@@ -278,6 +301,9 @@ const Home: React.FC = () => {
                                         <TouchableOpacity
                                             onPress={() => {
                                                 trackButtonClick('select_pdf', { screen: 'Home' });
+                                                setItems([]);
+                                                setAnalysis('');
+                                                setShowUploadArea(true);
                                                 handleSelectPdf();
                                             }}
                                             disabled={phase === 'loading'}
@@ -392,6 +418,8 @@ const Home: React.FC = () => {
                                     <TouchableOpacity
                                         onPress={() => {
                                             trackButtonClick('show_upload_area', { screen: 'Home' });
+                                            setItems([]);
+                                            setAnalysis('');
                                             setShowUploadArea(true);
                                         }}
                                         activeOpacity={0.7}
@@ -438,13 +466,16 @@ const Home: React.FC = () => {
                                         {t('home.analysisResult')}
                                     </T>
 
-                                    {items.length > 0 && (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                trackButtonClick('interpret_result', {
-                                                    screen: 'Home',
-                                                });
-                                                useAnalysisModalStore.getState().open({
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            trackButtonClick('interpret_result', {
+                                                screen: 'Home',
+                                            });
+                                            if (items.length === 0 && !analysis) {
+                                                setNoPdfWarningVisible(true);
+                                                return;
+                                            }
+                                            useAnalysisModalStore.getState().open({
                                                     title: t('home.analysisTitle'),
                                                     content: (
                                                         <ScrollView
@@ -455,19 +486,11 @@ const Home: React.FC = () => {
                                                                 <View>
                                                                     <View style={styles.pill}>
                                                                         <T size={fontSize.label} weight="700" color="#111827">
-                                                                            ANALİZ
+                                                                            {t('tabs.analysis').toUpperCase()}
                                                                         </T>
                                                                     </View>
                                                                     {analysis ? (
-                                                                        analysis.split(/\n+/).map((line, idx) => (
-                                                                            <T
-                                                                                key={idx}
-                                                                                size={fontSize.body}
-                                                                                color="#111827"
-                                                                                style={{ marginBottom: 6 * h1px }}>
-                                                                                {line}
-                                                                            </T>
-                                                                        ))
+                                                                        <AnalysisContent content={analysis} />
                                                                     ) : (
                                                                         <T size={fontSize.body} color="#111827">
                                                                             {t('home.noAnalysis')}
@@ -497,43 +520,44 @@ const Home: React.FC = () => {
                                                     ),
                                                     onClose: () => {},
                                                 });
-                                            }}
-                                            activeOpacity={0.7}
-                                            style={{
-                                                flexDirection: 'row',
-                                                alignItems: 'center',
-                                                alignSelf: 'flex-start',
-                                                gap: 8 * w1px,
-                                                marginBottom: 12 * h1px,
-                                                backgroundColor: colors.backgroundPurpleSoft,
-                                                paddingVertical: 10 * h1px,
-                                                paddingHorizontal: 14 * w1px,
-                                                borderRadius: 12 * w1px,
-                                                borderWidth: 1,
-                                                borderColor: colors.backgroundPurple + '30',
-                                            }}>
-                                            <Ionicons
-                                                name="document-text-outline"
-                                                size={iconSize.medium}
-                                                color={colors.backgroundPurple}
-                                            />
-                                            <T
-                                                size={fontSize.body}
-                                                weight="600"
-                                                color={colors.backgroundPurple}>
-                                                {t('home.interpretButton')}
-                                            </T>
-                                            <Ionicons
-                                                name="chevron-forward"
-                                                size={iconSize.small}
-                                                color={colors.backgroundPurple}
-                                            />
-                                        </TouchableOpacity>
-                                    )}
+                                        }}
+                                        activeOpacity={0.7}
+                                        style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            alignSelf: 'flex-start',
+                                            gap: 8 * w1px,
+                                            marginBottom: 12 * h1px,
+                                            backgroundColor: colors.backgroundPurpleSoft,
+                                            paddingVertical: 10 * h1px,
+                                            paddingHorizontal: 14 * w1px,
+                                            borderRadius: 12 * w1px,
+                                            borderWidth: 1,
+                                            borderColor: colors.backgroundPurple + '30',
+                                        }}>
+                                        <Ionicons
+                                            name="document-text-outline"
+                                            size={iconSize.medium}
+                                            color={colors.backgroundPurple}
+                                        />
+                                        <T
+                                            size={fontSize.body}
+                                            weight="600"
+                                            color={colors.backgroundPurple}>
+                                            {t('home.interpretButton')}
+                                        </T>
+                                        <Ionicons
+                                            name="chevron-forward"
+                                            size={iconSize.small}
+                                            color={colors.backgroundPurple}
+                                        />
+                                    </TouchableOpacity>
 
-                                    <View>
-                                        <Chart items={items} />
-                                    </View>
+                                    {items.length > 0 && !pickedFile && (
+                                        <View>
+                                            <Chart items={items} />
+                                        </View>
+                                    )}
                                 </View>
                             </View>
                         </View>
@@ -560,7 +584,7 @@ const Home: React.FC = () => {
                     <PopupModal
                         visible={notLabVisible}
                         title={t('common.warning')}
-                        message={t('home.notLab')}
+                        message={t('home.pleaseUploadResult')}
                         type="warning"
                         rightButtonText={t('common.understand')}
                         onRightPress={() => setNotLabVisible(false)}
@@ -583,10 +607,17 @@ const Home: React.FC = () => {
                         rightButtonText={t('common.ok')}
                         onRightPress={() => setUploadErrorVisible(false)}
                     />
+
+                    <PopupModal
+                        visible={noPdfWarningVisible}
+                        title={t('common.warning')}
+                        message={t('home.pleaseUploadResult')}
+                        type="warning"
+                        rightButtonText={t('common.ok')}
+                        onRightPress={() => setNoPdfWarningVisible(false)}
+                    />
                 </ScrollView>
             </PageLayout>
-
-            <LoadingModal visible={phase === 'loading'} />
         </View>
     );
 };

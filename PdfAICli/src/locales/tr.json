@@ -111,7 +111,8 @@
     "disclaimer": "Bu içerik bilgilendirme amaçlıdır ve tıbbi tavsiye değildir. Nihai yorum ve tedavi planı için lütfen **doktorunuza danışın**.",
     "rateLimitTitle": "Analiz Hakkı Doldu",
     "rateLimitMessage": "Günlük analiz hakkınız doldu. 24 saat içinde en fazla 2 kez PDF analizi yapabilirsiniz. Lütfen yarın tekrar deneyin.",
-    "uploadError": "PDF yüklenemedi."
+    "uploadError": "PDF yüklenemedi.",
+    "pleaseUploadResult": "Lütfen tahlil sonucunuzu yükleyin."
   },
   "history": {
     "emptyTitle": "Veri bulunamadı",
@@ -133,13 +134,20 @@
     "fetchError": "Geçmiş yüklenemedi. Lütfen tekrar deneyin.",
     "fetchErrorNetwork": "Sunucuya bağlanılamadı. İnternet bağlantınızı ve backend'in çalıştığını kontrol edin.",
     "fetchErrorServer": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.",
-    "detailError": "Detay alınamadı."
+    "detailError": "Detay alınamadı.",
+    "deleteConfirmMessage": "Silmek istediğinize emin misiniz?",
+    "searchPlaceholder": "Arama"
   },
   "tabs": {
     "analysis": "Analiz",
     "history": "Geçmiş"
   },
   "splash": {
+    "infoTitle": "Tahlil sonuçlarınızı anlamak artık kolay",
+    "infoSubtitle": "PDF tahlil raporlarınızı yükleyin; yapay zeka değerlerinizi çıkarıp size anlaşılır bir dille yorumlasın.",
+    "infoStep1": "PDF yükle",
+    "infoStep2": "Anında analiz",
+    "infoStep3": "Anlaşılır yorum",
     "logoAlt": "Tahlil Analizi Logo",
     "goToLoginHint": "Giriş ekranına geç",
     "termsTitle": "Kullanıcı Sözleşmesi",

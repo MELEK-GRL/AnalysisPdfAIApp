@@ -8,6 +8,7 @@ import {
     ActivityIndicator,
     RefreshControl,
     ScrollView,
+    TextInput,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
@@ -27,6 +28,7 @@ import CenterModal from '../../components/Modals/CenterModal';
 import PopupModal from '../../components/Modals/PopupModal';
 import Chart from '../../components/Chart/Chart';
 import EmptyState from '../../components/EmptyState/EmptyState';
+import AnalysisContent from '../../components/AnalysisContent/AnalysisContent';
 
 const History: React.FC = () => {
     useScreenTime('History');
@@ -40,6 +42,8 @@ const History: React.FC = () => {
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [errorSource, setErrorSource] = useState<'fetch' | 'detail'>('fetch');
+    const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const t = useT();
     const locale = useLocaleStore((s) => s.locale);
     const { w1px, h1px, fs1px } = useResponsive();
@@ -50,7 +54,11 @@ const History: React.FC = () => {
                 getLabHistory(),
                 getProfile(),
             ]);
-            setItems(history);
+            const onlyLabReports = (history ?? []).filter((it) => (it.itemCount ?? 0) > 0);
+            const sorted = [...onlyLabReports].sort(
+                (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+            );
+            setItems(sorted);
             if (me?.name) setDisplayName(me.name);
         } catch (e) {
             const msg = isNetworkError(e)
@@ -114,6 +122,14 @@ const History: React.FC = () => {
         });
     };
 
+    const filteredItems = useMemo(() => {
+        if (!searchQuery.trim()) return items;
+        const q = searchQuery.trim().toLowerCase();
+        return items.filter(
+            (it) => (it.pdfName ?? '').toLowerCase().includes(q),
+        );
+    }, [items, searchQuery]);
+
     const styles = useMemo(
         () =>
             StyleSheet.create({
@@ -168,6 +184,33 @@ const History: React.FC = () => {
                     marginBottom: 8 * h1px,
                 },
                 sectionGap: { height: 12 * h1px },
+                searchWrap: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    height: 48 * h1px,
+                    backgroundColor: colors.white,
+                    borderRadius: 14 * w1px,
+                    marginHorizontal: 8 * w1px,
+                    marginBottom: 14 * h1px,
+                    paddingHorizontal: 16 * w1px,
+                    borderWidth: 1,
+                    borderColor: '#E5E7EB',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.04,
+                    shadowRadius: 8,
+                    elevation: 2,
+                },
+                searchIcon: {
+                    marginRight: 12 * w1px,
+                },
+                searchInput: {
+                    flex: 1,
+                    height: '100%',
+                    fontSize: 15,
+                    color: '#111827',
+                    paddingVertical: 0,
+                },
             }),
         [w1px, h1px, fs1px],
     );
@@ -206,6 +249,23 @@ const History: React.FC = () => {
             <Header title={displayName} />
             <PageLayout paddingHorizontal={10}>
                 <TitleHeader title={t('tabs.history')} />
+                {!loading && items.length > 0 ? (
+                    <View style={styles.searchWrap}>
+                        <Ionicons
+                            name="search"
+                            size={20}
+                            color={colors.backgroundPurple}
+                            style={styles.searchIcon}
+                        />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder={t('history.searchPlaceholder')}
+                            placeholderTextColor="#9CA3AF"
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                        />
+                    </View>
+                ) : null}
                 <View style={styles.scrollView}>
                     {loading ? (
                         <View style={styles.empty}>
@@ -220,9 +280,15 @@ const History: React.FC = () => {
                             subtitle={t('history.emptySub')}
                             style={styles.empty}
                         />
+                    ) : filteredItems.length === 0 ? (
+                        <View style={styles.empty}>
+                            <T size={fontSize.body} color="#6B7280">
+                                {t('history.emptyTitle')}
+                            </T>
+                        </View>
                     ) : (
                         <FlatList
-                            data={items}
+                            data={filteredItems}
                             keyExtractor={(it) => it.id}
                             renderItem={renderItem}
                             showsVerticalScrollIndicator={false}
@@ -245,19 +311,7 @@ const History: React.FC = () => {
                 leftButtonText={t('common.delete')}
                 rightButtonText={t('common.close')}
                 leftButtonBackgroundColor="#DC2626"
-                onLeftPress={async () => {
-                    if (selectedDetail) {
-                        try {
-                            await deleteLabHistoryItem(selectedDetail.id);
-                            setItems((prev) => prev.filter((i) => i.id !== selectedDetail.id));
-                            setDetailModal(false);
-                        } catch (err) {
-                            setErrorMessage(t('history.fetchErrorServer'));
-                            setErrorSource('fetch');
-                            setErrorVisible(true);
-                        }
-                    }
-                }}
+                onLeftPress={() => setDeleteConfirmVisible(true)}
                 onRightPress={() => setDetailModal(false)}>
                 <ScrollView
                     style={styles.detailModalView}
@@ -290,17 +344,7 @@ const History: React.FC = () => {
                                             {t('history.analysis')}
                                         </T>
                                     </View>
-                                    {selectedDetail.analysis
-                                        .split(/\n+/)
-                                        .map((line, idx) => (
-                                            <T
-                                                key={idx}
-                                                size={fontSize.body}
-                                                color="#111827"
-                                                style={{ marginBottom: 6 }}>
-                                                {line}
-                                            </T>
-                                        ))}
+                                    <AnalysisContent content={selectedDetail.analysis} />
                                 </>
                             ) : (
                                 <T size={fontSize.body} color="#6B7280">
@@ -311,6 +355,31 @@ const History: React.FC = () => {
                     ) : null}
                 </ScrollView>
             </CenterModal>
+
+            <PopupModal
+                visible={deleteConfirmVisible}
+                title={t('common.warning')}
+                message={t('history.deleteConfirmMessage')}
+                type="warning"
+                leftButtonText={t('common.cancel')}
+                rightButtonText={t('common.delete')}
+                onLeftPress={() => setDeleteConfirmVisible(false)}
+                onRightPress={async () => {
+                    setDeleteConfirmVisible(false);
+                    if (selectedDetail) {
+                        try {
+                            await deleteLabHistoryItem(selectedDetail.id);
+                            setItems((prev) => prev.filter((i) => i.id !== selectedDetail.id));
+                            setDetailModal(false);
+                            setSelectedDetail(null);
+                        } catch (err) {
+                            setErrorMessage(t('history.fetchErrorServer'));
+                            setErrorSource('fetch');
+                            setErrorVisible(true);
+                        }
+                    }
+                }}
+            />
 
             <PopupModal
                 visible={errorVisible}

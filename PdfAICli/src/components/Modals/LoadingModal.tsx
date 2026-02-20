@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Modal, Dimensions } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
+
+const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get('window');
 
 type Props = {
     visible: boolean;
@@ -13,8 +15,9 @@ const LoadingModal: React.FC<Props> = ({ visible }) => {
     const styles = useMemo(
         () =>
             StyleSheet.create({
-                overlay: {
-                    ...StyleSheet.absoluteFillObject,
+                fullScreen: {
+                    width: WINDOW_WIDTH,
+                    height: WINDOW_HEIGHT,
                     backgroundColor: 'rgba(17, 24, 39, 0.40)',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -34,16 +37,23 @@ const LoadingModal: React.FC<Props> = ({ visible }) => {
     }
 
     return (
-        <View style={styles.overlay}>
-            <View style={styles.box}>
-                <LottieView
-                    source={require('../../assets/splash/LoadingAnimation.json')}
-                    autoPlay
-                    loop
-                    style={styles.lottie}
-                />
+        <Modal
+            visible={visible}
+            transparent
+            statusBarTranslucent
+            animationType="fade"
+            onRequestClose={() => {}}>
+            <View style={styles.fullScreen} pointerEvents="auto">
+                <View style={styles.box}>
+                    <LottieView
+                        source={require('../../assets/splash/LoadingAnimation.json')}
+                        autoPlay
+                        loop
+                        style={styles.lottie}
+                    />
+                </View>
             </View>
-        </View>
+        </Modal>
     );
 };
 

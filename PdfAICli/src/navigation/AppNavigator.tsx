@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useT } from '../store/useLocaleStore';
+import { useAnalysisLoadingStore } from '../store/useAnalysisLoadingStore';
 import { NavigationContainer } from '@react-navigation/native';
+import LoadingModal from '../components/Modals/LoadingModal';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useAnalizResetStore } from '../store/useAnalizResetStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfile } from '../server/api/User';
 import { fontSize } from '../constants/typography';
@@ -45,7 +46,6 @@ const Tab = createBottomTabNavigator();
 
 const MainTabs = () => {
     const t = useT();
-    const requestAnalizReset = useAnalizResetStore((s) => s.requestAnalizReset);
     return (
         <Tab.Navigator
             screenOptions={{
@@ -93,9 +93,6 @@ const MainTabs = () => {
             <Tab.Screen
                 name="Geçmiş"
                 component={History}
-                listeners={{
-                    tabPress: () => requestAnalizReset(),
-                }}
                 options={{
                     title: t('tabs.history'),
                     tabBarIcon: ({ focused, color }) => (
@@ -122,6 +119,7 @@ const AppNavigator = () => {
     const [hasSeenLanguageSplash, setHasSeenLanguageSplash] = useState(false);
     const [hasConsentOnce, setHasConsentOnce] = useState(false);
     const [hasToken, setHasToken] = useState(false);
+    const analysisLoading = useAnalysisLoadingStore((s) => s.loading);
 
     useEffect(() => {
         (async () => {
@@ -174,23 +172,26 @@ const AppNavigator = () => {
     };
 
     return (
-        <NavigationContainer linking={linking}>
-            <Stack.Navigator
-                initialRouteName={initialRouteName}
-                screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="LanguageSplash" component={LanguageSplash} />
-                <Stack.Screen name="InfoSplash" component={InfoSplash} />
-                <Stack.Screen name="SplashTwo" component={SplashTwo} />
-                <Stack.Screen name="Login" component={Login} />
-                <Stack.Screen name="Register" component={Register} />
-                <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-                <Stack.Screen name="ResetPassword" component={ResetPassword} />
-                <Stack.Screen name="MainTabs" component={MainTabs} />
-                <Stack.Screen name="Settings" component={Settings} />
-                <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-                <Stack.Screen name="Logout" component={Logout} />
-            </Stack.Navigator>
-        </NavigationContainer>
+        <>
+            <NavigationContainer linking={linking}>
+                <Stack.Navigator
+                    initialRouteName={initialRouteName}
+                    screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="LanguageSplash" component={LanguageSplash} />
+                    <Stack.Screen name="InfoSplash" component={InfoSplash} />
+                    <Stack.Screen name="SplashTwo" component={SplashTwo} />
+                    <Stack.Screen name="Login" component={Login} />
+                    <Stack.Screen name="Register" component={Register} />
+                    <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+                    <Stack.Screen name="ResetPassword" component={ResetPassword} />
+                    <Stack.Screen name="MainTabs" component={MainTabs} />
+                    <Stack.Screen name="Settings" component={Settings} />
+                    <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+                    <Stack.Screen name="Logout" component={Logout} />
+                </Stack.Navigator>
+            </NavigationContainer>
+            <LoadingModal visible={analysisLoading} />
+        </>
     );
 };
 

@@ -97,14 +97,13 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
                     },
                     { upsert: true, new: true, setDefaultsOnInsert: true }
                 );
+                await LabHistory.create({
+                    user: req.user._id,
+                    items: result.items,
+                    analysis: result.analysis ?? null,
+                    pdfName,
+                });
             }
-
-            await LabHistory.create({
-                user: req.user._id,
-                items: result?.items || [],
-                analysis: result?.analysis ?? null,
-                pdfName,
-            });
         } catch (ex) {
             console.error('DB ERR:', ex?.message || ex);
             // DB hatası olsa bile kullanıcıya yanıtı veriyoruz

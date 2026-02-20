@@ -71,9 +71,23 @@ app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 // Gizlilik politikası – Play Store ve uygulama içi link (repo private kalabilir)
 app.get('/privacy', (_req, res) => {
-    const htmlPath = path.join(__dirname, '..', 'public', 'privacy.html');
-    if (!fs.existsSync(htmlPath)) return res.status(404).send('Not found');
-    res.type('html').send(fs.readFileSync(htmlPath, 'utf8'));
+    try {
+        const candidates = [
+            path.join(__dirname, '..', 'public', 'privacy.html'),
+            path.join(process.cwd(), 'public', 'privacy.html'),
+        ];
+        for (const htmlPath of candidates) {
+            if (fs.existsSync(htmlPath)) {
+                return res.type('html').send(fs.readFileSync(htmlPath, 'utf8'));
+            }
+        }
+        // Dosya bulunamadıysa minimal inline sayfa (Railway path farklı olabilir)
+        const fallback = '<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gizlilik Politikası</title></head><body style="font-family:sans-serif;max-width:720px;margin:2rem auto;padding:0 1rem;"><h1>Gizlilik Politikası</h1><p><strong>PDF Tahlil Analizi</strong> uygulaması kullanıcı verilerini toplar, işler ve korur. Hesap bilgileri, tahlil PDF verileri (sağlık verisi – KVKK) ve teknik veriler işlenir. Analiz hizmeti için OpenAI (ABD) ile paylaşım yapılır. Bu uygulama bilgilendirme amaçlıdır; tıbbi tavsiye yerine geçmez. Detay için uygulama içi ayarlardan iletişime geçebilirsiniz.</p></body></html>';
+        return res.type('html').send(fallback);
+    } catch (e) {
+        console.error('Privacy route error', e?.message || e);
+        res.status(500).type('html').send('<!DOCTYPE html><html><body><h1>Geçici hata</h1><p>Lütfen daha sonra tekrar deneyin.</p></body></html>');
+    }
 });
 
 // Merkezi hata yakalayıcı (route'lardan next(err) veya yakalanmamış hatalar)

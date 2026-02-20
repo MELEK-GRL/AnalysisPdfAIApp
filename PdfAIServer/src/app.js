@@ -3,6 +3,7 @@
  * index.js bu modülü alıp Mongo bağlantısı ve listen yapar.
  */
 const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -67,6 +68,13 @@ app.use('/api/labs', requireAuth, labsRoutes);
 app.use('/api/analytics', optionalAuth, analyticsRateLimit, analyticsRoutes);
 
 app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
+
+// Gizlilik politikası – Play Store ve uygulama içi link (repo private kalabilir)
+app.get('/privacy', (_req, res) => {
+    const htmlPath = path.join(__dirname, '..', 'public', 'privacy.html');
+    if (!fs.existsSync(htmlPath)) return res.status(404).send('Not found');
+    res.type('html').send(fs.readFileSync(htmlPath, 'utf8'));
+});
 
 // Merkezi hata yakalayıcı (route'lardan next(err) veya yakalanmamış hatalar)
 app.use((err, _req, res, _next) => {

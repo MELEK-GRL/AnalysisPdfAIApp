@@ -9,3 +9,6 @@ export const CONSENT_GIVEN_ONCE = 'consent_given_once';
 
 /** Key for has ever logged in flag (value: '1') */
 export const HAS_EVER_LOGGED_IN = 'has_ever_logged_in';
+
+/** Key for language splash seen / language chosen on first launch (value: '1') */
+export const LANGUAGE_SPLASH_SEEN = 'language_splash_seen';

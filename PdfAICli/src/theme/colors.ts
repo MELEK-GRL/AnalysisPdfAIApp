@@ -15,7 +15,7 @@ const colors = {
     backgroundPurple: '#7453E0',
     backgroundPurpleDark: '#7453E0',
     buttonPurple: '#4941B3',
-    buttonGray: '#A6A6A6',
+    buttonGray: '#9CA3AF', // Tek gri buton rengi (Şifremi Unuttum ekranındaki griden biraz koyu)
     textPurple: '#7067F0',
     textGray: '#333',
     textGraySoft: '#4B5563',

@@ -1,9 +1,17 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const User = require('../models/user');
+const PasswordReset = require('../models/passwordReset');
 const requireAuth = require('../middleware/requireAuth');
+const { sendPasswordResetEmail } = require('../services/mail');
 const { JWT_EXPIRES_IN, BCRYPT_ROUNDS } = require('../constants');
+
+const RESET_CODE_EXPIRY_MS = 60 * 60 * 1000; // 1 saat
+function generateResetToken() {
+    return crypto.randomBytes(32).toString('hex');
+}
 
 const signToken = (user) =>
     jwt.sign({ sub: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
@@ -71,6 +79,83 @@ router.post('/login', async (req, res) => {
     } catch (e) {
         console.error('LOGIN ERR:', e?.message || e);
         return res.status(500).json({ message: 'Login failed' });
+    }
+});
+
+router.post('/forgot-password', async (req, res) => {
+    try {
+        let { email } = req.body || {};
+        email = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        if (!email) {
+            return res.status(400).json({ message: 'Email required' });
+        }
+
+        const user = await User.findOne({ email }).lean();
+        if (!user) {
+            return res.status(404).json({ ok: false, message: 'Email not registered' });
+        }
+        return res.json({ ok: true, email });
+    } catch (e) {
+        console.error('FORGOT-PASSWORD ERR:', e?.message || e);
+        return res.status(500).json({ message: 'Request failed' });
+    }
+});
+
+router.post('/reset-password-by-email', async (req, res) => {
+    try {
+        let { email, newPassword } = req.body || {};
+        email = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        newPassword = typeof newPassword === 'string' ? newPassword : '';
+        if (!email || !newPassword) {
+            return res.status(400).json({ message: 'Email and new password required' });
+        }
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+        user.password = hash;
+        await user.save();
+
+        return res.json({ message: 'Password updated. You can sign in with your new password.' });
+    } catch (e) {
+        console.error('RESET-PASSWORD-BY-EMAIL ERR:', e?.message || e);
+        return res.status(500).json({ message: 'Reset failed' });
+    }
+});
+
+router.post('/reset-password', async (req, res) => {
+    try {
+        let { token, newPassword } = req.body || {};
+        token = typeof token === 'string' ? token.trim() : '';
+        newPassword = typeof newPassword === 'string' ? newPassword : '';
+        if (!token || !newPassword) {
+            return res.status(400).json({ message: 'Token and new password required' });
+        }
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        }
+
+        const reset = await PasswordReset.findOne({ token }).sort({ createdAt: -1 });
+        if (!reset || reset.expiresAt < new Date()) {
+            return res.status(400).json({ message: 'Invalid or expired link' });
+        }
+
+        const user = await User.findOne({ email: reset.email });
+        if (!user) return res.status(400).json({ message: 'User not found' });
+
+        const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+        user.password = hash;
+        await user.save();
+        await PasswordReset.deleteOne({ _id: reset._id });
+
+        return res.json({ message: 'Password updated. You can sign in with your new password.' });
+    } catch (e) {
+        console.error('RESET-PASSWORD ERR:', e?.message || e);
+        return res.status(500).json({ message: 'Reset failed' });
     }
 });
 

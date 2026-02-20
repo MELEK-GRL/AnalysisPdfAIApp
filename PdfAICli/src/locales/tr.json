@@ -37,8 +37,36 @@
     "button": "Giriş",
     "noAccount": "Hesabın yok mu?",
     "register": "Kayıt ol",
+    "forgotPassword": "Şifremi unuttum",
     "warnEmpty": "Lütfen e-posta/kullanıcı adı ve şifreyi girin.",
     "errorTitle": "Giriş Hatası"
+  },
+  "forgotPassword": {
+    "title": "Şifremi Unuttum",
+    "subtitle": "E-posta adresinizi girin, size şifre sıfırlama kodu gönderelim.",
+    "subtitleNoCode": "E-posta adresinizi girin. Kayıtlıysa şifre değiştirme ekranına yönlendirileceksiniz.",
+    "emailLabel": "E-posta",
+    "sendButton": "Kod Gönder",
+    "continueButton": "İleri",
+    "warnEmail": "Lütfen e-posta adresinizi girin.",
+    "emailNotRegistered": "Bu e-posta adresi kayıtlı değil.",
+    "emailSentTitle": "E-posta gönderildi",
+    "emailSentMessage": "Bu e-posta kayıtlıysa, size şifre sıfırlama linki gönderdik. E-postanızı kontrol edin ve linke tıklayarak yeni şifre belirleyin.",
+    "devLinkHint": "Geliştirme (e-posta gönderilmedi) – link"
+  },
+  "resetPassword": {
+    "title": "Yeni Şifre Belirle",
+    "subtitle": "E-postanıza gelen 6 haneli kodu ve yeni şifrenizi girin.",
+    "subtitleLink": "Yeni şifrenizi girin.",
+    "noTokenHint": "Şifre sıfırlama linkine e-postanızdan erişin. Linke tıkladığınızda bu ekran açılır.",
+    "codeLabel": "Sıfırlama kodu",
+    "codePlaceholder": "6 haneli kod",
+    "newPasswordLabel": "Yeni şifre",
+    "submitButton": "Şifreyi güncelle",
+    "warnCode": "Lütfen e-postanıza gelen kodu girin.",
+    "successTitle": "Şifre güncellendi",
+    "successMessage": "Yeni şifrenizle giriş yapabilirsiniz.",
+    "errorInvalidCode": "Kod geçersiz veya süresi dolmuş. Lütfen yeni kod isteyin."
   },
   "register": {
     "title": "Kayıt Ol",
@@ -61,7 +89,8 @@
     "viewTerms": "Kullanıcı sözleşmesi",
     "successTitle": "Başarılı",
     "success": "Kayıt tamamlandı.",
-    "error": "Kayıt başarısız. Lütfen tekrar deneyin."
+    "error": "Kayıt başarısız. Lütfen tekrar deneyin.",
+    "emailInUse": "Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin veya farklı bir e-posta kullanın."
   },
   "home": {
     "dragOrSelect": "Sürükle veya Seç",
@@ -117,7 +146,7 @@
     "termsIntro": "Bu uygulamayı kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız:",
     "consentCheckbox": "Sözleşmeyi okudum ve kabul ediyorum.",
     "saving": "Kaydediliyor…",
-    "continue": "Devam Et",
+    "continue": "İleri",
     "consentHint": "Devam ederek kullanım şartlarını kabul edeceksiniz",
     "consentRequired": "Devam edebilmek için Kullanıcı Sözleşmesini onaylamalısınız.",
     "consentError": "Sözleşme onayı kaydedilemedi. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.",

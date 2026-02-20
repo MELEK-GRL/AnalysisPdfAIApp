@@ -13,7 +13,7 @@ import { CONSENT_GIVEN_ONCE } from '../../constants/storageKeys';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
 import colors from '../../theme/colors';
-import { useT } from '../../store/useLocaleStore';
+import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
@@ -24,10 +24,14 @@ const SplashTwo: React.FC = () => {
     useScreenTime('SplashTwo');
     const { w1px, h1px, fs1px } = useResponsive();
     const t = useT();
+    const locale = useLocaleStore((s) => s.locale);
 
     const handleContinue = async () => {
         await AsyncStorage.setItem(CONSENT_GIVEN_ONCE, '1');
         navigation.replace('Login');
+    };
+    const goBack = () => {
+        navigation.replace('InfoSplash');
     };
 
     const s = styles(w1px, h1px, fs1px);
@@ -38,7 +42,7 @@ const SplashTwo: React.FC = () => {
                 <View style={s.topBlock}>
                     <View style={s.logoWrap}>
                         <Image
-                            source={require('../../assets/icons/test8.png')}
+                            source={locale === 'en' ? require('../../assets/icons/test10.png') : require('../../assets/icons/test8.png')}
                             style={s.logo}
                             accessible
                             accessibilityLabel={t('splash.logoAlt')}
@@ -46,45 +50,60 @@ const SplashTwo: React.FC = () => {
                     </View>
 
                     <View style={s.card}>
-                        <View style={s.cardHeader}>
-                            <View style={s.iconBadge}>
-                                <Ionicons
-                                    name="document-text"
-                                    size={iconSize.large}
-                                    color={colors.backgroundPurple}
-                                />
+                        <View style={s.cardAccent} />
+                        <View style={s.cardInner}>
+                            <View style={s.cardHeader}>
+                                <View style={s.iconBadge}>
+                                    <Ionicons
+                                        name="document-text"
+                                        size={iconSize.xl}
+                                        color={colors.backgroundPurple}
+                                    />
+                                </View>
+                                <T
+                                    size={fontSize.title}
+                                    weight="700"
+                                    color={colors.textDark}
+                                    style={s.cardTitle}>
+                                    {t('splash.splashTwoTitle')}
+                                </T>
                             </View>
-                            <T
-                                size={fontSize.title}
-                                weight="700"
-                                color="#374151"
-                                style={s.cardTitle}>
-                                {t('splash.splashTwoTitle')}
-                            </T>
-                        </View>
 
-                        <T size={fontSize.body} color="#6B7280" style={s.desc}>
-                            {t('splash.splashTwoDesc')}
-                        </T>
-
-                        <View style={s.disclaimerBox}>
-                            <Ionicons
-                                name="heart-outline"
-                                size={iconSize.medium}
-                                color="#B45309"
-                                style={s.disclaimerIcon}
-                            />
-                            <T
-                                size={fontSize.bodySmall}
-                                color="#92400E"
-                                style={s.disclaimerText}>
-                                {t('splash.splashTwoDisclaimer')}
+                            <T size={fontSize.body} color="#5B5B6B" style={s.desc}>
+                                {t('splash.splashTwoDesc')}
                             </T>
+
+                            <View style={s.disclaimerBox}>
+                                <View style={s.disclaimerIconWrap}>
+                                    <Ionicons
+                                        name="heart"
+                                        size={iconSize.medium}
+                                        color={colors.backgroundPurple}
+                                    />
+                                </View>
+                                <T
+                                    size={fontSize.bodySmall}
+                                    color="#4C1D95"
+                                    weight="500"
+                                    style={s.disclaimerText}>
+                                    {t('splash.splashTwoDisclaimer')}
+                                </T>
+                            </View>
                         </View>
                     </View>
                 </View>
 
                 <View style={s.buttonWrap}>
+                    <TouchableOpacity
+                        onPress={goBack}
+                        style={s.backButton}
+                        activeOpacity={0.8}
+                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+                        <Ionicons name="chevron-back" size={iconSize.large} color={colors.white} />
+                        <T size={fontSize.body} color={colors.white} weight="600">
+                            {t('common.back')}
+                        </T>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleContinue}
                         activeOpacity={0.8}
@@ -92,6 +111,7 @@ const SplashTwo: React.FC = () => {
                         <T size={fontSize.subtitle} weight="600" color="#fff">
                             {t('splash.continue')}
                         </T>
+                        <Ionicons name="chevron-forward" size={iconSize.medium} color="#fff" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -124,60 +144,93 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
         },
         card: {
             backgroundColor: '#fff',
-            borderRadius: 20 * w1px,
-            padding: 20 * w1px,
-            borderWidth: 1,
-            borderColor: 'rgba(139, 92, 246, 0.12)',
-            shadowColor: colors.backgroundPurple,
-            shadowOpacity: 0.06,
-            shadowRadius: 16 * w1px,
-            shadowOffset: { width: 0, height: 4 },
-            elevation: 3,
+            borderRadius: 24 * w1px,
+            overflow: 'hidden',
+            shadowColor: '#5B21B6',
+            shadowOpacity: 0.08,
+            shadowRadius: 24 * w1px,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: 6,
             marginBottom: 24 * h1px,
+            position: 'relative',
+        },
+        cardAccent: {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 4,
+            backgroundColor: colors.backgroundPurple,
+            borderTopLeftRadius: 4,
+            borderBottomLeftRadius: 4,
+        },
+        cardInner: {
+            padding: 24 * w1px,
+            paddingLeft: 28 * w1px,
         },
         cardHeader: {
             flexDirection: 'row',
             alignItems: 'center',
-            marginBottom: 12 * h1px,
+            marginBottom: 16 * h1px,
         },
         iconBadge: {
-            width: 44 * w1px,
-            height: 44 * w1px,
-            borderRadius: 12 * w1px,
+            width: 52 * w1px,
+            height: 52 * w1px,
+            borderRadius: 16 * w1px,
             backgroundColor: colors.backgroundPurpleSoft,
             alignItems: 'center',
             justifyContent: 'center',
-            marginRight: 12 * w1px,
+            marginRight: 14 * w1px,
         },
         cardTitle: {
             flex: 1,
+            letterSpacing: 0.3,
         },
         desc: {
-            lineHeight: 22,
-            marginBottom: 16 * h1px,
+            lineHeight: 24,
+            marginBottom: 20 * h1px,
+            paddingLeft: 2,
         },
         disclaimerBox: {
             flexDirection: 'row',
             alignItems: 'flex-start',
-            backgroundColor: '#FFFBEB',
-            borderRadius: 12 * w1px,
-            padding: 12 * w1px,
+            backgroundColor: '#F5F3FF',
+            borderRadius: 16 * w1px,
+            padding: 16 * w1px,
             borderWidth: 1,
-            borderColor: '#FDE68A',
+            borderColor: '#E9D5FF',
         },
-        disclaimerIcon: {
-            marginRight: 10 * w1px,
-            marginTop: 2,
+        disclaimerIconWrap: {
+            width: 36 * w1px,
+            height: 36 * w1px,
+            borderRadius: 18 * w1px,
+            backgroundColor: 'rgba(139, 92, 246, 0.15)',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 12 * w1px,
         },
         disclaimerText: {
             flex: 1,
-            lineHeight: 20,
+            lineHeight: 22,
         },
         buttonWrap: {
+            flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'space-between',
             paddingTop: 16 * h1px,
         },
+        backButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6 * w1px,
+            backgroundColor: colors.buttonGray,
+            borderRadius: 16 * w1px,
+            paddingVertical: 14 * h1px,
+            paddingHorizontal: 20 * w1px,
+        },
         continueButton: {
+            flexDirection: 'row',
             backgroundColor: colors.backgroundPurple,
             borderRadius: 16 * w1px,
             paddingVertical: 14 * h1px,
@@ -185,6 +238,7 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
             width: 220 * h1px,
             alignItems: 'center',
             justifyContent: 'center',
+            gap: 8 * w1px,
             shadowColor: '#5B21B6',
             shadowOpacity: 0.16,
             shadowRadius: 10 * w1px,

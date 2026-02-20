@@ -171,10 +171,20 @@ const Login: React.FC = () => {
                         onChangeText={setPassword}
                         autoCapitalize="none"
                         secureTextEntry
+                        passwordToggle
                         returnKeyType="done"
                         onSubmitEditing={handleLogin}
-                        containerStyle={{ marginBottom: 12 * h1px }}
+                        containerStyle={{ marginBottom: 4 * h1px }}
                     />
+                    <View style={{ alignItems: 'flex-end', marginBottom: 12 * h1px }}>
+                        <T
+                            size={fontSize.body}
+                            weight="600"
+                            color={colors.backgroundPurple}
+                            onPress={() => nav.navigate('ForgotPassword')}>
+                            {t('login.forgotPassword')}
+                        </T>
+                    </View>
 
                     <Button
                         buttonText={t('login.button')}

@@ -10,7 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfile } from '../server/api/User';
 import { fontSize } from '../constants/typography';
 import { iconSize } from '../constants/icons';
-import { AUTH_TOKEN, CONSENT_GIVEN_ONCE } from '../constants/storageKeys';
+import { AUTH_TOKEN, CONSENT_GIVEN_ONCE, LANGUAGE_SPLASH_SEEN } from '../constants/storageKeys';
 import colors from '../theme/colors';
 
 import Home from '../screens/Home';
@@ -19,15 +19,21 @@ import Settings from '../screens/Settings';
 import PrivacyPolicy from '../screens/PrivacyPolicy';
 import Register from '../screens/Register';
 import Login from '../screens/Login';
+import ForgotPassword from '../screens/ForgotPassword';
+import ResetPassword from '../screens/ResetPassword';
+import LanguageSplash from '../screens/Splashs/LanguageSplash';
 import InfoSplash from '../screens/Splashs/InfoSplash';
 import SplashTwo from '../screens/SplashTwo/SplashTwo';
 import Logout from '../screens/Logout';
 
 export type RootStackParamList = {
+    LanguageSplash: undefined;
     InfoSplash: undefined;
     SplashTwo: undefined;
     Login: undefined;
     Register: undefined;
+    ForgotPassword: undefined;
+    ResetPassword: { token?: string; email?: string };
     MainTabs: undefined;
     Settings: undefined;
     PrivacyPolicy: undefined;
@@ -113,26 +119,31 @@ const Loader = () => (
 
 const AppNavigator = () => {
     const [ready, setReady] = useState(false);
+    const [hasSeenLanguageSplash, setHasSeenLanguageSplash] = useState(false);
     const [hasConsentOnce, setHasConsentOnce] = useState(false);
     const [hasToken, setHasToken] = useState(false);
 
     useEffect(() => {
         (async () => {
             try {
-                const consent = await AsyncStorage.getItem(CONSENT_GIVEN_ONCE);
+                const [langSeen, consent, token] = await Promise.all([
+                    AsyncStorage.getItem(LANGUAGE_SPLASH_SEEN),
+                    AsyncStorage.getItem(CONSENT_GIVEN_ONCE),
+                    AsyncStorage.getItem(AUTH_TOKEN),
+                ]);
+                setHasSeenLanguageSplash(langSeen === '1');
                 setHasConsentOnce(consent === '1');
 
-                const token = await AsyncStorage.getItem(AUTH_TOKEN);
                 if (!token) {
                     setHasToken(false);
-                    return;
-                }
-                try {
-                    await getProfile();
-                    setHasToken(true);
-                } catch {
-                    await AsyncStorage.removeItem(AUTH_TOKEN);
-                    setHasToken(false);
+                } else {
+                    try {
+                        await getProfile();
+                        setHasToken(true);
+                    } catch {
+                        await AsyncStorage.removeItem(AUTH_TOKEN);
+                        setHasToken(false);
+                    }
                 }
             } finally {
                 setReady(true);
@@ -143,21 +154,37 @@ const AppNavigator = () => {
     if (!ready) {
         return <Loader />;
     }
-    const initialRouteName: keyof RootStackParamList = hasConsentOnce
-        ? hasToken
-            ? 'MainTabs'
-            : 'Login'
-        : 'InfoSplash';
+    const initialRouteName: keyof RootStackParamList = !hasSeenLanguageSplash
+        ? 'LanguageSplash'
+        : hasConsentOnce
+          ? hasToken
+              ? 'MainTabs'
+              : 'Login'
+          : 'InfoSplash';
+
+    const linking = {
+        prefixes: ['pdfai://'],
+        config: {
+            screens: {
+                ResetPassword: {
+                    path: 'reset-password',
+                },
+            },
+        },
+    };
 
     return (
-        <NavigationContainer>
+        <NavigationContainer linking={linking}>
             <Stack.Navigator
                 initialRouteName={initialRouteName}
                 screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="LanguageSplash" component={LanguageSplash} />
                 <Stack.Screen name="InfoSplash" component={InfoSplash} />
                 <Stack.Screen name="SplashTwo" component={SplashTwo} />
                 <Stack.Screen name="Login" component={Login} />
                 <Stack.Screen name="Register" component={Register} />
+                <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+                <Stack.Screen name="ResetPassword" component={ResetPassword} />
                 <Stack.Screen name="MainTabs" component={MainTabs} />
                 <Stack.Screen name="Settings" component={Settings} />
                 <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />

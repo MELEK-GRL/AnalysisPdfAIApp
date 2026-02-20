@@ -1,20 +1,23 @@
 // src/screens/InfoSplash/index.tsx
 import React from 'react';
-import { View, StyleSheet, Image, Pressable } from 'react-native';
+import { View, StyleSheet, Image, Pressable, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
 import GradientLayout from '../../components/Layout/GradientLayout';
-import { useT } from '../../store/useLocaleStore';
+import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
+import { iconSize } from '../../constants/icons';
 
 const InfoSplash: React.FC = () => {
     const navigation = useNavigation<any>();
     useScreenTime('InfoSplash');
     const t = useT();
+    const locale = useLocaleStore((s) => s.locale);
     const { w1px, h1px, fs1px } = useResponsive();
 
     const goNext = () => {
@@ -25,6 +28,9 @@ const InfoSplash: React.FC = () => {
             })
         );
     };
+    const goBack = () => {
+        navigation.replace('LanguageSplash');
+    };
     const s = styles(w1px, h1px, fs1px);
 
     return (
@@ -32,13 +38,23 @@ const InfoSplash: React.FC = () => {
             <View style={s.container}>
                 <View style={s.centerWrap}>
                     <Image
-                        source={require('../../assets/icons/test8.png')}
+                        source={locale === 'en' ? require('../../assets/icons/test10.png') : require('../../assets/icons/test8.png')}
                         style={s.logo}
                         accessible
                         accessibilityLabel={t('splash.logoAlt')}
                     />
                 </View>
                 <View style={s.cta}>
+                    <TouchableOpacity
+                        onPress={goBack}
+                        style={s.backButton}
+                        activeOpacity={0.8}
+                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+<Ionicons name="chevron-back" size={iconSize.large} color={colors.white} />
+                    <T size={fontSize.body} color={colors.white} weight="600">
+                            {t('common.back')}
+                        </T>
+                    </TouchableOpacity>
                     <Pressable
                         onPress={goNext}
                         style={({ pressed }) => [s.button, pressed && { opacity: 0.85 }]}
@@ -46,6 +62,7 @@ const InfoSplash: React.FC = () => {
                         <T size={fontSize.subtitle} weight="600" color="#fff">
                             {t('splash.continue')}
                         </T>
+                        <Ionicons name="chevron-forward" size={iconSize.medium} color="#fff" />
                     </Pressable>
                 </View>
             </View>
@@ -55,7 +72,7 @@ const InfoSplash: React.FC = () => {
 
 export default InfoSplash;
 
-const styles = (w1px: number, h1px: number, fs1px: number) =>
+const styles = (w1px: number, h1px: number, _fs1px: number) =>
     StyleSheet.create({
         container: {
             flex: 1,
@@ -74,10 +91,22 @@ const styles = (w1px: number, h1px: number, fs1px: number) =>
             resizeMode: 'contain',
         },
         cta: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+        },
+        backButton: {
+            flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
+            gap: 6 * w1px,
+            backgroundColor: colors.buttonGray,
+            borderRadius: 16 * w1px,
+            paddingVertical: 14 * h1px,
+            paddingHorizontal: 20 * w1px,
         },
         button: {
+            flexDirection: 'row',
             backgroundColor: colors.backgroundPurple,
             borderRadius: 16 * w1px,
             paddingVertical: 14 * h1px,
@@ -85,6 +114,7 @@ const styles = (w1px: number, h1px: number, fs1px: number) =>
             minWidth: 220 * h1px,
             alignItems: 'center',
             justifyContent: 'center',
+            gap: 8 * w1px,
             shadowColor: '#5B21B6',
             shadowOpacity: 0.16,
             shadowRadius: 10 * w1px,

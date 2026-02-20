@@ -279,25 +279,26 @@ const Register: React.FC = () => {
                 }
             }
 
-            await useAuthStore.getState().setUserAndToken(user, token);
-
             setModal({
                 visible: true,
                 title: t('register.successTitle'),
                 message: t('register.success'),
                 type: 'success',
             });
-            setTimeout(() => nav.replace('MainTabs'), 600);
+            setTimeout(() => nav.replace('Login'), 600);
         } catch (err: any) {
+            const status = err?.response?.status;
             const msg =
-                err?.response?.data?.message ||
-                err?.message ||
-                t('register.error');
+                status === 409
+                    ? t('register.emailInUse')
+                    : err?.response?.data?.message ||
+                      err?.message ||
+                      t('register.error');
             setModal({
                 visible: true,
-                title: t('common.error'),
+                title: status === 409 ? t('common.warning') : t('common.error'),
                 message: msg,
-                type: 'error',
+                type: status === 409 ? 'warning' : 'error',
             });
         } finally {
             setLoading(false);
@@ -350,6 +351,7 @@ const Register: React.FC = () => {
                             value={form.password}
                             onChangeText={v => handleChange('password', v)}
                             secureTextEntry
+                            passwordToggle
                             returnKeyType="next"
                             containerStyle={{ marginBottom: 10 * h1px }}
                         />
@@ -360,6 +362,7 @@ const Register: React.FC = () => {
                             value={form.confirm}
                             onChangeText={v => handleChange('confirm', v)}
                             secureTextEntry
+                            passwordToggle
                             returnKeyType="done"
                             containerStyle={{ marginBottom: 4 * h1px }}
                         />

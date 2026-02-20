@@ -37,8 +37,36 @@
     "button": "Sign In",
     "noAccount": "Don't have an account?",
     "register": "Sign Up",
+    "forgotPassword": "Forgot password",
     "warnEmpty": "Please enter email/username and password.",
     "errorTitle": "Sign In Error"
+  },
+  "forgotPassword": {
+    "title": "Forgot Password",
+    "subtitle": "Enter your email and we'll send you a password reset code.",
+    "subtitleNoCode": "Enter your email. If it's registered, you'll be taken to the password change screen.",
+    "emailLabel": "Email",
+    "sendButton": "Send Code",
+    "continueButton": "Forward",
+    "warnEmail": "Please enter your email address.",
+    "emailNotRegistered": "This email address is not registered.",
+    "emailSentTitle": "Email sent",
+    "emailSentMessage": "If this email is registered, we've sent you a password reset link. Check your inbox and tap the link to set a new password.",
+    "devLinkHint": "Dev (email not sent) – link"
+  },
+  "resetPassword": {
+    "title": "Set New Password",
+    "subtitle": "Enter the 6-digit code from your email and your new password.",
+    "subtitleLink": "Enter your new password.",
+    "noTokenHint": "Open the password reset link from your email. This screen opens when you tap the link.",
+    "codeLabel": "Reset code",
+    "codePlaceholder": "6-digit code",
+    "newPasswordLabel": "New password",
+    "submitButton": "Update password",
+    "warnCode": "Please enter the code from your email.",
+    "successTitle": "Password updated",
+    "successMessage": "You can sign in with your new password.",
+    "errorInvalidCode": "Code is invalid or expired. Please request a new code."
   },
   "register": {
     "title": "Sign Up",
@@ -61,7 +89,8 @@
     "viewTerms": "User agreement",
     "successTitle": "Success",
     "success": "Registration completed.",
-    "error": "Registration failed. Please try again."
+    "error": "Registration failed. Please try again.",
+    "emailInUse": "This email is already registered. Try signing in or use a different email."
   },
   "home": {
     "dragOrSelect": "Drag or Select",
@@ -117,7 +146,7 @@
     "termsIntro": "By using this app you agree to the following terms:",
     "consentCheckbox": "I have read and accept the agreement.",
     "saving": "Saving…",
-    "continue": "Continue",
+    "continue": "Forward",
     "consentHint": "By continuing you accept the terms of use",
     "consentRequired": "You must accept the User Agreement to continue.",
     "consentError": "Could not save consent. Please check your internet connection and try again.",

@@ -84,15 +84,20 @@ router.post('/login', async (req, res) => {
 
 router.post('/forgot-password', async (req, res) => {
     try {
-        let { email } = req.body || {};
+        let { email, name } = req.body || {};
         email = typeof email === 'string' ? email.trim().toLowerCase() : '';
-        if (!email) {
-            return res.status(400).json({ message: 'Email required' });
+        name = typeof name === 'string' ? name.trim() : '';
+        if (!email || !name) {
+            return res.status(400).json({ message: 'Email and username required' });
         }
 
         const user = await User.findOne({ email }).lean();
         if (!user) {
             return res.status(404).json({ ok: false, message: 'Email not registered' });
+        }
+        const userNameMatch = (user.name || '').trim().toLowerCase() === name.toLowerCase();
+        if (!userNameMatch) {
+            return res.status(400).json({ ok: false, message: 'Email and username do not match the same account' });
         }
         return res.json({ ok: true, email });
     } catch (e) {

@@ -46,8 +46,9 @@ export async function getProfile(): Promise<User> {
 
 export async function forgotPassword(
     email: string,
+    name: string,
 ): Promise<{ ok: true; email: string }> {
-    return post<{ ok: true; email: string }>(endpoints.forgotPassword, { email });
+    return post<{ ok: true; email: string }>(endpoints.forgotPassword, { email, name });
 }
 
 export async function resetPasswordByEmail(

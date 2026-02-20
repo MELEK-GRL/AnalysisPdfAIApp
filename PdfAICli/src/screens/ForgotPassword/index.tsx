@@ -26,6 +26,7 @@ const ForgotPassword: React.FC = () => {
     const t = useT();
     const { w1px, h1px } = useResponsive();
     const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(false);
     const [modal, setModal] = useState<{
         visible: boolean;
@@ -74,8 +75,18 @@ const ForgotPassword: React.FC = () => {
     );
 
     const handleSubmit = async () => {
-        const trimmed = email.trim().toLowerCase();
-        if (!trimmed) {
+        const trimmedEmail = email.trim().toLowerCase();
+        const trimmedName = username.trim();
+        if (!trimmedName) {
+            setModal({
+                visible: true,
+                title: t('common.warning'),
+                message: t('forgotPassword.warnUsername'),
+                type: 'warning',
+            });
+            return;
+        }
+        if (!trimmedEmail) {
             setModal({
                 visible: true,
                 title: t('common.warning'),
@@ -84,7 +95,7 @@ const ForgotPassword: React.FC = () => {
             });
             return;
         }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
             setModal({
                 visible: true,
                 title: t('common.warning'),
@@ -96,7 +107,7 @@ const ForgotPassword: React.FC = () => {
 
         try {
             setLoading(true);
-            const res = await forgotPassword(trimmed);
+            const res = await forgotPassword(trimmedEmail, trimmedName);
             if (res?.ok && res?.email) {
                 nav.replace('ResetPassword', { email: res.email });
                 return;
@@ -108,14 +119,19 @@ const ForgotPassword: React.FC = () => {
                 type: 'warning',
             });
         } catch (e: any) {
-            const is404 = e?.response?.status === 404;
+            const status = e?.response?.status;
+            const serverMsg = e?.response?.data?.message || '';
+            const is404 = status === 404;
+            const is400Mismatch = status === 400 && /username|kullanıcı|match|eşleşm/i.test(serverMsg);
             setModal({
                 visible: true,
-                title: is404 ? t('common.warning') : t('common.error'),
+                title: is404 || is400Mismatch ? t('common.warning') : t('common.error'),
                 message: is404
                     ? t('forgotPassword.emailNotRegistered')
-                    : e?.message || t('common.genericError'),
-                type: is404 ? 'warning' : 'error',
+                    : is400Mismatch
+                        ? t('forgotPassword.emailUsernameMismatch')
+                        : e?.message || t('common.genericError'),
+                type: is404 || is400Mismatch ? 'warning' : 'error',
             });
         } finally {
             setLoading(false);
@@ -152,6 +168,15 @@ const ForgotPassword: React.FC = () => {
                         {t('forgotPassword.subtitleNoCode')}
                     </T>
                             <TextInputComponent
+                                label={t('forgotPassword.usernameLabel')}
+                                placeholder={t('forgotPassword.usernamePlaceholder')}
+                                value={username}
+                                onChangeText={setUsername}
+                                autoCapitalize="none"
+                                returnKeyType="next"
+                                containerStyle={{ marginBottom: 12 * h1px }}
+                            />
+                            <TextInputComponent
                                 label={t('forgotPassword.emailLabel')}
                                 placeholder={t('register.emailPlaceholder')}
                                 value={email}
@@ -176,7 +201,7 @@ const ForgotPassword: React.FC = () => {
                                         buttonText={t('forgotPassword.continueButton')}
                                         onPress={handleSubmit}
                                         activityIndicatorLoading={loading}
-                                        disabled={loading || !email.trim()}
+                                        disabled={loading || !email.trim() || !username.trim()}
                                     />
                                 </View>
                             </View>

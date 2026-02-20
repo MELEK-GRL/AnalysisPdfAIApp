@@ -30,6 +30,9 @@ const VALID_ANALYTICS_TYPES = ['screen_view', 'button_click', 'login', 'event'];
 /** Health check yanıtı */
 const EARLY_OK = 'EARLY_OK';
 
+/** Kullanıcı başına geçmişte tutulacak maksimum tahlil analizi sayısı (en güncel N kayıt) */
+const MAX_LAB_HISTORY_PER_USER = 30;
+
 module.exports = {
     RATE_LIMIT_ANALYSIS_WINDOW_MS,
     RATE_LIMIT_ANALYSIS_MAX,
@@ -41,4 +44,5 @@ module.exports = {
     MAX_UPLOAD_BYTES,
     VALID_ANALYTICS_TYPES,
     EARLY_OK,
+    MAX_LAB_HISTORY_PER_USER,
 };

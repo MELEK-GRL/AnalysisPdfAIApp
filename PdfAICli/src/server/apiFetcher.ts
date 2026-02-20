@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@env';
 import { AUTH_TOKEN } from '../constants/storageKeys';
 import { API_TIMEOUT_MS } from '../constants/api';
+import { useSessionStore } from '../store/useSessionStore';
 
 export const api = axios.create({
     baseURL: `${API_BASE_URL}/api`,
@@ -86,6 +87,7 @@ api.interceptors.request.use(async config => {
 
 api.interceptors.response.use(
     res => {
+        useSessionStore.getState().touch();
         if (__DEV__) {
             console.log('[RES]', res.status, res.config.url);
         }

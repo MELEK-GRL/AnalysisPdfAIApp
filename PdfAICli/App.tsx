@@ -4,9 +4,13 @@ import AppNavigator from './src/navigation/AppNavigator';
 import AnalysisModalRoot from './src/components/Modals/AnalysisModalRoot';
 import { Dimensions, AppState, AppStateStatus } from 'react-native';
 import useDeviceStore from './src/store/useDeviceStore';
+import { useInactivityTimeout } from './src/hooks/useInactivityTimeout';
+
 const App = () => {
   const setDimensions = useDeviceStore(state => state.setDimensions);
   const appState = useRef(AppState.currentState);
+
+  useInactivityTimeout();
 
   useEffect(() => {
     const updateDimensions = () => {

@@ -33,6 +33,7 @@ import { getInstallationId } from '../../utils/analytics/getInstallationId';
 import { api } from '../../server/apiFetcher';
 import { LAST_CONSENT_ID } from '../../constants/storageKeys';
 import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
+import OPEN_CONSENT_ITEMS from '../../utils/contractArticles/OpenConsentArticles.json';
 
 const Register: React.FC = () => {
     const nav = useNavigation<any>();
@@ -49,6 +50,8 @@ const Register: React.FC = () => {
     });
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [termsModalVisible, setTermsModalVisible] = useState(false);
+    const [openConsentAccepted, setOpenConsentAccepted] = useState(false);
+    const [openConsentModalVisible, setOpenConsentModalVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const [modal, setModal] = useState<{
@@ -143,6 +146,16 @@ const Register: React.FC = () => {
         setForm(prev => ({ ...prev, [key]: value }));
     };
 
+    const allFieldsFilled = useMemo(() => {
+        const { name, email, password, confirm } = form;
+        return (
+            name.trim().length > 0 &&
+            email.trim().length > 0 &&
+            password.trim().length > 0 &&
+            confirm.trim().length > 0
+        );
+    }, [form]);
+
     const validate = () => {
         const { name, email, password, confirm } = form;
         const nameT = name.trim();
@@ -213,6 +226,14 @@ const Register: React.FC = () => {
                 visible: true,
                 title: t('common.warning'),
                 message: t('register.warnTerms'),
+                type: 'warning',
+            });
+        }
+        if (!openConsentAccepted) {
+            return setModal({
+                visible: true,
+                title: t('common.warning'),
+                message: t('register.warnOpenConsent'),
                 type: 'warning',
             });
         }
@@ -422,11 +443,68 @@ const Register: React.FC = () => {
                             />
                         </TouchableOpacity>
 
+                        <TouchableOpacity
+                            onPress={() => setOpenConsentAccepted(!openConsentAccepted)}
+                            activeOpacity={0.8}
+                            style={s.checkboxRow}>
+                            <View
+                                style={[
+                                    s.checkbox,
+                                    {
+                                        backgroundColor: openConsentAccepted
+                                            ? colors.backgroundPurple
+                                            : '#fff',
+                                    },
+                                ]}>
+                                {openConsentAccepted && (
+                                    <Ionicons
+                                        name="checkmark"
+                                        size={13}
+                                        color="#fff"
+                                    />
+                                )}
+                            </View>
+                            <T
+                                size={fontSize.body}
+                                color="#111827"
+                                style={{ marginLeft: 8 * w1px, flex: 1 }}>
+                                {t('register.openConsentCheckbox')}
+                            </T>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={() => setOpenConsentModalVisible(true)}
+                            activeOpacity={0.8}
+                            style={s.termsLinkRow}>
+                            <Ionicons
+                                name="document-text-outline"
+                                size={iconSize.medium}
+                                color={colors.backgroundPurple}
+                                style={{ marginRight: 6 * w1px }}
+                            />
+                            <T
+                                size={fontSize.body}
+                                weight="600"
+                                color={colors.backgroundPurple}>
+                                {t('register.viewOpenConsent')}
+                            </T>
+                            <Ionicons
+                                name="open-outline"
+                                size={iconSize.small}
+                                color={colors.backgroundPurple}
+                                style={{ marginLeft: 4 * w1px }}
+                            />
+                        </TouchableOpacity>
+
                         <Button
                             buttonText={t('register.button')}
                             onPress={onRegister}
                             activityIndicatorLoading={loading}
-                            disabled={!termsAccepted}
+                            disabled={
+                                !allFieldsFilled ||
+                                !termsAccepted ||
+                                !openConsentAccepted
+                            }
                             style={{ marginTop: 4 * h1px }}
                             width={h1px * 260}
                         />
@@ -495,6 +573,47 @@ size={fontSize.subtitleLarge}
                             <Button
                                 buttonText={t('common.close')}
                                 onPress={() => setTermsModalVisible(false)}
+                                style={{ marginTop: 16 * h1px }}
+                            />
+                        </View>
+                    </View>
+                </Modal>
+
+                <Modal
+                    visible={openConsentModalVisible}
+                    transparent
+                    animationType="fade">
+                    <View
+                        style={{
+                            flex: 1,
+                            backgroundColor: 'rgba(17,24,39,0.4)',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: 20 * w1px,
+                        }}>
+                        <View
+                            style={{
+                                backgroundColor: '#fff',
+                                borderRadius: 12 * w1px,
+                                padding: 16 * w1px,
+                                maxHeight: '85%',
+                                width: '100%',
+                            }}>
+                            <T
+                                size={fontSize.title}
+                                weight="700"
+                                color="#111827"
+                                style={{ marginBottom: 12 * h1px }}>
+                                {t('register.openConsentTitle')}
+                            </T>
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                                style={{ maxHeight: 400 * h1px }}>
+                                {OPEN_CONSENT_ITEMS.map(renderTermItem)}
+                            </ScrollView>
+                            <Button
+                                buttonText={t('common.close')}
+                                onPress={() => setOpenConsentModalVisible(false)}
                                 style={{ marginTop: 16 * h1px }}
                             />
                         </View>

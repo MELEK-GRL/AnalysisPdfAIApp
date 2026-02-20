@@ -1,4 +1,4 @@
-import { get, post, setToken } from '../apiFetcher';
+import { get, post, del, setToken } from '../apiFetcher';
 
 export type User = { _id: string; name: string; email: string };
 
@@ -19,6 +19,7 @@ const endpoints = {
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
     resetPasswordByEmail: '/auth/reset-password-by-email',
+    deleteAccount: '/auth/account',
 };
 
 export async function register(
@@ -69,4 +70,8 @@ export async function resetPasswordByToken(
         token,
         newPassword,
     });
+}
+
+export async function deleteAccount(): Promise<{ success: true }> {
+    return del<{ success: true }>(endpoints.deleteAccount);
 }

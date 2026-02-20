@@ -5,7 +5,7 @@ const LabHistory = require('../src/models/LabHistory');
 const registerAndLogin = async () => {
     const reg = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'LabsUser', email: 'labs@example.com', password: '123456' });
+        .send({ name: 'LabsUser', email: 'labs@example.com', password: '123456', termsAccepted: true });
     return reg.body.token;
 };
 
@@ -85,7 +85,7 @@ describe('Labs', () => {
 
             const other = await request(app)
                 .post('/api/auth/register')
-                .send({ name: 'OtherUser', email: 'other@x.com', password: '123456' });
+                .send({ name: 'OtherUser', email: 'other@x.com', password: '123456', termsAccepted: true });
             const otherMe = await request(app).get('/api/auth/me').set('Authorization', `Bearer ${other.body.token}`);
             const otherId = otherMe.body.user._id;
 

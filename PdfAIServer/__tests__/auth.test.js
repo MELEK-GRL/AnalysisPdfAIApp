@@ -12,7 +12,7 @@ describe('Auth', () => {
         it('geçerli isim, email, şifre ile kullanıcı oluşturur', async () => {
             const res = await request(app)
                 .post('/api/auth/register')
-                .send({ name: 'TestUser', email: 'test@example.com', password: '123456' });
+                .send({ name: 'TestUser', email: 'test@example.com', password: '123456', termsAccepted: true });
             expect(res.status).toBe(201);
             expect(res.body).toHaveProperty('token');
             expect(res.body.user).toEqual(expect.objectContaining({
@@ -24,10 +24,10 @@ describe('Auth', () => {
         it('aynı email ile 409 döner', async () => {
             await request(app)
                 .post('/api/auth/register')
-                .send({ name: 'User1', email: 'dup@example.com', password: '123456' });
+                .send({ name: 'User1', email: 'dup@example.com', password: '123456', termsAccepted: true });
             const res = await request(app)
                 .post('/api/auth/register')
-                .send({ name: 'User2', email: 'dup@example.com', password: '654321' });
+                .send({ name: 'User2', email: 'dup@example.com', password: '654321', termsAccepted: true });
             expect(res.status).toBe(409);
             expect(res.body.message).toBe('Email in use');
         });
@@ -37,7 +37,7 @@ describe('Auth', () => {
         beforeEach(async () => {
             await request(app)
                 .post('/api/auth/register')
-                .send({ name: 'LoginUser', email: 'login@example.com', password: 'secret123' });
+                .send({ name: 'LoginUser', email: 'login@example.com', password: 'secret123', termsAccepted: true });
         });
 
         it('eksik credentials ile 400 döner', async () => {
@@ -88,7 +88,7 @@ describe('Auth', () => {
         it('geçerli token ile kullanıcı döner', async () => {
             const reg = await request(app)
                 .post('/api/auth/register')
-                .send({ name: 'MeUser', email: 'me@example.com', password: '123456' });
+                .send({ name: 'MeUser', email: 'me@example.com', password: '123456', termsAccepted: true });
             const token = reg.body.token;
             const res = await request(app)
                 .get('/api/auth/me')

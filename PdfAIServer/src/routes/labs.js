@@ -25,6 +25,16 @@ router.get('/history', async (req, res) => {
     }
 });
 
+router.delete('/history', async (req, res) => {
+    try {
+        const result = await LabHistory.deleteMany({ user: req.user._id });
+        return res.json({ success: true, deletedCount: result.deletedCount });
+    } catch (e) {
+        console.error('LABS/HISTORY DELETE ALL ERR:', e?.message || e);
+        return res.status(500).json({ message: 'Geçmiş silinemedi', detail: e?.message });
+    }
+});
+
 router.get('/history/:id', async (req, res) => {
     try {
         const doc = await LabHistory.findOne({

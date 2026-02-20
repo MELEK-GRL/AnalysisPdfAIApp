@@ -12,6 +12,7 @@ import { getProfile } from '../server/api/User';
 import { fontSize } from '../constants/typography';
 import { iconSize } from '../constants/icons';
 import { AUTH_TOKEN, CONSENT_GIVEN_ONCE, LANGUAGE_SPLASH_SEEN } from '../constants/storageKeys';
+import { useAuthStore } from '../store/useAuthStore';
 import colors from '../theme/colors';
 
 import Home from '../screens/Home';
@@ -119,6 +120,7 @@ const AppNavigator = () => {
     const [hasSeenLanguageSplash, setHasSeenLanguageSplash] = useState(false);
     const [hasConsentOnce, setHasConsentOnce] = useState(false);
     const [hasToken, setHasToken] = useState(false);
+    const storeToken = useAuthStore((s) => s.token);
     const analysisLoading = useAnalysisLoadingStore((s) => s.loading);
 
     useEffect(() => {
@@ -139,7 +141,8 @@ const AppNavigator = () => {
                         await getProfile();
                         setHasToken(true);
                     } catch {
-                        await AsyncStorage.removeItem(AUTH_TOKEN);
+                        const { logout: doLogout } = useAuthStore.getState();
+                        await doLogout();
                         setHasToken(false);
                     }
                 }
@@ -152,13 +155,16 @@ const AppNavigator = () => {
     if (!ready) {
         return <Loader />;
     }
-    const initialRouteName: keyof RootStackParamList = !hasSeenLanguageSplash
-        ? 'LanguageSplash'
-        : hasConsentOnce
-          ? hasToken
-              ? 'MainTabs'
-              : 'Login'
-          : 'InfoSplash';
+    const initialRouteName: keyof RootStackParamList =
+        storeToken == null
+            ? 'Login'
+            : !hasSeenLanguageSplash
+              ? 'LanguageSplash'
+              : hasConsentOnce
+                ? hasToken
+                    ? 'MainTabs'
+                    : 'Login'
+                : 'InfoSplash';
 
     const linking = {
         prefixes: ['pdfai://'],
@@ -175,6 +181,7 @@ const AppNavigator = () => {
         <>
             <NavigationContainer linking={linking}>
                 <Stack.Navigator
+                    key={storeToken ?? 'logged-out'}
                     initialRouteName={initialRouteName}
                     screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="LanguageSplash" component={LanguageSplash} />

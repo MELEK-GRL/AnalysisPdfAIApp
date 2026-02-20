@@ -1,6 +1,10 @@
+import { PRIVACY_POLICY_URL as ENV_PRIVACY_URL } from '@env';
+
 /**
  * Play Store gereksinimi: Gizlilik politikası URL zorunludur.
- * mock/PRIVACY_POLICY.md içeriğini GitHub Pages, Notion veya hosting'e yükleyip buraya yazın.
- * Örnek: https://username.github.io/pdf-ai-app/privacy
+ * .env / env-examples içinde PRIVACY_POLICY_URL tanımlayın (GitHub Pages veya hosting).
+ * Canlı build öncesi mutlaka gerçek URL set edilmeli.
  */
-export const PRIVACY_POLICY_URL = 'https://example.com/privacy';
+export const PRIVACY_POLICY_URL = ENV_PRIVACY_URL && ENV_PRIVACY_URL.trim() !== ''
+    ? ENV_PRIVACY_URL.trim()
+    : 'https://example.com/privacy';

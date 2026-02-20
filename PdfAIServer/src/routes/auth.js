@@ -4,6 +4,11 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const User = require('../models/user');
 const PasswordReset = require('../models/passwordReset');
+const LabHistory = require('../models/LabHistory');
+const LatestLabResult = require('../models/LatestLabResult');
+const DeviceSession = require('../models/DeviceSession');
+const Consent = require('../models/Consent');
+const AppAnalytics = require('../models/AppAnalytics');
 const requireAuth = require('../middleware/requireAuth');
 const { sendPasswordResetEmail } = require('../services/mail');
 const { JWT_EXPIRES_IN, BCRYPT_ROUNDS } = require('../constants');
@@ -177,6 +182,26 @@ router.post('/session', requireAuth, async (req, res) => {
     } catch (e) {
         console.error('SESSION ERR:', e?.message || e);
         return res.status(500).json({ message: 'Session failed' });
+    }
+});
+
+/** Kullanıcı kendi hesabını siler. İlişkili veriler (lab, session, consent, analytics) silinir. */
+router.delete('/account', requireAuth, async (req, res) => {
+    try {
+        const userId = req.user._id;
+        await Promise.all([
+            LabHistory.deleteMany({ user: userId }),
+            LatestLabResult.deleteMany({ user: userId }),
+            DeviceSession.deleteMany({ user: userId }),
+            Consent.updateMany({ user: userId }, { $set: { user: null } }),
+            AppAnalytics.updateMany({ user: userId }, { $set: { user: null } }),
+            PasswordReset.deleteMany({ email: req.user.email }),
+        ]);
+        await User.deleteOne({ _id: userId });
+        return res.json({ success: true, message: 'Account deleted' });
+    } catch (e) {
+        console.error('DELETE ACCOUNT ERR:', e?.message || e);
+        return res.status(500).json({ message: 'Account deletion failed' });
     }
 });
 

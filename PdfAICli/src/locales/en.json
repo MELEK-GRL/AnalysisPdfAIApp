@@ -17,12 +17,19 @@
   },
   "settings": {
     "title": "Settings",
+    "userName": "Username",
     "language": "Language",
     "languageSub": "Turkish / English",
     "langTr": "Turkish",
     "langEn": "English",
     "logout": "Logout",
-    "privacyPolicy": "Privacy Policy"
+    "privacyPolicy": "Privacy Policy",
+    "dangerZone": "Danger Zone",
+    "deleteAccount": "Delete my account",
+    "deleteAccountConfirmTitle": "Account will be deleted",
+    "deleteAccountConfirmMessage": "Your account will be permanently deleted. This action cannot be undone. Do you confirm?",
+    "deleteAccountConfirm": "Delete",
+    "deleteAccountError": "Could not delete account. Please try again."
   },
   "logout": {
     "title": "Do you want to sign out?",
@@ -89,8 +96,12 @@
     "warnPasswordLength": "Password must be at least 6 characters.",
     "warnPasswordMatch": "Passwords do not match.",
     "warnTerms": "You must accept the user agreement to continue.",
+    "warnOpenConsent": "You must accept the explicit consent text to continue.",
     "termsCheckbox": "I have read and accept the agreement.",
     "viewTerms": "User agreement",
+    "openConsentCheckbox": "I have read and accept the explicit consent text.",
+    "viewOpenConsent": "Explicit consent text",
+    "openConsentTitle": "Explicit Consent",
     "successTitle": "Success",
     "success": "Registration completed.",
     "error": "Registration failed. Please try again.",
@@ -140,6 +151,8 @@
     "fetchErrorServer": "Server error occurred. Please try again later.",
     "detailError": "Could not load detail.",
     "deleteConfirmMessage": "Are you sure you want to delete?",
+    "deleteAllButton": "Delete All",
+    "deleteAllConfirm": "Are you sure you want to delete all?",
     "searchPlaceholder": "Search"
   },
   "tabs": {

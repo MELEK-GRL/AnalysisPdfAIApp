@@ -19,6 +19,19 @@ console.log('BOOT', {
 
 const PORT = Number(process.env.PORT || DEFAULT_PORT);
 const MONGODB_URI = process.env.MONGODB_URI;
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Production'da zorunlu env kontrolleri
+if (isProduction) {
+    if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 16) {
+        console.error('❌ Production için JWT_SECRET zorunludur (en az 16 karakter).');
+        process.exit(1);
+    }
+    if (!MONGODB_URI) {
+        console.error('❌ Production için MONGODB_URI zorunludur.');
+        process.exit(1);
+    }
+}
 
 (async function start() {
     if (!MONGODB_URI) {

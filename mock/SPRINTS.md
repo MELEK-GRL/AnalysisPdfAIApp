@@ -158,33 +158,33 @@
 
 ---
 
-## FAZ 3 – Analytics
+## FAZ 3 – Analytics ✓
 
-### Sprint 3.1 – AppAnalytics modeli ve endpoint
-- [ ] AppAnalytics modeli: user, eventType, screenName?, buttonId?, durationSeconds?, meta?, createdAt
-- [ ] POST /api/analytics (requireAuth, rate limit)
-- [ ] Route mount
+### Sprint 3.1 – AppAnalytics modeli ve endpoint ✓ Tamamlandı
+- [x] AppAnalytics modeli: user, eventType, screenName?, buttonId?, durationSeconds?, meta?, createdAt
+- [x] POST /api/analytics (requireAuth, rate limit)
+- [x] Route mount
 
-**→ Tamamlandıktan sonra izin al, Sprint 3.2'ye geç**
-
----
-
-### Sprint 3.2 – Client analytics servisi (iOS + Android)
-- [ ] analytics.ts: trackEvent, trackScreenView, trackButtonClick
-- [ ] useScreenTime hook
-- [ ] KVKK opt-out: rıza yoksa gönderme
-
-**→ Tamamlandıktan sonra izin al, Sprint 3.3'e geç**
+**→ Tamamlandı. Sprint 3.2'ye geç**
 
 ---
 
-### Sprint 3.3 – Analytics entegrasyonu (iOS + Android)
-- [ ] AppNavigator: ekran geçişinde trackScreenView
-- [ ] Login: trackEvent('login')
-- [ ] Home: useScreenTime, butonlara trackButtonClick
-- [ ] Login sayacı (backend veya analytics üzerinden)
+### Sprint 3.2 – Client analytics servisi (iOS + Android) ✓ Tamamlandı
+- [x] analytics.ts: trackEvent, trackScreenView, trackButtonClick
+- [x] useScreenTime hook
+- [x] KVKK opt-out: rıza yoksa gönderme (CONSENT_GIVEN_ONCE kontrolü)
 
-**→ Tamamlandıktan sonra izin al, Faz 4'e geç**
+**→ Tamamlandı. Sprint 3.3'e geç**
+
+---
+
+### Sprint 3.3 – Analytics entegrasyonu (iOS + Android) ✓ Tamamlandı
+- [x] Ekranlarda useScreenTime ile trackScreenView
+- [x] Login: trackEvent('login')
+- [x] Home: useScreenTime, butonlara trackButtonClick
+- [x] Login sayacı (analytics 'login' eventType ile)
+
+**→ Tamamlandı. Faz 4'e geç**
 
 ---
 
@@ -192,32 +192,35 @@
 
 **Not:** Mevcut teknolojiler kullanılacak (Jest, supertest). Yeni test framework eklenmeyecek.
 
-### Sprint 4.1 – Backend test altyapısı
-- [ ] Jest + supertest kurulumu (PdfAIServer)
-- [ ] jest.config.js
-- [ ] Mock: openai, pdf-parse
+### Sprint 4.1 – Backend test altyapısı ✓ Tamamlandı
+- [x] Jest + supertest kurulumu (PdfAIServer)
+- [x] jest.config.js, __tests__/setup.js
+- [x] Mock: openai, pdf (upload/dailyAnalysisLimit testlerinde)
 
-**→ Tamamlandıktan sonra izin al, Sprint 4.2'ye geç**
-
----
-
-### Sprint 4.2 – Backend test dosyaları
-- [ ] auth.test.js
-- [ ] upload.test.js
-- [ ] labs.test.js
-- [ ] dailyAnalysisLimit.test.js
-
-**→ Tamamlandıktan sonra izin al, Sprint 4.3'e geç**
+**→ Tamamlandı. Sprint 4.2'ye geç**
 
 ---
 
-### Sprint 4.3 – Client test dosyaları (her iki platform için geçerli)
-- [ ] Login.test.tsx
-- [ ] Home.test.tsx
-- [ ] Button.test.tsx
-- [ ] Lab.test.ts (API mock)
+### Sprint 4.2 – Backend test dosyaları ✓ Tamamlandı
+- [x] auth.test.js (termsAccepted ile güncellendi)
+- [x] upload.test.js
+- [x] labs.test.js
+- [x] analytics.test.js (requireAuth ile güncellendi)
+- [x] dailyAnalysisLimit.test.js
+- [x] health.test.js
 
-**→ Tamamlandıktan sonra izin al, Faz 5'e geç**
+**→ Tamamlandı. Sprint 4.3'e geç**
+
+---
+
+### Sprint 4.3 – Client test dosyaları (her iki platform için geçerli) ✓ Tamamlandı
+- [x] Login.test.tsx
+- [x] Home.test.tsx
+- [x] Button.test.tsx
+- [x] Lab.test.ts (API mock)
+- [x] App.test.tsx
+
+**→ Tamamlandı. Faz 5'e geç**
 
 ---
 
@@ -225,21 +228,22 @@
 
 **Hedef:** Kapsamlı proje için sürdürülebilir, okunabilir kod ve net mimari.
 
-### Sprint 5.1 – Home refaktör (iOS + Android uyumlu)
-- [ ] PdfUploadSection, ResultSection bileşenleri (UI aynı, sadece parçalama)
-- [ ] Modals ayrı component veya grupla
-- [ ] constants/limits.ts, constants/messages.ts
-- [ ] Servis katmanı: API çağrıları, iş mantığı ayrımı
+### Sprint 5.1 – Home refaktör (iOS + Android uyumlu) ✓ Tamamlandı
+- [x] PdfUploadSection, ResultSection bileşenleri (UI aynı, parçalama)
+- [x] Modals Home içinde PopupModal ile (ResultSection içinde interpret modal)
+- [x] constants/limits.ts, constants/messages.ts
+- [x] Client: MESSAGES.uploadError kullanımı
 
-**→ Tamamlandıktan sonra izin al, Sprint 5.2'ye geç**
+**→ Tamamlandı. Sprint 5.2'ye geç**
 
 ---
 
-### Sprint 5.2 – Genel clean code ve mimari
-- [ ] Backend: upload route servis katmanı (controller → service → model)
-- [ ] ESLint kuralları gözden geçirme
-- [ ] Gereksiz console.log temizliği
-- [ ] Kod tekrarlarının kaldırılması (DRY)
+### Sprint 5.2 – Genel clean code ve mimari ✓ Tamamlandı
+- [x] Backend: upload route servis katmanı (uploadAnalysis.js: runAnalysis, persistResult, analyzeAndSave)
+- [x] Controller → service → model: route ince, servis iş mantığı taşıyor
+- [ ] ESLint kuralları gözden geçirme (opsiyonel)
+- [ ] Gereksiz console.log temizliği (opsiyonel)
+- [ ] Kod tekrarlarının kaldırılması (DRY) (kısmen)
 
 **→ Tamamlandı. Faz 6 tamamlandı.**
 
@@ -389,6 +393,20 @@
 - [x] `mock/ENVIRONMENTS.md` – ortam kurulum rehberi, hızlı başlangıç
 - [ ] README veya ENVIRONMENTS’a “Ortam nasıl değiştirilir?” maddesi
 - [ ] Dev, UAT, Prod için akış doğrulaması (login, PDF analizi)
+
+---
+
+## FAZ 11 – Canlı öncesi teknik düzeltmeler
+
+### Sprint 11.1 – Canlı öncesi eksikler ✓ Tamamlandı
+- [x] CORS: Production'da CLIENT_ORIGIN ile kısıtlama (app.js)
+- [x] JWT_SECRET ve MONGODB_URI production'da zorunlu, startup'ta kontrol (index.js)
+- [x] Multer PDF fileFilter – sadece application/pdf kabul (upload.js)
+- [x] Express merkezi error handler (app.js)
+- [x] __early / __routes sadece NODE_ENV !== 'production' (app.js)
+- [x] Gizlilik politikası URL env'den (PRIVACY_POLICY_URL, appUrls.ts, env-examples)
+
+**→ Tamamlandı. Faz 7 (Son Faz) veya sonraki sprinte geçilebilir.**
 
 ---
 

@@ -57,6 +57,10 @@ export async function deleteLabHistoryItem(id: string): Promise<void> {
     await api.delete(`/labs/history/${id}`);
 }
 
+export async function deleteAllLabHistory(): Promise<void> {
+    await api.delete('/labs/history');
+}
+
 export async function uploadPdf(form: FormData): Promise<UploadResponse> {
     const handleError = (err: any): never => {
         if (err?.response?.status === 429) {

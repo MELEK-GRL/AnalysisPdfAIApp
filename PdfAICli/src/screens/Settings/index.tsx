@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useNavigation, CommonActions } from '@react-navigation/native';
+import { useNavigation, CommonActions, useFocusEffect } from '@react-navigation/native';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useSessionStore } from '../../store/useSessionStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../../components/Text/T';
@@ -12,13 +13,22 @@ import { iconSize } from '../../constants/icons';
 import PopupModal from '../../components/Modals/PopupModal';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
+import { deleteAccount } from '../../server/api/User';
 
 const Settings: React.FC = () => {
     const nav = useNavigation<any>();
     useScreenTime('Settings');
+    useFocusEffect(
+        useCallback(() => {
+            useSessionStore.getState().touch();
+        }, []),
+    );
     const { locale, setLocale, t } = useLocaleStore();
+    const user = useAuthStore(s => s.user);
     const logout = useAuthStore(s => s.logout);
     const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+    const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
+    const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
     const { w1px, h1px, fs1px } = useResponsive();
 
     const styles = useMemo(
@@ -51,19 +61,6 @@ const Settings: React.FC = () => {
                 },
                 headerCenter: {
                     flex: 1,
-                },
-                logoutBtn: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 8 * w1px,
-                },
-                logoutIconWrap: {
-                    width: 34 * w1px,
-                    height: 34 * w1px,
-                    borderRadius: 17 * w1px,
-                    backgroundColor: '#FEE2E2',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                 },
                 pageTitle: {
                     marginBottom: 20 * h1px,
@@ -107,6 +104,53 @@ const Settings: React.FC = () => {
                     borderRadius: 6,
                     backgroundColor: colors.backgroundPurple,
                 },
+                userCard: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#fff',
+                    borderRadius: 16 * w1px,
+                    paddingVertical: 18 * h1px,
+                    paddingHorizontal: 18 * w1px,
+                    marginBottom: 24 * h1px,
+                    borderWidth: 1,
+                    borderColor: 'rgba(116, 83, 224, 0.15)',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.04,
+                    shadowRadius: 6,
+                    elevation: 2,
+                },
+                userAvatarWrap: {
+                    width: 48 * w1px,
+                    height: 48 * w1px,
+                    borderRadius: 24 * w1px,
+                    backgroundColor: colors.backgroundPurpleSoft,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 14 * w1px,
+                },
+                userInfo: { flex: 1 },
+                userLabel: { marginBottom: 2 * h1px },
+                deleteRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: '#fff',
+                    borderRadius: 12 * w1px,
+                    paddingVertical: 16 * h1px,
+                    paddingHorizontal: 16 * w1px,
+                    marginBottom: 10 * w1px,
+                    borderWidth: 1,
+                    borderColor: '#E5E7EB',
+                    gap: 12 * w1px,
+                },
+                deleteIconWrap: {
+                    width: 34 * w1px,
+                    height: 34 * w1px,
+                    borderRadius: 17 * w1px,
+                    backgroundColor: '#F5F5F5',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
             }),
         [w1px, h1px, fs1px],
     );
@@ -118,6 +162,20 @@ const Settings: React.FC = () => {
             nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
         } catch (_) {
             setLogoutModalVisible(true);
+        }
+    }, [logout, nav]);
+
+    const handleDeleteAccountConfirm = useCallback(async () => {
+        setDeleteAccountLoading(true);
+        try {
+            await deleteAccount();
+            setDeleteAccountModalVisible(false);
+            await logout();
+            nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
+        } catch (_) {
+            setDeleteAccountModalVisible(false);
+        } finally {
+            setDeleteAccountLoading(false);
         }
     }, [logout, nav]);
 
@@ -134,22 +192,26 @@ const Settings: React.FC = () => {
                     <T size={fontSize.subtitleLarge} weight="600" color="#1F2937" style={styles.headerCenter}>
                         {t('common.back')}
                     </T>
-                    <TouchableOpacity
-                        style={styles.logoutBtn}
-                        onPress={() => setLogoutModalVisible(true)}
-                        activeOpacity={0.8}>
-                        <View style={styles.logoutIconWrap}>
-                            <Ionicons name="exit-outline" size={iconSize.medium} color="#DC2626" />
-                        </View>
-                        <T size={fontSize.subtitleLarge} weight="600" color="#B91C1C">
-                            {t('settings.logout')}
-                        </T>
-                    </TouchableOpacity>
                 </View>
 
                 <T size={fontSize.titleXl} weight="700" color="#374151" style={styles.pageTitle}>
                     {t('settings.title')}
                 </T>
+                {user?.name ? (
+                    <View style={styles.userCard}>
+                        <View style={styles.userAvatarWrap}>
+                            <Ionicons name="person" size={26} color={colors.backgroundPurple} />
+                        </View>
+                        <View style={styles.userInfo}>
+                            <T size={fontSize.captionLarge} weight="500" color="#6B7280" style={styles.userLabel}>
+                                {t('settings.userName')}
+                            </T>
+                            <T size={fontSize.subtitleLarge} weight="600" color="#1F2937">
+                                {user.name}
+                            </T>
+                        </View>
+                    </View>
+                ) : null}
 
                 <View style={styles.section}>
                     <T size={fontSize.subtitle} weight="600" color="#1F2937" style={styles.sectionTitle}>
@@ -184,6 +246,36 @@ const Settings: React.FC = () => {
                         </View>
                     </TouchableOpacity>
                 </View>
+
+                <View style={styles.section}>
+                    <TouchableOpacity
+                        style={styles.deleteRow}
+                        onPress={() => setLogoutModalVisible(true)}
+                        activeOpacity={0.8}>
+                        <View style={styles.deleteIconWrap}>
+                            <Ionicons name="exit-outline" size={iconSize.medium} color="#B91C1C" />
+                        </View>
+                        <T size={fontSize.subtitle} weight="500" color="#B91C1C" style={{ flex: 1 }}>
+                            {t('settings.logout')}
+                        </T>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.deleteRow}
+                        onPress={() => setDeleteAccountModalVisible(true)}
+                        activeOpacity={0.8}
+                        disabled={deleteAccountLoading}>
+                        <View style={styles.deleteIconWrap}>
+                            <Ionicons name="trash-outline" size={iconSize.medium} color="#B91C1C" />
+                        </View>
+                        {deleteAccountLoading ? (
+                            <ActivityIndicator size="small" color="#B91C1C" style={{ flex: 1 }} />
+                        ) : (
+                            <T size={fontSize.subtitle} weight="500" color="#B91C1C" style={{ flex: 1 }}>
+                                {t('settings.deleteAccount')}
+                            </T>
+                        )}
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <PopupModal
@@ -194,6 +286,16 @@ const Settings: React.FC = () => {
                 rightButtonText={t('logout.confirm')}
                 onLeftPress={() => setLogoutModalVisible(false)}
                 onRightPress={handleLogoutConfirm}
+            />
+            <PopupModal
+                visible={deleteAccountModalVisible}
+                title={t('settings.deleteAccountConfirmTitle')}
+                message={t('settings.deleteAccountConfirmMessage')}
+                type="warning"
+                leftButtonText={t('common.cancel')}
+                rightButtonText={t('settings.deleteAccountConfirm')}
+                onLeftPress={() => setDeleteAccountModalVisible(false)}
+                onRightPress={handleDeleteAccountConfirm}
             />
         </GradientLayout>
     );

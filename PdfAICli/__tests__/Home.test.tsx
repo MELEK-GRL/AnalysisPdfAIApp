@@ -11,6 +11,7 @@ jest.mock('react-native-document-picker', () => ({
 }));
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: jest.fn() }),
+    useFocusEffect: jest.fn(),
 }));
 jest.mock('../src/server/api/User', () => ({
     getProfile: jest.fn().mockResolvedValue({ name: 'Test' }),
@@ -21,7 +22,7 @@ jest.mock('../src/server/api/Lab', () => ({
 jest.mock('../src/server/api/Analytics', () => ({
     trackButtonClick: jest.fn(),
 }));
-jest.mock('../src/utils/analytics/useScreenTime', () => jest.fn());
+jest.mock('../src/utils/analytics/useScreenTime', () => ({ useScreenTime: jest.fn() }));
 jest.mock('../src/store/useAuthStore', () => ({
     useAuthStore: (fn: (s: any) => any) => fn({ user: { name: 'Test' } }),
 }));

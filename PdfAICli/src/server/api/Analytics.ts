@@ -1,6 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { api } from '../apiFetcher';
 import { getInstallationId } from '../../utils/analytics/getInstallationId';
-import { Platform } from 'react-native';
+import { CONSENT_GIVEN_ONCE } from '../../constants/storageKeys';
 
 type EventType = 'screen_view' | 'button_click' | 'login' | 'event';
 
@@ -14,8 +16,11 @@ type AnalyticsPayload = {
     platform?: string;
 };
 
+/** KVKK: Rıza yoksa analytics gönderilmez. */
 async function sendEvent(payload: AnalyticsPayload): Promise<void> {
     try {
+        const consent = await AsyncStorage.getItem(CONSENT_GIVEN_ONCE);
+        if (consent !== '1') return;
         const installationId = await getInstallationId();
         await api.post('/analytics', {
             ...payload,

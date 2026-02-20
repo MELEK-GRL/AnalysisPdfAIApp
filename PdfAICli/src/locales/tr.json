@@ -17,12 +17,19 @@
   },
   "settings": {
     "title": "Ayarlar",
+    "userName": "Kullanıcı adı",
     "language": "Dil",
     "languageSub": "Türkçe / English",
     "langTr": "Türkçe",
     "langEn": "English",
     "logout": "Çıkış Yap",
-    "privacyPolicy": "Gizlilik Politikası"
+    "privacyPolicy": "Gizlilik Politikası",
+    "dangerZone": "Tehlikeli Bölge",
+    "deleteAccount": "Hesabımı sil",
+    "deleteAccountConfirmTitle": "Hesap silinecek",
+    "deleteAccountConfirmMessage": "Hesabınız kalıcı olarak silinecektir. Bu işlem geri alınamaz. Onaylıyor musunuz?",
+    "deleteAccountConfirm": "Sil",
+    "deleteAccountError": "Hesap silinemedi. Lütfen tekrar deneyin."
   },
   "logout": {
     "title": "Oturumu kapatmak istiyor musun?",
@@ -89,8 +96,12 @@
     "warnPasswordLength": "Şifre en az 6 karakter olmalıdır.",
     "warnPasswordMatch": "Şifreler eşleşmiyor.",
     "warnTerms": "Devam etmek için kullanıcı sözleşmesini kabul etmelisiniz.",
+    "warnOpenConsent": "Devam etmek için açık rıza metnini kabul etmelisiniz.",
     "termsCheckbox": "Sözleşmeyi okudum ve kabul ediyorum.",
     "viewTerms": "Kullanıcı sözleşmesi",
+    "openConsentCheckbox": "Açık rıza metnini okudum ve kabul ediyorum.",
+    "viewOpenConsent": "Açık rıza metni",
+    "openConsentTitle": "Açık Rıza Metni",
     "successTitle": "Başarılı",
     "success": "Kayıt tamamlandı.",
     "error": "Kayıt başarısız. Lütfen tekrar deneyin.",
@@ -140,6 +151,8 @@
     "fetchErrorServer": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.",
     "detailError": "Detay alınamadı.",
     "deleteConfirmMessage": "Silmek istediğinize emin misiniz?",
+    "deleteAllButton": "Tümünü Sil",
+    "deleteAllConfirm": "Tümünü silmek istediğine emin misin?",
     "searchPlaceholder": "Arama"
   },
   "tabs": {

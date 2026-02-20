@@ -12,8 +12,9 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
-import { getLabHistory, getLabHistoryItem, deleteLabHistoryItem, LabHistoryItem, LabHistoryDetail } from '../../server/api/Lab';
+import { getLabHistory, getLabHistoryItem, deleteLabHistoryItem, deleteAllLabHistory, LabHistoryItem, LabHistoryDetail } from '../../server/api/Lab';
 import { useT, useLocaleStore } from '../../store/useLocaleStore';
+import { useSessionStore } from '../../store/useSessionStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
@@ -43,6 +44,7 @@ const History: React.FC = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [errorSource, setErrorSource] = useState<'fetch' | 'detail'>('fetch');
     const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+    const [deleteAllConfirmVisible, setDeleteAllConfirmVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const t = useT();
     const locale = useLocaleStore((s) => s.locale);
@@ -79,6 +81,7 @@ const History: React.FC = () => {
 
     useFocusEffect(
         useCallback(() => {
+            useSessionStore.getState().touch();
             fetchHistory();
         }, [fetchHistory]),
     );
@@ -211,6 +214,20 @@ const History: React.FC = () => {
                     color: '#111827',
                     paddingVertical: 0,
                 },
+                deleteAllRow: {
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    marginHorizontal: 8 * w1px,
+                    marginBottom: 12 * h1px,
+                },
+                deleteAllButton: {
+                    backgroundColor: colors.white,
+                    borderWidth: 1.5,
+                    borderColor: colors.backgroundPurple,
+                    borderRadius: 10 * w1px,
+                    paddingVertical: 10 * h1px,
+                    paddingHorizontal: 16 * w1px,
+                },
             }),
         [w1px, h1px, fs1px],
     );
@@ -250,21 +267,33 @@ const History: React.FC = () => {
             <PageLayout paddingHorizontal={10}>
                 <TitleHeader title={t('tabs.history')} />
                 {!loading && items.length > 0 ? (
-                    <View style={styles.searchWrap}>
-                        <Ionicons
-                            name="search"
-                            size={20}
-                            color={colors.backgroundPurple}
-                            style={styles.searchIcon}
-                        />
-                        <TextInput
-                            style={styles.searchInput}
-                            placeholder={t('history.searchPlaceholder')}
-                            placeholderTextColor="#9CA3AF"
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                        />
-                    </View>
+                    <>
+                        <View style={styles.searchWrap}>
+                            <Ionicons
+                                name="search"
+                                size={20}
+                                color={colors.backgroundPurple}
+                                style={styles.searchIcon}
+                            />
+                            <TextInput
+                                style={styles.searchInput}
+                                placeholder={t('history.searchPlaceholder')}
+                                placeholderTextColor="#9CA3AF"
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                            />
+                        </View>
+                        <View style={styles.deleteAllRow}>
+                            <TouchableOpacity
+                                style={styles.deleteAllButton}
+                                onPress={() => setDeleteAllConfirmVisible(true)}
+                                activeOpacity={0.7}>
+                                <T size={fontSize.body} weight="600" color={colors.backgroundPurple}>
+                                    {t('history.deleteAllButton')}
+                                </T>
+                            </TouchableOpacity>
+                        </View>
+                    </>
                 ) : null}
                 <View style={styles.scrollView}>
                     {loading ? (
@@ -377,6 +406,29 @@ const History: React.FC = () => {
                             setErrorSource('fetch');
                             setErrorVisible(true);
                         }
+                    }
+                }}
+            />
+
+            <PopupModal
+                visible={deleteAllConfirmVisible}
+                title={t('common.warning')}
+                message={t('history.deleteAllConfirm')}
+                type="warning"
+                leftButtonText={t('common.cancel')}
+                rightButtonText={t('common.delete')}
+                onLeftPress={() => setDeleteAllConfirmVisible(false)}
+                onRightPress={async () => {
+                    setDeleteAllConfirmVisible(false);
+                    try {
+                        await deleteAllLabHistory();
+                        setItems([]);
+                        setDetailModal(false);
+                        setSelectedDetail(null);
+                    } catch (err) {
+                        setErrorMessage(t('history.fetchErrorServer'));
+                        setErrorSource('fetch');
+                        setErrorVisible(true);
                     }
                 }}
             />

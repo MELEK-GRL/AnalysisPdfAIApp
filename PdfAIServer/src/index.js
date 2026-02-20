@@ -33,20 +33,23 @@ if (isProduction) {
     }
 }
 
-(async function start() {
-    if (!MONGODB_URI) {
-        console.warn('⚠️  MONGODB_URI yok, Mongo atlanıyor.');
-        app.listen(PORT, () => console.log(`🚀 Server listening on port ${PORT} (no Mongo)`));
-        return;
-    }
+// Önce dinlemeye başla (Railway/Docker için 0.0.0.0; istekler hemen yanıtlanabilsin)
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server listening on port ${PORT}`);
+});
 
-    try {
-        mongoose.set('strictQuery', true);
-        await mongoose.connect(MONGODB_URI, { dbName: process.env.DB_NAME || DEFAULT_DB_NAME });
-        console.log('✅ MongoDB connected');
-        app.listen(PORT, () => console.log(`🚀 Server listening on port ${PORT}`));
-    } catch (err) {
-        console.error('❌ Mongo error:', err?.message || err);
-        process.exit(1);
-    }
-})();
+// MongoDB'yi arka planda bağla (başarısız olsa bile sunucu ayakta kalır)
+if (MONGODB_URI) {
+    (async function connectMongo() {
+        try {
+            mongoose.set('strictQuery', true);
+            await mongoose.connect(MONGODB_URI, { dbName: process.env.DB_NAME || DEFAULT_DB_NAME });
+            console.log('✅ MongoDB connected');
+        } catch (err) {
+            console.error('❌ Mongo error:', err?.message || err);
+            // process.exit(1) yok – sunucu çalışmaya devam eder; /health ve /privacy yanıt verir
+        }
+    })();
+} else {
+    console.warn('⚠️  MONGODB_URI yok, Mongo atlanıyor.');
+}

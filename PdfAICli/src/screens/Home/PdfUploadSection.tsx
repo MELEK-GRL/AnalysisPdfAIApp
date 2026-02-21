@@ -105,7 +105,7 @@ const PdfUploadSection: React.FC<PdfUploadSectionProps> = ({
                         <Ionicons name="cloud-upload" size={iconSize.xxl} color={colors.backgroundPurple} />
                     </View>
                     <View style={styles.uploadTextWrap}>
-                        <T size={fontSize.subtitle} weight="700" color="#111827" style={{ marginBottom: 4 }}>
+                        <T size={fontSize.subtitle} weight="700" color="#111827" style={{ marginBottom: 2 }}>
                             {t('home.uploadPdf')}
                         </T>
                         <T size={fontSize.bodySmall} color="#9CA3AF">

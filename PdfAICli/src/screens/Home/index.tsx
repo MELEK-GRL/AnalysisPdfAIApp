@@ -143,18 +143,18 @@ const Home: React.FC = () => {
                     borderWidth: 2,
                     borderColor: '#E5E7EB',
                     borderStyle: 'dashed',
-                    paddingVertical: 24 * h1px,
+                    paddingVertical: 14 * h1px,
                     paddingHorizontal: 20 * w1px,
-                    marginTop: h1px * 16,
+                    marginTop: h1px * 8,
                 },
                 uploadCardTop: {
                     alignSelf: 'center',
-                    marginBottom: 16 * h1px,
+                    marginBottom: 8 * h1px,
                 },
                 uploadCardContent: {
                     flexDirection: 'row',
                     alignItems: 'center',
-                    gap: 16 * w1px,
+                    gap: 10 * w1px,
                 },
                 uploadIconWrap: {
                     width: 56 * w1px,

@@ -16,7 +16,8 @@ const TitleHeader: React.FC<Props> = ({ title }) => {
         () =>
             StyleSheet.create({
                 wrap: {
-                    paddingVertical: 16 * h1px,
+                    paddingTop: 10 * h1px,
+                    paddingBottom: 6 * h1px,
                     paddingHorizontal: 0,
                 },
                 title: {

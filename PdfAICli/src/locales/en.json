@@ -35,7 +35,7 @@
   },
   "logout": {
     "title": "Do you want to sign out?",
-    "confirm": "Yes, Sign Out",
+    "confirm": "Sign out",
     "cancel": "Cancel",
     "error": "Could not sign out."
   },
@@ -49,7 +49,8 @@
     "forgotPassword": "Forgot password",
     "warnEmpty": "Please enter email/username and password.",
     "errorTitle": "Sign In Error",
-    "serverError": "Sign in is temporarily unavailable. Please try again later."
+    "serverError": "Sign in is temporarily unavailable. Please try again later.",
+    "invalidCredentials": "Email/username or password is incorrect. Please check and try again."
   },
   "forgotPassword": {
     "title": "Forgot Password",

@@ -35,7 +35,7 @@
   },
   "logout": {
     "title": "Oturumu kapatmak istiyor musun?",
-    "confirm": "Evet, Çıkış Yap",
+    "confirm": "Çıkış yap",
     "cancel": "Vazgeç",
     "error": "Çıkış yapılamadı."
   },
@@ -49,7 +49,8 @@
     "forgotPassword": "Şifremi unuttum",
     "warnEmpty": "Lütfen e-posta/kullanıcı adı ve şifreyi girin.",
     "errorTitle": "Giriş Hatası",
-    "serverError": "Giriş işlemi şu an yapılamıyor. Lütfen daha sonra tekrar deneyin."
+    "serverError": "Giriş işlemi şu an yapılamıyor. Lütfen daha sonra tekrar deneyin.",
+    "invalidCredentials": "E-posta veya kullanıcı adı ile şifre hatalı. Lütfen kontrol edip tekrar deneyin."
   },
   "forgotPassword": {
     "title": "Şifremi Unuttum",

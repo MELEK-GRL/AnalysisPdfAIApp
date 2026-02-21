@@ -130,11 +130,15 @@ const Login: React.FC = () => {
             nav.replace('MainTabs');
         } catch (e: any) {
             const rawMessage = e?.message || '';
-            const message = isNetworkError(e)
-                ? t('common.networkError')
-                : rawMessage === 'Login failed' || e?.response?.status === 500
-                  ? t('login.serverError')
-                  : rawMessage || t('common.genericError');
+            const status = e?.response?.status;
+            const message =
+                rawMessage === 'Invalid credentials' || status === 401
+                    ? t('login.invalidCredentials')
+                    : isNetworkError(e)
+                      ? t('common.networkError')
+                      : rawMessage === 'Login failed' || status === 500
+                        ? t('login.serverError')
+                        : rawMessage || t('common.genericError');
             setModal({
                 visible: true,
                 title: t('login.errorTitle'),

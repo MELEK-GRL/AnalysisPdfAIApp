@@ -27,11 +27,19 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             backgroundColor: colors.backgroundPurpleDark,
-            height: h1px * 100,
+            height: h1px * 110,
             borderBottomRightRadius: fs1px * 14,
             borderBottomLeftRadius: fs1px * 14,
         },
+        headerView:{
+            marginTop:h1px*18,
+            flex:1,
+            alignItems:'center',
+            justifyContent:'center',
+            flexDirection:'row'
+        },
         headerTitle: {
+           
             flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
@@ -51,7 +59,8 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
 
     return (
         <View style={styles.header}>
-            <View style={styles.headerTitle}>
+   <View style={styles.headerView}>
+   <View style={styles.headerTitle}>
                 <T size={fontSize.titleLarge} weight="700" color={colors.textWhite}>
                     {t('header.welcome')},
                 </T>
@@ -72,6 +81,7 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
                     style={styles.settingsView}
                 />
             </TouchableOpacity>
+   </View>
         </View>
     );
 };

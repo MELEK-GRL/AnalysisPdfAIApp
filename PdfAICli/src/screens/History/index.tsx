@@ -20,7 +20,7 @@ import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
 import { getToken } from '../../server/apiFetcher';
 import Header from '../../components/Header/Header';
-import TitleHeader from '../../components/TitleHeader/TitleHeader';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import PageLayout from '../../components/Layout/PageLayout';
 import T from '../../components/Text/T';
 import colors from '../../theme/colors';
@@ -195,7 +195,6 @@ const History: React.FC = () => {
                     height: 48 * h1px,
                     backgroundColor: colors.white,
                     borderRadius: 14 * w1px,
-                    marginHorizontal: 8 * w1px,
                     marginBottom: 14 * h1px,
                     paddingHorizontal: 16 * w1px,
                     borderWidth: 1,
@@ -219,7 +218,6 @@ const History: React.FC = () => {
                 deleteAllRow: {
                     flexDirection: 'row',
                     justifyContent: 'flex-end',
-                    marginHorizontal: 8 * w1px,
                     marginBottom: 12 * h1px,
                 },
                 deleteAllButton: {
@@ -266,8 +264,8 @@ const History: React.FC = () => {
     return (
         <View style={styles.contentView}>
             <Header title={displayName} />
-            <PageLayout paddingHorizontal={10}>
-                <TitleHeader title={t('tabs.history')} />
+            <PageLayout>
+                <PageHeader title={t('tabs.history')} />
                 {!loading && items.length > 0 ? (
                     <>
                         <View style={styles.searchWrap}>

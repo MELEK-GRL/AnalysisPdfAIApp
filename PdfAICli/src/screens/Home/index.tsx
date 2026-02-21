@@ -22,7 +22,7 @@ import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
 import Header from '../../components/Header/Header';
-import TitleHeader from '../../components/TitleHeader/TitleHeader';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import { MESSAGES } from '../../constants/messages';
 import { useSessionStore } from '../../store/useSessionStore';
 import PdfUploadSection from './PdfUploadSection';
@@ -280,7 +280,7 @@ const Home: React.FC = () => {
         <View style={styles.contentView}>
             <Header title={displayName} />
             <PageLayout>
-                <TitleHeader title={t('tabs.analysis')} />
+                <PageHeader title={t('tabs.analysis')} />
                 <ScrollView
                     style={styles.scrollView}
                     contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}

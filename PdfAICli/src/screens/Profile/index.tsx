@@ -8,7 +8,7 @@ import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useT } from '../../store/useLocaleStore';
 import { useResponsive } from '../../utils/deviceStore/device';
 import Header from '../../components/Header/Header';
-import TitleHeader from '../../components/TitleHeader/TitleHeader';
+import PageHeader from '../../components/PageHeader/PageHeader';
 import PageLayout from '../../components/Layout/PageLayout';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import PopupModal from '../../components/Modals/PopupModal';
@@ -117,7 +117,7 @@ const Profile: React.FC = () => {
             <View style={styles.contentView}>
                 <Header title={displayName} />
                 <PageLayout>
-                    <TitleHeader title={t('tabs.profile')} />
+                    <PageHeader title={t('tabs.profile')} />
                     {(user?.name ?? user?.email) ? (
                         <View style={styles.userCard}>
                             <View style={styles.userAvatarWrap}>

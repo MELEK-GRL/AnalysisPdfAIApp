@@ -15,7 +15,9 @@ import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { deleteAccount } from '../../server/api/User';
 
-const Settings: React.FC = () => {
+type SettingsProps = { showBackButton?: boolean };
+
+const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
     const nav = useNavigation<any>();
     useScreenTime('Settings');
     useFocusEffect(
@@ -104,33 +106,6 @@ const Settings: React.FC = () => {
                     borderRadius: 6,
                     backgroundColor: colors.backgroundPurple,
                 },
-                userCard: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: '#fff',
-                    borderRadius: 16 * w1px,
-                    paddingVertical: 18 * h1px,
-                    paddingHorizontal: 18 * w1px,
-                    marginBottom: 24 * h1px,
-                    borderWidth: 1,
-                    borderColor: 'rgba(116, 83, 224, 0.15)',
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.04,
-                    shadowRadius: 6,
-                    elevation: 2,
-                },
-                userAvatarWrap: {
-                    width: 48 * w1px,
-                    height: 48 * w1px,
-                    borderRadius: 24 * w1px,
-                    backgroundColor: colors.backgroundPurpleSoft,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 14 * w1px,
-                },
-                userInfo: { flex: 1 },
-                userLabel: { marginBottom: 2 * h1px },
                 deleteRow: {
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -182,36 +157,23 @@ const Settings: React.FC = () => {
     return (
         <GradientLayout>
             <View style={styles.container}>
-                <View style={styles.headerRow}>
-                    <TouchableOpacity
-                        style={styles.backBtnWrap}
-                        onPress={() => nav.goBack()}
-                        activeOpacity={0.8}>
-                        <Ionicons name="arrow-back" size={iconSize.medium} color={colors.backgroundPurple} />
-                    </TouchableOpacity>
-                    <T size={fontSize.subtitleLarge} weight="600" color="#1F2937" style={styles.headerCenter}>
-                        {t('common.back')}
-                    </T>
-                </View>
+                {showBackButton ? (
+                    <View style={styles.headerRow}>
+                        <TouchableOpacity
+                            style={styles.backBtnWrap}
+                            onPress={() => nav.goBack()}
+                            activeOpacity={0.8}>
+                            <Ionicons name="arrow-back" size={iconSize.medium} color={colors.backgroundPurple} />
+                        </TouchableOpacity>
+                        <T size={fontSize.subtitleLarge} weight="600" color="#1F2937" style={styles.headerCenter}>
+                            {t('common.back')}
+                        </T>
+                    </View>
+                ) : null}
 
                 <T size={fontSize.titleXl} weight="700" color="#374151" style={styles.pageTitle}>
                     {t('settings.title')}
                 </T>
-                {user?.name ? (
-                    <View style={styles.userCard}>
-                        <View style={styles.userAvatarWrap}>
-                            <Ionicons name="person" size={26} color={colors.backgroundPurple} />
-                        </View>
-                        <View style={styles.userInfo}>
-                            <T size={fontSize.captionLarge} weight="500" color="#6B7280" style={styles.userLabel}>
-                                {t('settings.userName')}
-                            </T>
-                            <T size={fontSize.subtitleLarge} weight="600" color="#1F2937">
-                                {user.name}
-                            </T>
-                        </View>
-                    </View>
-                ) : null}
 
                 <View style={styles.section}>
                     <T size={fontSize.subtitle} weight="600" color="#1F2937" style={styles.sectionTitle}>

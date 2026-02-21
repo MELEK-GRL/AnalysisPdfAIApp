@@ -19,6 +19,7 @@
   "settings": {
     "title": "Ayarlar",
     "userName": "Kullanıcı adı",
+    "email": "E-posta",
     "language": "Dil",
     "languageSub": "Türkçe / English",
     "langTr": "Türkçe",
@@ -161,7 +162,8 @@
   },
   "tabs": {
     "analysis": "Analiz",
-    "history": "Geçmiş"
+    "history": "Geçmiş",
+    "profile": "Profil"
   },
   "splash": {
     "infoTitle": "Tahlil sonuçlarınızı anlamak artık kolay",

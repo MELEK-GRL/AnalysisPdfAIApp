@@ -17,6 +17,7 @@ import colors from '../theme/colors';
 
 import Home from '../screens/Home';
 import History from '../screens/History';
+import Profile from '../screens/Profile';
 import Settings from '../screens/Settings';
 import PrivacyPolicy from '../screens/PrivacyPolicy';
 import Register from '../screens/Register';
@@ -44,6 +45,8 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
+
+const ProfileTab = () => <Profile />;
 
 const MainTabs = () => {
     const t = useT();
@@ -99,6 +102,20 @@ const MainTabs = () => {
                     tabBarIcon: ({ focused, color }) => (
                         <Ionicons
                             name={focused ? 'time' : 'time-outline'}
+                            size={iconSize.large}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Profil"
+                component={ProfileTab}
+                options={{
+                    title: t('tabs.profile'),
+                    tabBarIcon: ({ focused, color }) => (
+                        <Ionicons
+                            name={focused ? 'person' : 'person-outline'}
                             size={iconSize.large}
                             color={color}
                         />

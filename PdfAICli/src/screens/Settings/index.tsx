@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions, useFocusEffect } from '@react-navigation/native';
 import { useLocaleStore } from '../../store/useLocaleStore';
@@ -13,7 +13,6 @@ import { iconSize } from '../../constants/icons';
 import PopupModal from '../../components/Modals/PopupModal';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
-import { deleteAccount } from '../../server/api/User';
 
 type SettingsProps = { showBackButton?: boolean };
 
@@ -29,8 +28,6 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
     const user = useAuthStore(s => s.user);
     const logout = useAuthStore(s => s.logout);
     const [logoutModalVisible, setLogoutModalVisible] = useState(false);
-    const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
-    const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
     const { w1px, h1px, fs1px } = useResponsive();
 
     const styles = useMemo(
@@ -39,6 +36,7 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
                 container: {
                     flex: 1,
                     padding: 20 * w1px,
+                    paddingTop: 52 * h1px,
                 },
                 headerRow: {
                     flexDirection: 'row',
@@ -140,20 +138,6 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
         }
     }, [logout, nav]);
 
-    const handleDeleteAccountConfirm = useCallback(async () => {
-        setDeleteAccountLoading(true);
-        try {
-            await deleteAccount();
-            setDeleteAccountModalVisible(false);
-            await logout();
-            nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
-        } catch (_) {
-            setDeleteAccountModalVisible(false);
-        } finally {
-            setDeleteAccountLoading(false);
-        }
-    }, [logout, nav]);
-
     return (
         <GradientLayout>
             <View style={styles.container}>
@@ -224,22 +208,6 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
                             {t('settings.logout')}
                         </T>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.deleteRow}
-                        onPress={() => setDeleteAccountModalVisible(true)}
-                        activeOpacity={0.8}
-                        disabled={deleteAccountLoading}>
-                        <View style={styles.deleteIconWrap}>
-                            <Ionicons name="trash-outline" size={iconSize.medium} color="#B91C1C" />
-                        </View>
-                        {deleteAccountLoading ? (
-                            <ActivityIndicator size="small" color="#B91C1C" style={{ flex: 1 }} />
-                        ) : (
-                            <T size={fontSize.subtitle} weight="500" color="#B91C1C" style={{ flex: 1 }}>
-                                {t('settings.deleteAccount')}
-                            </T>
-                        )}
-                    </TouchableOpacity>
                 </View>
             </View>
 
@@ -251,16 +219,6 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
                 rightButtonText={t('logout.confirm')}
                 onLeftPress={() => setLogoutModalVisible(false)}
                 onRightPress={handleLogoutConfirm}
-            />
-            <PopupModal
-                visible={deleteAccountModalVisible}
-                title={t('settings.deleteAccountConfirmTitle')}
-                message={t('settings.deleteAccountConfirmMessage')}
-                type="warning"
-                leftButtonText={t('common.cancel')}
-                rightButtonText={t('settings.deleteAccountConfirm')}
-                onLeftPress={() => setDeleteAccountModalVisible(false)}
-                onRightPress={handleDeleteAccountConfirm}
             />
         </GradientLayout>
     );

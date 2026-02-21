@@ -127,7 +127,7 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
             flex: 1,
             justifyContent: 'space-between',
             paddingTop: 24 * h1px,
-            paddingBottom: 40 * h1px,
+            paddingBottom: 56 * h1px,
             paddingHorizontal: 20 * w1px,
         },
         topBlock: {
@@ -216,10 +216,12 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
         buttonWrap: {
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingTop: 16 * h1px,
+            gap: 16 * w1px,
+            paddingTop: 24 * h1px,
+            paddingBottom: 8 * h1px,
         },
         backButton: {
+            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
@@ -230,12 +232,12 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
             paddingHorizontal: 20 * w1px,
         },
         continueButton: {
+            flex: 1,
             flexDirection: 'row',
             backgroundColor: colors.backgroundPurple,
             borderRadius: 16 * w1px,
             paddingVertical: 14 * h1px,
-            paddingHorizontal: 28 * w1px,
-            width: 220 * h1px,
+            paddingHorizontal: 20 * w1px,
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8 * w1px,

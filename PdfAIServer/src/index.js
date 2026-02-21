@@ -6,7 +6,8 @@ const mongoose = require('mongoose');
 const app = require('./app');
 const { DEFAULT_PORT, DEFAULT_DB_NAME } = require('./constants');
 
-const rateLimitDisabled = process.env.NODE_ENV === 'development' ||
+// Limit sadece production'da açık; dev/local (NODE_ENV boş veya development) ve DISABLE_RATE_LIMIT ile kapalı
+const rateLimitDisabled = process.env.NODE_ENV !== 'production' ||
     process.env.DISABLE_RATE_LIMIT === 'true' || process.env.DISABLE_RATE_LIMIT === '1';
 
 console.log('BOOT', {
@@ -14,7 +15,7 @@ console.log('BOOT', {
     file: __filename,
     startedAt: new Date().toISOString(),
     NODE_ENV: process.env.NODE_ENV || '(yok)',
-    'Rate limit (24h/2)': rateLimitDisabled ? 'KAPALI (dev)' : 'AÇIK',
+    'Rate limit (24h/2)': rateLimitDisabled ? 'KAPALI (dev/uat dışı)' : 'AÇIK (prod)',
 });
 
 const PORT = Number(process.env.PORT || DEFAULT_PORT);

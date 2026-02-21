@@ -37,7 +37,7 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'PDF gerekli' });
 
-        const rateLimitDisabled = process.env.NODE_ENV === 'development' ||
+        const rateLimitDisabled = process.env.NODE_ENV !== 'production' ||
             process.env.DISABLE_RATE_LIMIT === 'true' || process.env.DISABLE_RATE_LIMIT === '1';
         if (!rateLimitDisabled) {
             const since = new Date(Date.now() - RATE_LIMIT_ANALYSIS_WINDOW_MS);

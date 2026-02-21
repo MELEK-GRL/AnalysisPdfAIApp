@@ -20,20 +20,22 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
 
     const styles = StyleSheet.create({
         header: {
-            paddingHorizontal: 10 * w1px,
-            paddingVertical: h1px * 10,
+            paddingLeft: 14 * w1px,
+            paddingRight: 20 * w1px,
+            paddingVertical: h1px * 14,
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
             backgroundColor: colors.backgroundPurpleDark,
-            height: h1px * 90,
+            height: h1px * 100,
             borderBottomRightRadius: fs1px * 14,
             borderBottomLeftRadius: fs1px * 14,
         },
         headerTitle: {
+            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
+            marginRight: 16 * w1px,
         },
         title: { marginLeft: w1px * 3 },
         scrollView: {

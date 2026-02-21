@@ -80,7 +80,7 @@ const TextInputComponent: React.FC<Props> = ({
             {label && (
                 <T
                     size={fontSize.title}
-                    weight="700"
+                    weight="400"
                     color={colors.textGraySoft}
                     style={styles.label}>
                     {label}

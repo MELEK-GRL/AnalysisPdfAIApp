@@ -12,7 +12,7 @@ const TMP_DIR = path.join(__dirname, '..', 'tmp');
 /** Varsayılan server portu */
 const DEFAULT_PORT = 4000;
 
-/** Varsayılan MongoDB veritabanı adı */
+/** Varsayılan MongoDB veritabanı adı (küçük harf – Atlas büyük/küçük harf duyarlı) */
 const DEFAULT_DB_NAME = 'analysispdf';
 
 /** JWT token süresi */

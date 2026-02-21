@@ -31,7 +31,7 @@ const LanguageSplash: React.FC = () => {
                     flex: 1,
                     justifyContent: 'space-between',
                     paddingTop: 24 * h1px,
-                    paddingBottom: 40 * h1px,
+                    paddingBottom: 56 * h1px,
                     paddingHorizontal: 20 * w1px,
                 },
                 topBlock: {
@@ -108,7 +108,8 @@ const LanguageSplash: React.FC = () => {
                 },
                 buttonRow: {
                     alignItems: 'center',
-                    paddingTop: 16 * h1px,
+                    paddingTop: 24 * h1px,
+                    paddingBottom: 8 * h1px,
                 },
                 continueButton: {
                     flexDirection: 'row',

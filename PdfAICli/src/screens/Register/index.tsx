@@ -86,7 +86,7 @@ const Register: React.FC = () => {
                 },
                 textStyle: {
                     alignItems: 'center',
-                    marginTop: 10 * h1px,
+                    marginTop: 6 * h1px,
                     flexDirection: 'row',
                     justifyContent: 'center',
                 },
@@ -94,8 +94,8 @@ const Register: React.FC = () => {
                 checkboxRow: {
                     flexDirection: 'row',
                     alignItems: 'center',
-                    marginTop: 16 * h1px,
-                    marginBottom: 14 * h1px,
+                    marginTop: 8 * h1px,
+                    marginBottom: 4 * h1px,
                     alignSelf: 'flex-start',
                 },
                 checkbox: {
@@ -116,8 +116,8 @@ const Register: React.FC = () => {
                 termsLinksRow: {
                     flexDirection: 'row',
                     alignItems: 'center',
-                    marginBottom: 6 * h1px,
-                    gap: 12 * w1px,
+                    marginBottom: 4 * h1px,
+                    gap: 6 * w1px,
                 },
                 termsLinkItem: {
                     flex: 1,
@@ -352,7 +352,7 @@ const Register: React.FC = () => {
                             size={fontSize.display}
                             weight="900"
                             color={colors.backgroundPurple}
-                            style={{ marginBottom: 28 * h1px, textAlign: 'center' }}>
+                            style={{ marginBottom: 18 * h1px, textAlign: 'center' }}>
                             {t('register.title')}
                         </T>
 
@@ -506,7 +506,7 @@ const Register: React.FC = () => {
                                 !termsAccepted ||
                                 !openConsentAccepted
                             }
-                            style={{ marginTop: 4 * h1px }}
+                            style={{ marginTop: 14 * h1px }}
                             width={h1px * 260}
                         />
 

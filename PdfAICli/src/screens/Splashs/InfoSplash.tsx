@@ -111,7 +111,7 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
         container: {
             flex: 1,
             paddingTop: 56 * h1px,
-            paddingBottom: 40 * h1px,
+            paddingBottom: 56 * h1px,
             paddingHorizontal: 20 * w1px,
         },
         scroll: {
@@ -184,10 +184,12 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
         cta: {
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingTop: 20 * h1px,
+            gap: 16 * w1px,
+            paddingTop: 24 * h1px,
+            paddingBottom: 8 * h1px,
         },
         backButton: {
+            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
@@ -198,12 +200,12 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
             paddingHorizontal: 20 * w1px,
         },
         button: {
+            flex: 1,
             flexDirection: 'row',
             backgroundColor: colors.backgroundPurple,
             borderRadius: 16 * w1px,
             paddingVertical: 14 * h1px,
-            paddingHorizontal: 28 * w1px,
-            minWidth: 220 * h1px,
+            paddingHorizontal: 20 * w1px,
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8 * w1px,

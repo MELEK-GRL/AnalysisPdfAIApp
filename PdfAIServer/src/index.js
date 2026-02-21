@@ -4,18 +4,16 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const mongoose = require('mongoose');
 const app = require('./app');
-const { DEFAULT_PORT, DEFAULT_DB_NAME } = require('./constants');
+const { DEFAULT_PORT, DEFAULT_DB_NAME, RATE_LIMIT_ANALYSIS_DISABLED } = require('./constants');
 
-// Limit sadece production'da açık; dev/local (NODE_ENV boş veya development) ve DISABLE_RATE_LIMIT ile kapalı
-const rateLimitDisabled = process.env.NODE_ENV !== 'production' ||
-    process.env.DISABLE_RATE_LIMIT === 'true' || process.env.DISABLE_RATE_LIMIT === '1';
-
+// Kesin kural: sadece DEV'de günlük analiz limiti kapalı; UAT ve PROD'da 2/24h zorunlu
 console.log('BOOT', {
     cwd: process.cwd(),
     file: __filename,
     startedAt: new Date().toISOString(),
     NODE_ENV: process.env.NODE_ENV || '(yok)',
-    'Rate limit (24h/2)': rateLimitDisabled ? 'KAPALI (dev/uat dışı)' : 'AÇIK (prod)',
+    APP_ENV: process.env.APP_ENV || '(yok)',
+    'Günlük analiz limiti (2/24h)': RATE_LIMIT_ANALYSIS_DISABLED ? 'KAPALI (dev)' : 'AÇIK (uat/prod)',
 });
 
 const PORT = Number(process.env.PORT || DEFAULT_PORT);

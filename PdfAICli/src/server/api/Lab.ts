@@ -1,5 +1,5 @@
 import { api, getToken } from '../apiFetcher';
-import { API_BASE_URL } from '@env';
+import { API_BASE_URL } from '../../constants/apiBaseUrl';
 import { UPLOAD_TIMEOUT_MS } from '../../constants/api';
 
 export type LabItem = {

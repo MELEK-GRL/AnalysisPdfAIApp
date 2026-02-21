@@ -7,6 +7,7 @@ const { analyzeAndSave } = require('../services/uploadAnalysis');
 const {
     RATE_LIMIT_ANALYSIS_WINDOW_MS,
     RATE_LIMIT_ANALYSIS_MAX,
+    RATE_LIMIT_ANALYSIS_DISABLED,
     TMP_DIR,
     MAX_UPLOAD_BYTES,
 } = require('../constants');
@@ -37,9 +38,8 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'PDF gerekli' });
 
-        const rateLimitDisabled = process.env.NODE_ENV !== 'production' ||
-            process.env.DISABLE_RATE_LIMIT === 'true' || process.env.DISABLE_RATE_LIMIT === '1';
-        if (!rateLimitDisabled) {
+        // Sadece DEV'de limit kapalı; UAT ve PROD'da 2 analiz/24h zorunlu
+        if (!RATE_LIMIT_ANALYSIS_DISABLED) {
             const since = new Date(Date.now() - RATE_LIMIT_ANALYSIS_WINDOW_MS);
             const count = await LabHistory.countDocuments({
                 user: req.user._id,

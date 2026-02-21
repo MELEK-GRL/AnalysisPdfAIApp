@@ -3,8 +3,22 @@ const path = require('path');
 /** 24 saatlik pencerede kullanıcı başına maksimum PDF analizi */
 const RATE_LIMIT_ANALYSIS_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-/** 24 saatte izin verilen analiz sayısı */
+/** 24 saatte izin verilen analiz sayısı (UAT ve PROD'da; DEV'de limit yok) */
 const RATE_LIMIT_ANALYSIS_MAX = 2;
+
+/**
+ * Sadece DEV ortamında günlük analiz limiti kapalı; UAT ve PROD'da 2/24h zorunlu.
+ * DEV: APP_ENV=dev veya (APP_ENV set değil ve NODE_ENV=development).
+ */
+function isDevEnvironment() {
+    const appEnv = process.env.APP_ENV;
+    if (appEnv === 'dev') return true;
+    if (appEnv != null && appEnv !== '') return false; // uat, prod, staging → limit açık
+    return process.env.NODE_ENV === 'development';
+}
+
+/** DEV'de limit kapalı; UAT/PROD'da açık (2 analiz/24h). */
+const RATE_LIMIT_ANALYSIS_DISABLED = isDevEnvironment();
 
 /** Geçici dosyalar için dizin */
 const TMP_DIR = path.join(__dirname, '..', 'tmp');
@@ -36,6 +50,8 @@ const MAX_LAB_HISTORY_PER_USER = 30;
 module.exports = {
     RATE_LIMIT_ANALYSIS_WINDOW_MS,
     RATE_LIMIT_ANALYSIS_MAX,
+    RATE_LIMIT_ANALYSIS_DISABLED,
+    isDevEnvironment,
     TMP_DIR,
     DEFAULT_PORT,
     DEFAULT_DB_NAME,

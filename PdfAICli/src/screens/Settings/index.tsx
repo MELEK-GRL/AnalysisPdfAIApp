@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions, useFocusEffect } from '@react-navigation/native';
+import { API_BASE_URL } from '../../constants/apiBaseUrl';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSessionStore } from '../../store/useSessionStore';
@@ -209,6 +210,14 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
                         </T>
                     </TouchableOpacity>
                 </View>
+
+                {__DEV__ ? (
+                    <View style={styles.section}>
+                        <T size={fontSize.caption} weight="500" color="#6B7280" numberOfLines={1}>
+                            Backend: {API_BASE_URL || '(yok)'}
+                        </T>
+                    </View>
+                ) : null}
             </View>
 
             <PopupModal

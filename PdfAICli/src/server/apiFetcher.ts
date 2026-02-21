@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig, Method } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '@env';
+import { API_BASE_URL } from '../constants/apiBaseUrl';
 import { AUTH_TOKEN } from '../constants/storageKeys';
 import { API_TIMEOUT_MS } from '../constants/api';
 import { useSessionStore } from '../store/useSessionStore';

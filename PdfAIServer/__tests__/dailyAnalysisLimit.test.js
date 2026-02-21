@@ -10,13 +10,16 @@ const app = require('../src/app');
 
 describe('Daily analysis limit (24h/2)', () => {
     const originalNodeEnv = process.env.NODE_ENV;
+    const originalAppEnv = process.env.APP_ENV;
 
     afterEach(() => {
         process.env.NODE_ENV = originalNodeEnv;
+        process.env.APP_ENV = originalAppEnv;
     });
 
-    it('NODE_ENV=production ve kullanıcı 24h içinde 2 analiz yaptıysa 3. istek 429 döner', async () => {
+    it('UAT/PROD (dev değil) ve kullanıcı 24h içinde 2 analiz yaptıysa 3. istek 429 döner', async () => {
         process.env.NODE_ENV = 'production';
+        process.env.APP_ENV = 'uat';
         mockExtractText.mockResolvedValue('Lab text');
         mockClassifyAndExtract.mockResolvedValue({
             isLab: true,

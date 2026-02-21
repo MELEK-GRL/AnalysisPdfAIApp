@@ -158,6 +158,7 @@
     "deleteConfirmMessage": "Are you sure you want to delete?",
     "deleteAllButton": "Delete All",
     "deleteAllConfirm": "Are you sure you want to delete all?",
+    "deleteSelectedConfirm": "Are you sure you want to delete the selected items?",
     "searchPlaceholder": "Search"
   },
   "tabs": {

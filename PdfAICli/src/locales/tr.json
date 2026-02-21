@@ -158,6 +158,7 @@
     "deleteConfirmMessage": "Silmek istediğinize emin misiniz?",
     "deleteAllButton": "Tümünü Sil",
     "deleteAllConfirm": "Tümünü silmek istediğine emin misin?",
+    "deleteSelectedConfirm": "Seçtiklerinizi silmek istediğinize emin misiniz?",
     "searchPlaceholder": "Arama"
   },
   "tabs": {

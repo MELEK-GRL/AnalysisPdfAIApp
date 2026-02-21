@@ -46,6 +46,9 @@ const History: React.FC = () => {
     const [errorSource, setErrorSource] = useState<'fetch' | 'detail'>('fetch');
     const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
     const [deleteAllConfirmVisible, setDeleteAllConfirmVisible] = useState(false);
+    const [deleteSelectedConfirmVisible, setDeleteSelectedConfirmVisible] = useState(false);
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [searchQuery, setSearchQuery] = useState('');
     const t = useT();
     const locale = useLocaleStore((s) => s.locale);
@@ -135,6 +138,41 @@ const History: React.FC = () => {
         );
     }, [items, searchQuery]);
 
+    const toggleSelection = useCallback((id: string) => {
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    }, []);
+
+    const exitSelectionMode = useCallback(() => {
+        setSelectionMode(false);
+        setSelectedIds(new Set());
+    }, []);
+
+    const handleDeleteSelectedConfirm = useCallback(async () => {
+        setDeleteSelectedConfirmVisible(false);
+        const ids = Array.from(selectedIds);
+        if (ids.length === 0) return;
+        try {
+            for (const id of ids) {
+                await deleteLabHistoryItem(id);
+            }
+            setItems((prev) => prev.filter((i) => !selectedIds.has(i.id)));
+            if (selectedDetail && selectedIds.has(selectedDetail.id)) {
+                setDetailModal(false);
+                setSelectedDetail(null);
+            }
+            exitSelectionMode();
+        } catch (err) {
+            setErrorMessage(t('history.fetchErrorServer'));
+            setErrorSource('fetch');
+            setErrorVisible(true);
+        }
+    }, [selectedIds, selectedDetail, t]);
+
     const styles = useMemo(
         () =>
             StyleSheet.create({
@@ -153,14 +191,14 @@ const History: React.FC = () => {
                     borderRadius: 12 * w1px,
                     paddingVertical: 12 * h1px,
                     paddingHorizontal: 12 * w1px,
-                    marginHorizontal: 8 * w1px,
                     marginBottom: 10 * h1px,
                     shadowColor: '#000',
-                    shadowOpacity: 0.05,
-                    shadowRadius: 6,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.04,
+                    shadowRadius: 4,
                     elevation: 2,
                     borderWidth: 1,
-                    borderColor: '#F3F4F6',
+                    borderColor: '#E5E7EB',
                 },
                 cardContent: {
                     flex: 1,
@@ -218,7 +256,24 @@ const History: React.FC = () => {
                 deleteAllRow: {
                     flexDirection: 'row',
                     justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    gap: 10 * w1px,
                     marginBottom: 12 * h1px,
+                },
+                deleteButton: {
+                    backgroundColor: colors.white,
+                    borderWidth: 1.5,
+                    borderColor: colors.backgroundPurple,
+                    borderRadius: 10 * w1px,
+                    paddingVertical: 10 * h1px,
+                    paddingHorizontal: 16 * w1px,
+                },
+                deleteButtonRed: {
+                    backgroundColor: '#DC2626',
+                    borderWidth: 0,
+                    borderRadius: 10 * w1px,
+                    paddingVertical: 10 * h1px,
+                    paddingHorizontal: 16 * w1px,
                 },
                 deleteAllButton: {
                     backgroundColor: colors.white,
@@ -228,38 +283,61 @@ const History: React.FC = () => {
                     paddingVertical: 10 * h1px,
                     paddingHorizontal: 16 * w1px,
                 },
+                checkboxWrap: {
+                    marginRight: 12 * w1px,
+                },
             }),
         [w1px, h1px, fs1px],
     );
 
-    const renderItem = ({ item }: { item: LabHistoryItem }) => (
-        <TouchableOpacity
-            style={styles.card}
-            onPress={() => handleItemPress(item.id)}
-            activeOpacity={0.7}>
-            <View style={styles.cardContent}>
-                <View style={styles.cardTitle}>
-                    <T size={fontSize.subtitle} weight="600" color="#111827" numberOfLines={1} style={{ flex: 1 }}>
-                        {item.pdfName || t('history.labReport')}
-                    </T>
-                    <T size={fontSize.bodySmall} color="#9CA3AF" style={{ marginLeft: 8 }}>
-                        {formatDate(item.createdAt)}
+    const renderItem = ({ item }: { item: LabHistoryItem }) => {
+        const isSelected = selectedIds.has(item.id);
+        return (
+            <TouchableOpacity
+                style={styles.card}
+                onPress={() => {
+                    if (selectionMode) {
+                        toggleSelection(item.id);
+                    } else {
+                        handleItemPress(item.id);
+                    }
+                }}
+                activeOpacity={0.7}>
+                {selectionMode ? (
+                    <View style={styles.checkboxWrap}>
+                        <Ionicons
+                            name={isSelected ? 'checkbox' : 'checkbox-outline'}
+                            size={24}
+                            color={isSelected ? '#22C55E' : '#9CA3AF'}
+                        />
+                    </View>
+                ) : null}
+                <View style={styles.cardContent}>
+                    <View style={styles.cardTitle}>
+                        <T size={fontSize.subtitle} weight="600" color="#111827" numberOfLines={1} style={{ flex: 1 }}>
+                            {item.pdfName || t('history.labReport')}
+                        </T>
+                        <T size={fontSize.bodySmall} color="#9CA3AF" style={{ marginLeft: 8 }}>
+                            {formatDate(item.createdAt)}
+                        </T>
+                    </View>
+                    <T size={fontSize.body} color="#6B7280">
+                        {item.itemCount > 0
+                            ? `${item.itemCount} ${t('history.paramCount')}`
+                            : t('history.notLabReport')}
                     </T>
                 </View>
-                <T size={fontSize.body} color="#6B7280">
-                    {item.itemCount > 0
-                        ? `${item.itemCount} ${t('history.paramCount')}`
-                        : t('history.notLabReport')}
-                </T>
-            </View>
-            <Ionicons
-                name="chevron-forward"
-                size={iconSize.medium}
-                color={colors.backgroundPurple}
-                style={styles.cardChevron}
-            />
-        </TouchableOpacity>
-    );
+                {!selectionMode ? (
+                    <Ionicons
+                        name="chevron-forward"
+                        size={iconSize.medium}
+                        color={colors.backgroundPurple}
+                        style={styles.cardChevron}
+                    />
+                ) : null}
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <View style={styles.contentView}>
@@ -284,6 +362,39 @@ const History: React.FC = () => {
                             />
                         </View>
                         <View style={styles.deleteAllRow}>
+                            {selectionMode ? (
+                                <TouchableOpacity
+                                    style={styles.deleteButton}
+                                    onPress={exitSelectionMode}
+                                    activeOpacity={0.7}>
+                                    <T size={fontSize.body} weight="600" color={colors.backgroundPurple}>
+                                        {t('common.cancel')}
+                                    </T>
+                                </TouchableOpacity>
+                            ) : null}
+                            <TouchableOpacity
+                                style={
+                                    selectionMode && selectedIds.size > 0
+                                        ? styles.deleteButtonRed
+                                        : styles.deleteButton
+                                }
+                                onPress={() => {
+                                    if (!selectionMode) {
+                                        setSelectionMode(true);
+                                    } else if (selectedIds.size > 0) {
+                                        setDeleteSelectedConfirmVisible(true);
+                                    } else {
+                                        exitSelectionMode();
+                                    }
+                                }}
+                                activeOpacity={0.7}>
+                                <T
+                                    size={fontSize.body}
+                                    weight="600"
+                                    color={selectionMode && selectedIds.size > 0 ? '#fff' : colors.backgroundPurple}>
+                                    {t('common.delete')}
+                                </T>
+                            </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.deleteAllButton}
                                 onPress={() => setDeleteAllConfirmVisible(true)}
@@ -431,6 +542,17 @@ const History: React.FC = () => {
                         setErrorVisible(true);
                     }
                 }}
+            />
+
+            <PopupModal
+                visible={deleteSelectedConfirmVisible}
+                title={t('common.warning')}
+                message={t('history.deleteSelectedConfirm')}
+                type="warning"
+                leftButtonText={t('common.cancel')}
+                rightButtonText={t('common.delete')}
+                onLeftPress={() => setDeleteSelectedConfirmVisible(false)}
+                onRightPress={handleDeleteSelectedConfirm}
             />
 
             <PopupModal

@@ -33,23 +33,33 @@ if (isProduction) {
     }
 }
 
-// Önce dinlemeye başla (Railway/Docker için 0.0.0.0; istekler hemen yanıtlanabilsin)
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server listening on port ${PORT}`);
-});
+const mongoOptions = {
+    dbName: process.env.DB_NAME || DEFAULT_DB_NAME,
+    serverSelectionTimeoutMS: 30000,
+    connectTimeoutMS: 20000,
+};
 
-// MongoDB'yi arka planda bağla (başarısız olsa bile sunucu ayakta kalır)
-if (MONGODB_URI) {
-    (async function connectMongo() {
+async function start() {
+    if (MONGODB_URI) {
         try {
             mongoose.set('strictQuery', true);
-            await mongoose.connect(MONGODB_URI, { dbName: process.env.DB_NAME || DEFAULT_DB_NAME });
+            await mongoose.connect(MONGODB_URI, mongoOptions);
             console.log('✅ MongoDB connected');
         } catch (err) {
             console.error('❌ Mongo error:', err?.message || err);
-            // process.exit(1) yok – sunucu çalışmaya devam eder; /health ve /privacy yanıt verir
+            if (err?.stack) console.error('❌ Mongo stack:', err.stack);
+            if (isProduction) {
+                console.error('Production: MongoDB olmadan çalışmayı durduruyor.');
+                process.exit(1);
+            }
         }
-    })();
-} else {
-    console.warn('⚠️  MONGODB_URI yok, Mongo atlanıyor.');
+    } else {
+        console.warn('⚠️  MONGODB_URI yok, Mongo atlanıyor.');
+    }
+
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Server listening on port ${PORT}`);
+    });
 }
+
+start();

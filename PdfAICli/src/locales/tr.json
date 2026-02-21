@@ -2,6 +2,7 @@
   "common": {
     "ok": "Tamam",
     "genericError": "Bir hata oluştu",
+    "networkError": "Bağlantı kurulamadı. İnterneti kontrol edip tekrar deneyin.",
     "cancel": "İptal",
     "close": "Kapat",
     "delete": "Sil",
@@ -47,7 +48,8 @@
     "register": "Kayıt ol",
     "forgotPassword": "Şifremi unuttum",
     "warnEmpty": "Lütfen e-posta/kullanıcı adı ve şifreyi girin.",
-    "errorTitle": "Giriş Hatası"
+    "errorTitle": "Giriş Hatası",
+    "serverError": "Giriş işlemi şu an yapılamıyor. Lütfen daha sonra tekrar deneyin."
   },
   "forgotPassword": {
     "title": "Şifremi Unuttum",

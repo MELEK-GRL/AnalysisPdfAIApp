@@ -53,6 +53,7 @@ router.post('/register', async (req, res) => {
         return res.status(201).json({ token, user: toSafeUser(user) });
     } catch (e) {
         console.error('REGISTER ERR:', e?.message || e);
+        if (e?.stack) console.error('REGISTER ERR stack:', e.stack);
         return res.status(500).json({ message: 'Register failed' });
     }
 });
@@ -83,6 +84,7 @@ router.post('/login', async (req, res) => {
         return res.json({ token, user: toSafeUser(user) });
     } catch (e) {
         console.error('LOGIN ERR:', e?.message || e);
+        if (e?.stack) console.error('LOGIN ERR stack:', e.stack);
         return res.status(500).json({ message: 'Login failed' });
     }
 });

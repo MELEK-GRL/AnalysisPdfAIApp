@@ -39,10 +39,10 @@ const TextInputComponent: React.FC<Props> = ({
         () =>
             StyleSheet.create({
                 container: {
-                    marginBottom: 14 * h1px,
+                    marginBottom: 12 * h1px,
                 },
                 label: {
-                    marginBottom: 8 * h1px,
+                    marginBottom: 6 * h1px,
                 },
                 inputWrap: {
                     flexDirection: 'row',
@@ -54,7 +54,7 @@ const TextInputComponent: React.FC<Props> = ({
                 },
                 input: {
                     flex: 1,
-                    paddingVertical: 14 * h1px,
+                    paddingVertical: 10 * h1px,
                     paddingHorizontal: 12 * w1px,
                     fontSize: fontSize.body * fs1px,
                     color: '#111827',

@@ -155,16 +155,14 @@ const AppNavigator = () => {
     if (!ready) {
         return <Loader />;
     }
-    const initialRouteName: keyof RootStackParamList =
-        storeToken == null
-            ? 'Login'
-            : !hasSeenLanguageSplash
-              ? 'LanguageSplash'
-              : hasConsentOnce
-                ? hasToken
-                    ? 'MainTabs'
-                    : 'Login'
-                : 'InfoSplash';
+    // İlk açılışta önce splash akışı (dil → bilgi → onay), sonra login/token
+    const initialRouteName: keyof RootStackParamList = !hasSeenLanguageSplash
+        ? 'LanguageSplash'
+        : !hasConsentOnce
+          ? 'InfoSplash'
+          : hasToken
+            ? 'MainTabs'
+            : 'Login';
 
     const linking = {
         prefixes: ['pdfai://'],

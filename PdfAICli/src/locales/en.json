@@ -2,6 +2,7 @@
   "common": {
     "ok": "OK",
     "genericError": "An error occurred",
+    "networkError": "Could not connect. Check your internet and try again.",
     "cancel": "Cancel",
     "close": "Close",
     "delete": "Delete",
@@ -47,7 +48,8 @@
     "register": "Sign Up",
     "forgotPassword": "Forgot password",
     "warnEmpty": "Please enter email/username and password.",
-    "errorTitle": "Sign In Error"
+    "errorTitle": "Sign In Error",
+    "serverError": "Sign in is temporarily unavailable. Please try again later."
   },
   "forgotPassword": {
     "title": "Forgot Password",

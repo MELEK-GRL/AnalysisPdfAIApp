@@ -24,6 +24,7 @@ import {
     CONSENT_GIVEN_ONCE,
     HAS_EVER_LOGGED_IN,
 } from '../../constants/storageKeys';
+import { isNetworkError } from '../../utils/errorUtils';
 
 const Login: React.FC = () => {
     const nav = useNavigation<any>();
@@ -128,10 +129,16 @@ const Login: React.FC = () => {
 
             nav.replace('MainTabs');
         } catch (e: any) {
+            const rawMessage = e?.message || '';
+            const message = isNetworkError(e)
+                ? t('common.networkError')
+                : rawMessage === 'Login failed' || e?.response?.status === 500
+                  ? t('login.serverError')
+                  : rawMessage || t('common.genericError');
             setModal({
                 visible: true,
                 title: t('login.errorTitle'),
-                message: e?.message || t('common.genericError'),
+                message,
                 type: 'error',
             });
         } finally {

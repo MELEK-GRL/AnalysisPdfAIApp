@@ -32,6 +32,7 @@ import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { getInstallationId } from '../../utils/analytics/getInstallationId';
 import { api } from '../../server/apiFetcher';
 import { LAST_CONSENT_ID } from '../../constants/storageKeys';
+import { isNetworkError } from '../../utils/errorUtils';
 import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
 import OPEN_CONSENT_ITEMS from '../../utils/contractArticles/OpenConsentArticles.json';
 
@@ -109,9 +110,17 @@ const Register: React.FC = () => {
                 termsLinkRow: {
                     flexDirection: 'row',
                     alignItems: 'center',
-                    marginBottom: 14 * h1px,
                     paddingVertical: 6 * h1px,
                     paddingRight: 8 * w1px,
+                },
+                termsLinksRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 6 * h1px,
+                    gap: 12 * w1px,
+                },
+                termsLinkItem: {
+                    flex: 1,
                 },
             }),
         [w1px, h1px, fs1px],
@@ -309,12 +318,13 @@ const Register: React.FC = () => {
             setTimeout(() => nav.replace('Login'), 600);
         } catch (err: any) {
             const status = err?.response?.status;
-            const msg =
-                status === 409
-                    ? t('register.emailInUse')
-                    : err?.response?.data?.message ||
-                      err?.message ||
-                      t('register.error');
+            const msg = isNetworkError(err)
+                ? t('common.networkError')
+                : status === 409
+                  ? t('register.emailInUse')
+                  : err?.response?.data?.message ||
+                    err?.message ||
+                    t('register.error');
             setModal({
                 visible: true,
                 title: status === 409 ? t('common.warning') : t('common.error'),
@@ -419,29 +429,44 @@ const Register: React.FC = () => {
                             </T>
                         </TouchableOpacity>
 
-                        <TouchableOpacity
-                            onPress={() => setTermsModalVisible(true)}
-                            activeOpacity={0.8}
-                            style={s.termsLinkRow}>
-                            <Ionicons
-                                name="document-text-outline"
-                                size={iconSize.medium}
-                                color={colors.backgroundPurple}
-                                style={{ marginRight: 6 * w1px }}
-                            />
-                            <T
-                                size={fontSize.body}
-                                weight="600"
-                                color={colors.backgroundPurple}>
-                                {t('register.viewTerms')}
-                            </T>
-                            <Ionicons
-                                name="open-outline"
-                                size={iconSize.small}
-                                color={colors.backgroundPurple}
-                                style={{ marginLeft: 4 * w1px }}
-                            />
-                        </TouchableOpacity>
+                        <View style={s.termsLinksRow}>
+                            <TouchableOpacity
+                                onPress={() => setTermsModalVisible(true)}
+                                activeOpacity={0.8}
+                                style={[s.termsLinkRow, s.termsLinkItem]}>
+                                <T
+                                    size={fontSize.body}
+                                    weight="600"
+                                    color={colors.backgroundPurple}
+                                    numberOfLines={1}>
+                                    {t('register.viewTerms')}
+                                </T>
+                                <Ionicons
+                                    name="open-outline"
+                                    size={iconSize.small}
+                                    color={colors.backgroundPurple}
+                                    style={{ marginLeft: 4 * w1px }}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => setOpenConsentModalVisible(true)}
+                                activeOpacity={0.8}
+                                style={[s.termsLinkRow, s.termsLinkItem]}>
+                                <T
+                                    size={fontSize.body}
+                                    weight="600"
+                                    color={colors.backgroundPurple}
+                                    numberOfLines={1}>
+                                    {t('register.viewOpenConsent')}
+                                </T>
+                                <Ionicons
+                                    name="open-outline"
+                                    size={iconSize.small}
+                                    color={colors.backgroundPurple}
+                                    style={{ marginLeft: 4 * w1px }}
+                                />
+                            </TouchableOpacity>
+                        </View>
 
                         <TouchableOpacity
                             onPress={() => setOpenConsentAccepted(!openConsentAccepted)}
@@ -470,30 +495,6 @@ const Register: React.FC = () => {
                                 style={{ marginLeft: 8 * w1px, flex: 1 }}>
                                 {t('register.openConsentCheckbox')}
                             </T>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            onPress={() => setOpenConsentModalVisible(true)}
-                            activeOpacity={0.8}
-                            style={s.termsLinkRow}>
-                            <Ionicons
-                                name="document-text-outline"
-                                size={iconSize.medium}
-                                color={colors.backgroundPurple}
-                                style={{ marginRight: 6 * w1px }}
-                            />
-                            <T
-                                size={fontSize.body}
-                                weight="600"
-                                color={colors.backgroundPurple}>
-                                {t('register.viewOpenConsent')}
-                            </T>
-                            <Ionicons
-                                name="open-outline"
-                                size={iconSize.small}
-                                color={colors.backgroundPurple}
-                                style={{ marginLeft: 4 * w1px }}
-                            />
                         </TouchableOpacity>
 
                         <Button

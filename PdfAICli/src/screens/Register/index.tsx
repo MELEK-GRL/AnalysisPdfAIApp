@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     Modal,
     ScrollView,
+    Dimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -542,10 +543,15 @@ size={fontSize.subtitleLarge}
                 <Modal
                     visible={termsModalVisible}
                     transparent
-                    animationType="fade">
+                    animationType="fade"
+                    statusBarTranslucent>
                     <View
                         style={{
-                            flex: 1,
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            width: Dimensions.get('screen').width,
+                            height: Dimensions.get('screen').height,
                             backgroundColor: 'rgba(17,24,39,0.4)',
                             justifyContent: 'center',
                             alignItems: 'center',
@@ -583,10 +589,15 @@ size={fontSize.subtitleLarge}
                 <Modal
                     visible={openConsentModalVisible}
                     transparent
-                    animationType="fade">
+                    animationType="fade"
+                    statusBarTranslucent>
                     <View
                         style={{
-                            flex: 1,
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            width: Dimensions.get('screen').width,
+                            height: Dimensions.get('screen').height,
                             backgroundColor: 'rgba(17,24,39,0.4)',
                             justifyContent: 'center',
                             alignItems: 'center',

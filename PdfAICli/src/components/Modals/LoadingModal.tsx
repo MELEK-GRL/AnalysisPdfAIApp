@@ -3,7 +3,7 @@ import { View, StyleSheet, Modal, Dimensions } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
 
-const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
 type Props = {
     visible: boolean;
@@ -16,8 +16,11 @@ const LoadingModal: React.FC<Props> = ({ visible }) => {
         () =>
             StyleSheet.create({
                 fullScreen: {
-                    width: WINDOW_WIDTH,
-                    height: WINDOW_HEIGHT,
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: SCREEN_WIDTH,
+                    height: SCREEN_HEIGHT,
                     backgroundColor: 'rgba(17, 24, 39, 0.40)',
                     justifyContent: 'center',
                     alignItems: 'center',

@@ -1,5 +1,5 @@
 import React, { useMemo, ReactNode } from 'react';
-import { View, StyleSheet, Modal } from 'react-native';
+import { View, StyleSheet, Modal, Dimensions } from 'react-native';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import Button from '../Buttons/Button';
@@ -18,6 +18,8 @@ type Props = {
     leftButtonBackgroundColor?: string;
     rightButtonBackgroundColor?: string;
 };
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
 const CenterModal: React.FC<Props> = ({
     visible,
@@ -38,7 +40,11 @@ const CenterModal: React.FC<Props> = ({
         () =>
             StyleSheet.create({
                 overlay: {
-                    flex: 1,
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: SCREEN_WIDTH,
+                    height: SCREEN_HEIGHT,
                     backgroundColor: 'rgba(17, 24, 39, 0.4)',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -86,7 +92,7 @@ const CenterModal: React.FC<Props> = ({
     }
 
     return (
-        <Modal visible={visible} transparent animationType="fade">
+        <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
             <View style={styles.overlay}>
                 <View style={styles.box}>
                         <T

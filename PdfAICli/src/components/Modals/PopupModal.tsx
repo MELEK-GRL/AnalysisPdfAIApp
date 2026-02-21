@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, Modal, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, Modal, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
@@ -27,6 +27,8 @@ const TYPE_CONFIG: Record<PopupType, { accent: string; defaultTitle: string; ico
     info: { accent: '#3B82F6', defaultTitle: 'Bilgi', icon: 'information-circle' },
 };
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
+
 const PopupModal: React.FC<Props> = ({
     visible,
     title,
@@ -45,7 +47,11 @@ const PopupModal: React.FC<Props> = ({
         () =>
             StyleSheet.create({
                 overlay: {
-                    flex: 1,
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    width: SCREEN_WIDTH,
+                    height: SCREEN_HEIGHT,
                     backgroundColor: 'rgba(17, 24, 39, 0.45)',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -83,7 +89,7 @@ const PopupModal: React.FC<Props> = ({
     }
 
     return (
-        <Modal visible={visible} transparent animationType="fade">
+        <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
             <TouchableWithoutFeedback>
                 <View style={styles.overlay}>
                     <TouchableWithoutFeedback>

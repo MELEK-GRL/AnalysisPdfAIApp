@@ -30,9 +30,12 @@ const DetailModal: React.FC<Props> = ({
     const { w1px, h1px, fs1px } = useResponsive();
 
     const styles = useMemo(() => {
-        const { width, height } = Dimensions.get('window');
+        const { width, height } = Dimensions.get('screen');
         return StyleSheet.create({
                 overlay: {
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
                     width,
                     height,
                     backgroundColor: colors.white,

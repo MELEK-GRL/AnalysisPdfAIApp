@@ -24,7 +24,7 @@
     "languageSub": "Türkçe / English",
     "langTr": "Türkçe",
     "langEn": "English",
-    "profileSettings": "Profil Ayarı",
+    "profileSettings": "Hesap Ayarları",
     "logout": "Çıkış Yap",
     "privacyPolicy": "Gizlilik Politikası",
     "dangerZone": "Tehlikeli Bölge",
@@ -162,7 +162,7 @@
   },
   "tabs": {
     "analysis": "Analiz",
-    "history": "Geçmiş",
+    "history": "Analiz Listesi",
     "profile": "Profil"
   },
   "splash": {

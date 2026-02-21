@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Platform, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useT } from '../store/useLocaleStore';
 import { useAnalysisLoadingStore } from '../store/useAnalysisLoadingStore';
@@ -48,37 +49,44 @@ const Tab = createBottomTabNavigator();
 
 const ProfileTab = () => <Profile />;
 
+const TAB_BAR_CONTENT_HEIGHT = 60;
+const HOME_INDICATOR_HEIGHT_IOS = 34;
+
 const MainTabs = () => {
     const t = useT();
+    const insets = useSafeAreaInsets();
+    const bottomSafe = Platform.OS === 'ios'
+        ? Math.max(insets.bottom, HOME_INDICATOR_HEIGHT_IOS)
+        : Math.max(insets.bottom, 12);
+    const tabBarHeight = TAB_BAR_CONTENT_HEIGHT + bottomSafe;
+
     return (
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
                 tabBarActiveTintColor: colors.backgroundPurple,
-                tabBarInactiveTintColor: '#A1A1AA',
+                tabBarInactiveTintColor: '#6B7280',
                 tabBarLabelStyle: {
-                    fontSize: fontSize.label,
+                    fontSize: 12,
                     fontWeight: '600',
                 },
                 tabBarStyle: {
-                    backgroundColor: '#fff',
-                    borderTopWidth: 1,
-                    borderTopColor: '#F3F4F6',
-                    height: 60,
-                    paddingTop: 6,
-                    paddingBottom: 6,
-                    elevation: 8,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: -2 },
-                    shadowOpacity: 0.04,
-                    shadowRadius: 8,
+                    backgroundColor: '#FFFFFF',
+                    borderTopWidth: StyleSheet.hairlineWidth,
+                    borderTopColor: 'rgba(0,0,0,0.08)',
+                    height: tabBarHeight,
+                    paddingTop: 18,
+                    paddingBottom: bottomSafe,
+                    elevation: 0,
+                    shadowColor: 'transparent',
                 },
                 tabBarItemStyle: {
-                    paddingVertical: 0,
+                    paddingVertical: 6,
                 },
                 tabBarIconStyle: {
-                    marginBottom: 0,
+                    marginBottom: 12,
                 },
+                tabBarShowLabel: true,
             }}>
             <Tab.Screen
                 name="Analiz"
@@ -86,11 +94,13 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.analysis'),
                     tabBarIcon: ({ focused, color }) => (
-                        <Ionicons
-                            name={focused ? 'document-text' : 'document-text-outline'}
-                            size={iconSize.large}
-                            color={color}
-                        />
+                        <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                            <Ionicons
+                                name={focused ? 'document-text' : 'document-text-outline'}
+                                size={26}
+                                color={color}
+                            />
+                        </View>
                     ),
                 }}
             />
@@ -100,11 +110,13 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.history'),
                     tabBarIcon: ({ focused, color }) => (
-                        <Ionicons
-                            name={focused ? 'time' : 'time-outline'}
-                            size={iconSize.large}
-                            color={color}
-                        />
+                        <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                            <Ionicons
+                                name={focused ? 'time' : 'time-outline'}
+                                size={26}
+                                color={color}
+                            />
+                        </View>
                     ),
                 }}
             />
@@ -114,11 +126,13 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.profile'),
                     tabBarIcon: ({ focused, color }) => (
-                        <Ionicons
-                            name={focused ? 'person' : 'person-outline'}
-                            size={iconSize.large}
-                            color={color}
-                        />
+                        <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                            <Ionicons
+                                name={focused ? 'person' : 'person-outline'}
+                                size={26}
+                                color={color}
+                            />
+                        </View>
                     ),
                 }}
             />

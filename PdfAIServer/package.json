@@ -5,7 +5,8 @@
     "dev": "NODE_ENV=development nodemon src/index.js",
     "start:dev": "NODE_ENV=development node src/index.js",
     "start": "node src/index.js",
-    "test": "jest"
+    "test": "jest",
+    "check-mongo": "node scripts/check-mongo-uri.js"
   },
   "dependencies": {
     "bcryptjs": "3.0.2",

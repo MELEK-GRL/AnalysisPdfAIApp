@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
 import AnalysisModalRoot from './src/components/Modals/AnalysisModalRoot';
 import { Dimensions, AppState, AppStateStatus } from 'react-native';
@@ -35,10 +36,12 @@ const App = () => {
     return () => stateSub.remove();
   }, []);
   return (
-    <View style={{ flex: 1 }}>
-      <AppNavigator />
-      <AnalysisModalRoot />
-    </View>
+    <SafeAreaProvider>
+      <View style={{ flex: 1 }}>
+        <AppNavigator />
+        <AnalysisModalRoot />
+      </View>
+    </SafeAreaProvider>
   );
 };
 

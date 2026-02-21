@@ -24,7 +24,7 @@
     "languageSub": "Turkish / English",
     "langTr": "Turkish",
     "langEn": "English",
-    "profileSettings": "Profile Settings",
+    "profileSettings": "Account Settings",
     "logout": "Logout",
     "privacyPolicy": "Privacy Policy",
     "dangerZone": "Danger Zone",
@@ -162,7 +162,7 @@
   },
   "tabs": {
     "analysis": "Analysis",
-    "history": "History",
+    "history": "Analysis List",
     "profile": "Profile"
   },
   "splash": {

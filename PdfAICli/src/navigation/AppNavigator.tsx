@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, View, Platform, StyleSheet } from 'react-native';
+import { View, Platform, StyleSheet } from 'react-native';
+import LottieView from 'lottie-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useT } from '../store/useLocaleStore';
@@ -141,9 +142,26 @@ const MainTabs = () => {
     );
 };
 
+const styles = StyleSheet.create({
+    loaderContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    loaderLottie: {
+        width: 200,
+        height: 200,
+    },
+});
+
 const Loader = () => (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
+    <View style={styles.loaderContainer}>
+        <LottieView
+            source={require('../assets/splash/LoadingAnimation.json')}
+            autoPlay
+            loop
+            style={styles.loaderLottie}
+        />
     </View>
 );
 

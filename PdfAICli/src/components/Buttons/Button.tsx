@@ -7,11 +7,17 @@ import {
     ActivityIndicator,
     View,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useResponsive } from '../../utils/deviceStore/device';
 import LoadingModal from '../Modals/LoadingModal';
 import T from '../Text/T';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
+
+const PURPLE_GRADIENT: [string, string] = [
+    colors.backgroundPurpleDark,
+    '#8B6FEB',
+];
 
 type Props = {
     buttonText: string;
@@ -36,11 +42,15 @@ const Button: React.FC<Props> = ({
 }) => {
     const { w1px, h1px } = useResponsive();
 
+    const isPurple =
+        backgroundColor === colors.backgroundPurple ||
+        backgroundColor === colors.backgroundPurpleDark;
+
     const styles = useMemo(
         () =>
             StyleSheet.create({
                 button: {
-                    backgroundColor: backgroundColor,
+                    backgroundColor: isPurple ? undefined : backgroundColor,
                     borderRadius: 16 * w1px,
                     paddingVertical: 10 * h1px,
                     paddingHorizontal: 12 * h1px,
@@ -50,6 +60,7 @@ const Button: React.FC<Props> = ({
                     flexDirection: 'row',
                     gap: 8 * w1px,
                     width,
+                    overflow: 'hidden',
                 },
                 buttonView: {
                     alignItems: 'center',
@@ -57,23 +68,39 @@ const Button: React.FC<Props> = ({
                     width: '100%',
                 },
             }),
-        [w1px, h1px, disabled, width, backgroundColor],
+        [w1px, h1px, disabled, width, backgroundColor, isPurple],
+    );
+
+    const content = (
+        <>
+            {activityIndicatorLoading && (
+                <ActivityIndicator size="small" color="#fff" />
+            )}
+            <T size={fontSize.subtitle} weight="600" color="#fff">
+                {buttonText}
+            </T>
+        </>
     );
 
     return (
         <>
             <View style={styles.buttonView}>
                 <TouchableOpacity
-                    style={[styles.button, style]}
                     onPress={onPress}
                     activeOpacity={0.8}
-                    disabled={disabled || loading || activityIndicatorLoading}>
-                    {activityIndicatorLoading && (
-                        <ActivityIndicator size="small" color="#fff" />
+                    disabled={disabled || loading || activityIndicatorLoading}
+                    style={[{ width }, style]}>
+                    {isPurple ? (
+                        <LinearGradient
+                            colors={PURPLE_GRADIENT}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 0, y: 1 }}
+                            style={[styles.button, style]}>
+                            {content}
+                        </LinearGradient>
+                    ) : (
+                        <View style={[styles.button, style]}>{content}</View>
                     )}
-                    <T size={fontSize.subtitle} weight="600" color="#fff">
-                        {buttonText}
-                    </T>
                 </TouchableOpacity>
             </View>
 

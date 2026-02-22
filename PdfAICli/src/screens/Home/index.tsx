@@ -10,7 +10,7 @@ import { getToken } from '../../server/apiFetcher';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { uploadPdf, LabItem } from '../../server/api/Lab';
 import { useAuthStore } from '../../store/useAuthStore';
-import { useT } from '../../store/useLocaleStore';
+import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useAnalizResetStore } from '../../store/useAnalizResetStore';
 import { useAnalysisLoadingStore } from '../../store/useAnalysisLoadingStore';
 import { trackButtonClick } from '../../server/api/Analytics';
@@ -53,6 +53,7 @@ const Home: React.FC = () => {
     const [showUploadArea, setShowUploadArea] = useState(true);
     const [noPdfWarningVisible, setNoPdfWarningVisible] = useState(false);
     const t = useT();
+    const locale = useLocaleStore(s => s.locale);
     const resetTrigger = useAnalizResetStore((s) => s.resetTrigger);
     const { w1px, h1px, fs1px } = useResponsive();
 
@@ -253,6 +254,7 @@ const Home: React.FC = () => {
                 name: pickedFile.name ?? 'document.pdf',
                 type: pickedFile.type ?? 'application/pdf',
             } as any);
+            form.append('locale', locale);
 
             const data = await uploadPdf(form);
             if (data.type === 'lab') {

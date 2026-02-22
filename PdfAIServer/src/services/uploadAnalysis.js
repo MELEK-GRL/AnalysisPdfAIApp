@@ -37,7 +37,7 @@ function extractPatientName(text) {
  * @param {string} tmpPath - Geçici PDF dosya yolu
  * @returns {Promise<{ type: string, confidence?: number, reason?: string, items: array, analysis?: string }>}
  */
-async function runAnalysis(tmpPath) {
+async function runAnalysis(tmpPath, locale = 'tr') {
     let text = '';
     try {
         text = await extractTextFromPdf(tmpPath);
@@ -58,7 +58,7 @@ async function runAnalysis(tmpPath) {
     }
 
     try {
-        const result = await classifyAndExtract(text || '');
+        const result = await classifyAndExtract(text || '', locale);
         const patientName = extractPatientName(text);
         if (patientName) result.patientName = patientName;
         return result;
@@ -133,9 +133,10 @@ async function persistResult(userId, result, pdfName) {
  * @param {string} tmpPath - Geçici PDF yolu
  * @param {object} userId - Mongoose ObjectId
  * @param {string|null} pdfName - Orijinal dosya adı
+ * @param {string} [locale] - 'tr' | 'en' – tahlil yorumu dilini belirler
  */
-async function analyzeAndSave(tmpPath, userId, pdfName) {
-    const result = await runAnalysis(tmpPath);
+async function analyzeAndSave(tmpPath, userId, pdfName, locale = 'tr') {
+    const result = await runAnalysis(tmpPath, locale);
     await persistResult(userId, result, pdfName);
     return {
         type: result?.isLab ? 'lab' : 'non-lab',

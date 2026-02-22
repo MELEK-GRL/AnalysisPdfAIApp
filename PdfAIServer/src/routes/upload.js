@@ -55,10 +55,11 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
 
         tmpPath = req.file.path;
         const pdfName = req.file?.originalname ? String(req.file.originalname).replace(/\s+/g, '_') : null;
+        const locale = (req.body?.locale === 'en' || req.get('X-App-Locale') === 'en' ? 'en' : 'tr');
 
         let result;
         try {
-            result = await analyzeAndSave(tmpPath, req.user._id, pdfName);
+            result = await analyzeAndSave(tmpPath, req.user._id, pdfName, locale);
         } catch (err) {
             if (err.code === 'PDF_READ_FAILED') {
                 return res.status(400).json({ message: 'PDF okunamadı', detail: err.message });

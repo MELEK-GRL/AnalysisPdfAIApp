@@ -752,14 +752,30 @@ function itemsToBulletedText(items) {
         .join('\n');
 }
 
-async function generateAnalysisText(items) {
+async function generateAnalysisText(items, locale = 'tr') {
     if (!Array.isArray(items) || items.length === 0) {
-        return defaultAnalysisFallback();
+        return defaultAnalysisFallback(locale);
     }
 
     const bullet = itemsToBulletedText(items);
+    const isEn = locale === 'en';
 
-    const systemInstr = `
+    const systemInstr = isEn
+        ? `
+You are not a clinical assistant; **you do not give medical diagnoses**. Based only on the laboratory data provided, write an informative, plain **English** summary. **Comment only on the parameter names, values, and reference ranges given below.** Do not add or assume anything not in the data.
+OUTPUT ONLY IN MARKDOWN. Produce these 4 sections in order:
+1) **Summary**: Brief overview of the given values.
+2) **Notable findings**: List items outside the reference range with parameter name and value from the data (if any).
+3) **Recommendations**: General lifestyle/follow-up suggestions (no medical treatment advice).
+4) **Disclaimer**: A clear disclaimer such as "This is not a medical evaluation; share your results with your doctor."
+
+Constraints:
+- Do not give drug names, doses, or diagnoses.
+- If unclear, say "further clinical context may be needed."
+- Comment only from the given list; do not invent parameters or values.
+- Tone: calm, non-judgmental, plain.
+`
+        : `
 Sen bir klinik asistan değilsin; **tıbbi tanı koymazsın**. Sadece verilen laboratuvar verilerine dayanarak bilgilendirici ve sade Türkçe bir özet yaz. **Sadece aşağıda verilen parametrelerin adı, değeri ve referans aralığına göre yorum yap.** Veride olmayan bir şey ekleme veya varsayma.
 ÇIKTIYI SADECE MARKDOWN OLARAK VER. Aşağıdaki 4 bölümü bu sırada üret:
 1) **Tahlil Özeti**: Verilen değerlerin genel çerçevesi (kısa).
@@ -774,7 +790,13 @@ Kısıtlar:
 - Ton: sakin, yargısız, sade.
 `;
 
-    const userInput = `
+    const userInput = isEn
+        ? `
+Below are the user's lab parameters (item by item). Write a short assessment under the 4 sections above.
+Data:
+${bullet}
+`
+        : `
 Aşağıda kullanıcının laboratuvar maddeleri var (madde madde). Buna göre yukarıdaki 4 başlıkta kısa bir değerlendirme yaz.
 Veriler:
 ${bullet}
@@ -793,26 +815,45 @@ ${bullet}
         );
 
         const text = extractOutputText(resp)?.trim();
-        if (!text) return defaultAnalysisFallback();
-        return hardenWithDisclaimer(text);
+        if (!text) return defaultAnalysisFallback(locale);
+        return hardenWithDisclaimer(text, locale);
     } catch (e) {
         console.warn('OPENAI ANALYSIS ERR:', e?.message || e);
-        return defaultAnalysisFallback();
+        return defaultAnalysisFallback(locale);
     }
 }
 
-function hardenWithDisclaimer(markdown) {
+function hardenWithDisclaimer(markdown, locale = 'tr') {
     if (markdown == null || typeof markdown !== 'string') return markdown || '';
-    const warning =
-        '\n\n---\n**Uyarı:** Bu içerik tıbbi tavsiye değildir. Sonuçlarınızı semptomlarınız ve öykünüzle birlikte **doktorunuza** danışın.';
+    const isEn = locale === 'en';
+    const warning = isEn
+        ? '\n\n---\n**Disclaimer:** This content is not medical advice. Discuss your results with **your doctor** along with your symptoms and history.'
+        : '\n\n---\n**Uyarı:** Bu içerik tıbbi tavsiye değildir. Sonuçlarınızı semptomlarınız ve öykünüzle birlikte **doktorunuza** danışın.';
     const low = markdown.toLowerCase();
-    if (low.includes('tıbbi tavsiye değildir') || low.includes('doktorunuza')) {
-        return markdown;
+    if (isEn) {
+        if (low.includes('not medical') || low.includes('your doctor')) return markdown;
+    } else {
+        if (low.includes('tıbbi tavsiye değildir') || low.includes('doktorunuza')) return markdown;
     }
     return `${markdown}\n${warning}`;
 }
 
-function defaultAnalysisFallback() {
+function defaultAnalysisFallback(locale = 'tr') {
+    if (locale === 'en') {
+        return [
+            '### Summary',
+            'Data is limited or not in a standard format; having your doctor review the report is still best for a proper assessment.',
+            '',
+            '### Notable findings',
+            '- This preview may not reliably identify values outside the reference range.',
+            '',
+            '### Recommendations',
+            '- Balanced diet, adequate hydration, regular sleep, and light-to-moderate activity support general health.',
+            '',
+            '---',
+            '**Disclaimer:** This content is not medical advice. Discuss your results with **your doctor** along with your symptoms and history.',
+        ].join('\n');
+    }
     return [
         '### Tahlil Özeti',
         'Veriler sınırlı veya standart biçimde değil; yine de genel bir değerlendirme için doktorunuzun dosyayı görmesi en doğrusu olacaktır.',
@@ -854,7 +895,7 @@ Your task:
 7. When the PDF has section headers (e.g. "İDRAR TETKİKİ", "HEMOGRAM", "BİYOKİMYA (ACİL)", "Tam Kan Sayımı"), set section for each item to the section header under which that test appears. Use the exact header text as in the PDF. If no clear section, use null.
 8. Ignore headers, footers, page numbers, and URLs (e.g. enabiz.gov.tr).`;
 
-async function classifyAndExtract(text) {
+async function classifyAndExtract(text, locale = 'tr') {
     const baseInstr = LAB_EXTRACTION_INSTRUCTIONS;
     const fullText = text || '';
     const fullBaseItems = getFullTextBaseItems(fullText);
@@ -893,7 +934,7 @@ async function classifyAndExtract(text) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, r1.items));
             let items = assignSectionsFromPdfText(fullText, rawItems);
             items = fixIdrarHpfFromText(fullText, items);
-            const analysis = await generateAnalysisText(items);
+            const analysis = await generateAnalysisText(items, locale);
             return { ...r1, items, rawItems, analysis };
         }
 
@@ -909,7 +950,7 @@ async function classifyAndExtract(text) {
                 items: mergedItems,
                 rawItems,
             };
-            const analysis = await generateAnalysisText(merged.items);
+            const analysis = await generateAnalysisText(merged.items, locale);
             return { ...merged, analysis };
         }
 
@@ -917,7 +958,7 @@ async function classifyAndExtract(text) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, r1.items));
             let items = assignSectionsFromPdfText(fullText, rawItems);
             items = fixIdrarHpfFromText(fullText, items);
-            const analysis = await generateAnalysisText(items);
+            const analysis = await generateAnalysisText(items, locale);
             return { ...r1, items, rawItems, analysis };
         }
 
@@ -937,7 +978,7 @@ async function classifyAndExtract(text) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, r2.items));
             let items = assignSectionsFromPdfText(fullText, rawItems);
             items = fixIdrarHpfFromText(fullText, items);
-            const analysis = await generateAnalysisText(items);
+            const analysis = await generateAnalysisText(items, locale);
             return { ...r2, items, rawItems, analysis };
         }
 
@@ -952,7 +993,7 @@ async function classifyAndExtract(text) {
                 items: mergedItems,
                 rawItems,
             };
-            const analysis = await generateAnalysisText(merged.items);
+            const analysis = await generateAnalysisText(merged.items, locale);
             return { ...merged, analysis };
         }
 
@@ -960,7 +1001,7 @@ async function classifyAndExtract(text) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, r2.items));
             let items = assignSectionsFromPdfText(fullText, rawItems);
             items = fixIdrarHpfFromText(fullText, items);
-            const analysis = await generateAnalysisText(items);
+            const analysis = await generateAnalysisText(items, locale);
             return { ...r2, items, rawItems, analysis };
         }
 
@@ -1012,7 +1053,7 @@ async function classifyAndExtract(text) {
         rawItems: fallbackRawItems,
     };
 
-    const analysis = fallback.isLab ? await generateAnalysisText(fallback.items) : defaultAnalysisFallback();
+    const analysis = fallback.isLab ? await generateAnalysisText(fallback.items, locale) : defaultAnalysisFallback(locale);
     return { ...fallback, analysis };
 }
 

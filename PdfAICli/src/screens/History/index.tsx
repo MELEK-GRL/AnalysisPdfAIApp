@@ -241,28 +241,31 @@ const History: React.FC = () => {
                 searchWrap: {
                     flexDirection: 'row',
                     alignItems: 'center',
-                    height: 48 * h1px,
+                    height: 50 * h1px,
                     backgroundColor: colors.white,
-                    borderRadius: 14 * w1px,
+                    borderRadius: 10 * w1px,
                     marginBottom: 14 * h1px,
-                    paddingHorizontal: 16 * w1px,
-                    borderWidth: 1,
-                    borderColor: '#E5E7EB',
+                    paddingLeft: 20 * w1px,
+                    paddingRight: 16 * w1px,
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.04,
+                    shadowOpacity: 0.06,
                     shadowRadius: 8,
                     elevation: 2,
                 },
                 searchIcon: {
-                    marginRight: 12 * w1px,
+                    marginRight: 5 * w1px,
                 },
                 searchInput: {
                     flex: 1,
                     height: '100%',
-                    fontSize: fontSize.bodySmall * scale,
-                    color: '#111827',
+                    fontSize: fontSize.bodyMedium * scale,
+                    color: '#1E293B',
                     paddingVertical: 0,
+                },
+                searchClear: {
+                    padding: 6 * w1px,
+                    marginLeft: 2 * w1px,
                 },
                 deleteAllRow: {
                     flexDirection: 'row',
@@ -385,17 +388,25 @@ const History: React.FC = () => {
                         <View style={styles.searchWrap}>
                             <Ionicons
                                 name="search"
-                                size={20}
+                                size={22}
                                 color={colors.backgroundPurple}
                                 style={styles.searchIcon}
                             />
                             <TextInput
                                 style={styles.searchInput}
                                 placeholder={t('history.searchPlaceholder')}
-                                placeholderTextColor="#9CA3AF"
+                                placeholderTextColor="#94A3B8"
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
                             />
+                            {searchQuery.length > 0 ? (
+                                <TouchableOpacity
+                                    onPress={() => setSearchQuery('')}
+                                    style={styles.searchClear}
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                                    <Ionicons name="close-circle" size={22} color="#94A3B8" />
+                                </TouchableOpacity>
+                            ) : null}
                         </View>
                         <View style={styles.deleteAllRow}>
                             {selectionMode ? (

@@ -104,43 +104,43 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
       StyleSheet.create({
         card: {
           backgroundColor: '#fff',
-          borderRadius: 16 * w1px,
-          padding: 12 * w1px,
-          marginBottom: 14 * h1px,
+          borderRadius: 12 * w1px,
+          padding: 8 * w1px,
+          marginBottom: 10 * h1px,
           borderWidth: 1,
           borderColor: '#F3F4F6',
           shadowColor: '#000',
           shadowOpacity: 0.04,
-          shadowRadius: 8,
+          shadowRadius: 6,
           elevation: 2,
         },
         testName: {
-          marginBottom: 8 * h1px,
-          paddingRight: 6 * w1px,
+          marginBottom: 4 * h1px,
+          paddingRight: 4 * w1px,
         },
         valueRow: {
           flexDirection: 'row',
           alignItems: 'baseline',
-          marginBottom: 6 * h1px,
-          gap: 8 * w1px,
+          marginBottom: 3 * h1px,
+          gap: 5 * w1px,
         },
         rangeRow: {
           flexDirection: 'row',
           alignItems: 'center',
-          marginBottom: 6 * h1px,
+          marginBottom: 3 * h1px,
           flexWrap: 'wrap',
         },
         barWrapper: {
           width: '100%',
           alignItems: 'center',
-          marginTop: 6 * h1px,
-          marginBottom: 8 * h1px,
+          marginTop: 4 * h1px,
+          marginBottom: 5 * h1px,
           paddingHorizontal: BAR_HORIZONTAL_PADDING * w1px,
           position: 'relative',
         },
         bar: {
-          height: 12 * h1px,
-          borderRadius: 6 * w1px,
+          height: 10 * h1px,
+          borderRadius: 5 * w1px,
           backgroundColor: '#F3F4F6',
           position: 'relative',
           overflow: 'hidden',
@@ -149,7 +149,7 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
         seg: {height: '100%'},
         markerWrap: {
           position: 'absolute',
-          top: -10 * h1px,
+          top: -8 * h1px,
           alignItems: 'center',
           justifyContent: 'center',
         },
@@ -158,8 +158,8 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
           alignItems: 'center',
         },
         statusPill: {
-          paddingVertical: 5 * h1px,
-          paddingHorizontal: 10 * w1px,
+          paddingVertical: 3 * h1px,
+          paddingHorizontal: 8 * w1px,
           borderRadius: 999,
         },
       }),
@@ -304,7 +304,7 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
       <View style={s.card}>
         {/* Test adı – Potasyum, Klor, Amilaz gibi okunaklı isim */}
         <T
-          size={fontSize.subtitle}
+          size={fontSize.bodyMedium}
           weight="600"
           color="#111827"
           numberOfLines={2}
@@ -314,7 +314,7 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
 
         {/* Kullanıcının değeri – kategorikse (HPV Negatif vb.) etiket; değilse sayı veya valueDisplay */}
         <View style={s.valueRow}>
-          <T size={fontSize.title} weight="700" color={flagColor}>
+          <T size={fontSize.subtitle} weight="700" color={flagColor}>
             {isCategorical
               ? flagText
               : item.valueDisplay != null &&
@@ -322,7 +322,7 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
               ? `${String(item.valueDisplay).trim()}${unitStr}`
               : `${fmtNum(v)}${unitStr}`}
           </T>
-          <T size={fontSize.body} color="#6B7280">
+          <T size={fontSize.bodySmall} color="#6B7280">
             ({t('history.yourResult')})
           </T>
         </View>
@@ -330,11 +330,11 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
         {/* Normal aralık – sadece belirtilmişse göster */}
         {_hasRef && (
           <View style={s.rangeRow}>
-            <T size={fontSize.body} color="#6B7280">
+            <T size={fontSize.bodySmall} color="#6B7280">
               {t('history.normalRange')}:
             </T>
             <T
-              size={fontSize.body}
+              size={fontSize.bodySmall}
               weight="600"
               color="#374151"
               style={{marginLeft: 4}}>
@@ -374,16 +374,16 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
                     Math.max(
                       0,
                       Math.min(
-                        widthPx - iconSize.large * w1px,
+                        widthPx - iconSize.medium * w1px,
                         markerLeft -
-                          (iconSize.large / 2) * Math.min(w1px, h1px),
+                          (iconSize.medium / 2) * Math.min(w1px, h1px),
                       ),
                     ),
                 },
               ]}>
               <Ionicons
                 name="heart"
-                size={iconSize.large * Math.min(w1px, h1px)}
+                size={iconSize.medium * Math.min(w1px, h1px)}
                 color={HEART_PURPLE}
               />
             </View>
@@ -401,11 +401,11 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
               gap: 8,
             },
           ]}>
-          <T size={fontSize.body} color="#6B7280">
+          <T size={fontSize.bodySmall} color="#6B7280">
             {t('history.statusLabel')}:
           </T>
           <View style={[s.statusPill, {backgroundColor: bgColor}]}>
-            <T size={fontSize.body} weight="700" color={flagColor}>
+            <T size={fontSize.label} weight="700" color={flagColor}>
               {flagText}
             </T>
           </View>

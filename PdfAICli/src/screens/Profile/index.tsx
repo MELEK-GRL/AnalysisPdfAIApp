@@ -126,20 +126,20 @@ const Profile: React.FC = () => {
                             <View style={styles.userInfo}>
                                 {user?.name ? (
                                     <>
-                                        <T size={fontSize.captionLarge} weight="500" color="#6B7280" style={styles.userLabel}>
+                                        <T size={fontSize.bodySmall} weight="600" color={colors.textGraySoft} style={styles.userLabel}>
                                             {t('settings.userName')}
                                         </T>
-                                        <T size={fontSize.subtitleLarge} weight="600" color="#1F2937">
+                                        <T size={fontSize.subtitle} weight="600" color="#1F2937">
                                             {user.name}
                                         </T>
                                     </>
                                 ) : null}
                                 {user?.email ? (
                                     <>
-                                        <T size={fontSize.captionLarge} weight="500" color="#6B7280" style={styles.userEmailLabel}>
+                                        <T size={fontSize.bodySmall} weight="600" color={colors.textGraySoft} style={styles.userEmailLabel}>
                                             {t('settings.email')}
                                         </T>
-                                        <T size={fontSize.subtitleLarge} weight="600" color="#1F2937">
+                                        <T size={fontSize.subtitle} weight="600" color="#1F2937">
                                             {user.email}
                                         </T>
                                     </>

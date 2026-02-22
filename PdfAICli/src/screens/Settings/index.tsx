@@ -2,7 +2,6 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, CommonActions, useFocusEffect } from '@react-navigation/native';
-import { API_BASE_URL } from '../../constants/apiBaseUrl';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSessionStore } from '../../store/useSessionStore';
@@ -156,7 +155,7 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
                     </View>
                 ) : null}
 
-                <T size={fontSize.titleXl} weight="700" color="#374151" style={styles.pageTitle}>
+                <T size={fontSize.title} weight="700" color="#374151" style={styles.pageTitle}>
                     {t('settings.title')}
                 </T>
 
@@ -209,12 +208,6 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
                             {t('settings.logout')}
                         </T>
                     </TouchableOpacity>
-                </View>
-
-                <View style={styles.section}>
-                    <T size={fontSize.caption} weight="500" color="#6B7280" numberOfLines={2}>
-                        Backend: {API_BASE_URL || '(yok)'}
-                    </T>
                 </View>
             </View>
 

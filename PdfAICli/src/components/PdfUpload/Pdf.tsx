@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { fontSize } from '../../constants/typography';
+import React, { useMemo, useState } from 'react';
 import {
     View,
     Text,
@@ -11,6 +10,7 @@ import DocumentPicker, {
     types,
     DocumentPickerResponse,
 } from 'react-native-document-picker';
+import { useTypography } from '../../theme/useTypography';
 
 type Props = {
     onPicked?: (file: DocumentPickerResponse) => void;
@@ -21,6 +21,30 @@ type Props = {
 const Pdf: React.FC<Props> = ({ onPicked, onUpload, disableUploadButton }) => {
     const [selected, setSelected] = useState<DocumentPickerResponse | null>(null);
     const [loading, setLoading] = useState(false);
+    const { fontSize: scaledFontSize } = useTypography();
+    const styles = useMemo(
+        () =>
+            StyleSheet.create({
+                container: { gap: 12, alignItems: 'center' },
+                pickBtn: {
+                    backgroundColor: '#2563eb',
+                    paddingVertical: 12,
+                    paddingHorizontal: 20,
+                    borderRadius: 12,
+                },
+                uploadBtn: {
+                    backgroundColor: '#16a34a',
+                    paddingVertical: 12,
+                    paddingHorizontal: 20,
+                    borderRadius: 12,
+                },
+                btnText: { color: '#fff', fontWeight: '600' },
+                info: { alignItems: 'center', maxWidth: '90%' },
+                name: { fontSize: scaledFontSize.body, color: '#111', maxWidth: 280 },
+                meta: { fontSize: scaledFontSize.label, color: '#6b7280' },
+            }),
+        [scaledFontSize.body, scaledFontSize.label],
+    );
 
     const pickPdf = async () => {
         try {
@@ -88,23 +112,3 @@ const Pdf: React.FC<Props> = ({ onPicked, onUpload, disableUploadButton }) => {
 };
 
 export default Pdf;
-
-const styles = StyleSheet.create({
-    container: { gap: 12, alignItems: 'center' },
-    pickBtn: {
-        backgroundColor: '#2563eb',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 12,
-    },
-    uploadBtn: {
-        backgroundColor: '#16a34a',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 12,
-    },
-    btnText: { color: '#fff', fontWeight: '600' },
-    info: { alignItems: 'center', maxWidth: '90%' },
-    name: { fontSize: fontSize.body, color: '#111', maxWidth: 280 },
-    meta: { fontSize: fontSize.label, color: '#6b7280' },
-});

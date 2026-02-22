@@ -7,6 +7,7 @@ import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import Button from '../../components/Buttons/Button';
 import T from '../../components/Text/T';
 import { useResponsive } from '../../utils/deviceStore/device';
+import { fontSize } from '../../constants/typography';
 import colors from '../../theme/colors';
 import GradientLayout from '../../components/Layout/GradientLayout';
 
@@ -69,7 +70,7 @@ const Logout: React.FC = () => {
             <View style={s.container}>
                 <View style={s.card}>
                     <View style={s.titleWrap}>
-                        <T size={20 * fs1px} weight="700" color="#111827" align="center">
+                        <T size={fontSize.title} weight="700" color="#111827" align="center">
                             {t('logout.title')}
                         </T>
                     </View>

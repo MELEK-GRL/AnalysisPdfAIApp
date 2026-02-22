@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Text, TextStyle, StyleSheet, TextProps } from 'react-native';
-import { useResponsive } from '../../utils/deviceStore/device';
 import { fontSize } from '../../constants/typography';
+import { useTypography } from '../../theme/useTypography';
 
 type Props = TextProps & {
     children: React.ReactNode;
@@ -30,20 +30,20 @@ const T: React.FC<Props> = ({
     style,
     ...rest
 }) => {
-    const { fs1px } = useResponsive();
+    const { fontFamily, scale } = useTypography();
 
     const styles = useMemo(
         () =>
             StyleSheet.create({
                 text: {
-                    fontSize: size * fs1px,
+                    fontSize: size * scale,
                     fontWeight: weight,
                     color,
                     textAlign: align,
-                    fontFamily: 'System',
+                    fontFamily,
                 },
             }),
-        [size, weight, color, align, fs1px],
+        [size, weight, color, align, fontFamily, scale],
     );
 
     return (

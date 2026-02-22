@@ -10,7 +10,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfile } from '../server/api/User';
-import { fontSize } from '../constants/typography';
+import { useTypography } from '../theme/useTypography';
 import { iconSize } from '../constants/icons';
 import { AUTH_TOKEN, CONSENT_GIVEN_ONCE, LANGUAGE_SPLASH_SEEN } from '../constants/storageKeys';
 import { useAuthStore } from '../store/useAuthStore';
@@ -49,12 +49,13 @@ const Tab = createBottomTabNavigator();
 
 const ProfileTab = () => <Profile />;
 
-const TAB_BAR_CONTENT_HEIGHT = 60;
+const TAB_BAR_CONTENT_HEIGHT = 64;
 const HOME_INDICATOR_HEIGHT_IOS = 34;
 
 const MainTabs = () => {
     const t = useT();
     const insets = useSafeAreaInsets();
+    const { fontSize: scaledFontSize } = useTypography();
     const bottomSafe = Platform.OS === 'ios'
         ? Math.max(insets.bottom, HOME_INDICATOR_HEIGHT_IOS)
         : Math.max(insets.bottom, 12);
@@ -67,7 +68,7 @@ const MainTabs = () => {
                 tabBarActiveTintColor: colors.backgroundPurple,
                 tabBarInactiveTintColor: '#6B7280',
                 tabBarLabelStyle: {
-                    fontSize: 12,
+                    fontSize: scaledFontSize.body,
                     fontWeight: '600',
                 },
                 tabBarStyle: {
@@ -75,7 +76,7 @@ const MainTabs = () => {
                     borderTopWidth: StyleSheet.hairlineWidth,
                     borderTopColor: 'rgba(0,0,0,0.08)',
                     height: tabBarHeight,
-                    paddingTop: 18,
+                    paddingTop: 24,
                     paddingBottom: bottomSafe,
                     elevation: 0,
                     shadowColor: 'transparent',
@@ -84,7 +85,7 @@ const MainTabs = () => {
                     paddingVertical: 6,
                 },
                 tabBarIconStyle: {
-                    marginBottom: 12,
+                    marginBottom: 16,
                 },
                 tabBarShowLabel: true,
             }}>
@@ -94,10 +95,10 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.analysis'),
                     tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                        <View style={{ width: 30, height: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
                             <Ionicons
                                 name={focused ? 'document-text' : 'document-text-outline'}
-                                size={26}
+                                size={28}
                                 color={color}
                             />
                         </View>
@@ -110,10 +111,10 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.history'),
                     tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                        <View style={{ width: 30, height: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
                             <Ionicons
                                 name={focused ? 'time' : 'time-outline'}
-                                size={26}
+                                size={28}
                                 color={color}
                             />
                         </View>
@@ -126,10 +127,10 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.profile'),
                     tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                        <View style={{ width: 30, height: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
                             <Ionicons
                                 name={focused ? 'person' : 'person-outline'}
-                                size={26}
+                                size={28}
                                 color={color}
                             />
                         </View>

@@ -24,6 +24,7 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import PageLayout from '../../components/Layout/PageLayout';
 import T from '../../components/Text/T';
 import colors from '../../theme/colors';
+import { useTypography } from '../../theme/useTypography';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
 import CenterModal from '../../components/Modals/CenterModal';
@@ -54,6 +55,7 @@ const History: React.FC = () => {
     const t = useT();
     const locale = useLocaleStore((s) => s.locale);
     const { w1px, h1px, fs1px } = useResponsive();
+    const { scale } = useTypography();
 
     const fetchHistory = useCallback(async () => {
         try {
@@ -258,7 +260,7 @@ const History: React.FC = () => {
                 searchInput: {
                     flex: 1,
                     height: '100%',
-                    fontSize: 15,
+                    fontSize: fontSize.bodySmall * scale,
                     color: '#111827',
                     paddingVertical: 0,
                 },
@@ -321,7 +323,7 @@ const History: React.FC = () => {
                     backgroundColor: 'transparent',
                 },
             }),
-        [w1px, h1px, fs1px],
+        [w1px, h1px, fs1px, scale],
     );
 
     const renderItem = ({ item }: { item: LabHistoryItem }) => {

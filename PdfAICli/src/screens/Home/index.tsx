@@ -161,8 +161,8 @@ const Home: React.FC = () => {
                     gap: 10 * w1px,
                 },
                 uploadIconWrap: {
-                    width: 56 * w1px,
-                    height: 56 * h1px,
+                    width: 48 * w1px,
+                    height: 48 * h1px,
                     alignItems: 'center',
                     justifyContent: 'center',
                 },

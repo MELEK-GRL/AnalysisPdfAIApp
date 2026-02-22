@@ -97,15 +97,15 @@ const PdfUploadSection: React.FC<PdfUploadSectionProps> = ({
                 disabled={phase === 'loading'}
                 activeOpacity={0.8}
                 style={styles.uploadCard}>
-                <T size={fontSize.body} color="#6B7280" style={styles.uploadCardTop}>
+                <T size={fontSize.bodySmall} color="#6B7280" style={styles.uploadCardTop}>
                     {t('home.dragOrSelect')}
                 </T>
                 <View style={styles.uploadCardContent}>
                     <View style={styles.uploadIconWrap}>
-                        <Ionicons name="cloud-upload" size={iconSize.xxl} color={colors.backgroundPurple} />
+                        <Ionicons name="cloud-upload" size={36} color={colors.backgroundPurple} />
                     </View>
                     <View style={styles.uploadTextWrap}>
-                        <T size={fontSize.subtitle} weight="700" color="#111827" style={{ marginBottom: 2 }}>
+                        <T size={fontSize.body} weight="700" color="#111827" style={{ marginBottom: 2 }}>
                             {t('home.uploadPdf')}
                         </T>
                         <T size={fontSize.bodySmall} color="#9CA3AF">

@@ -11,6 +11,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import colors from '../../theme/colors';
+import { useTypography } from '../../theme/useTypography';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
 
@@ -31,6 +32,7 @@ const TextInputComponent: React.FC<Props> = ({
     ...props
 }) => {
     const { w1px, h1px, fs1px } = useResponsive();
+    const { scale } = useTypography();
     const [visible, setVisible] = useState(false);
     const isPassword = secureTextEntry === true || passwordToggle;
     const showPassword = passwordToggle ? visible : !secureTextEntry;
@@ -56,7 +58,7 @@ const TextInputComponent: React.FC<Props> = ({
                     flex: 1,
                     paddingVertical: 10 * h1px,
                     paddingHorizontal: 12 * w1px,
-                    fontSize: fontSize.body * fs1px,
+                    fontSize: fontSize.body * scale,
                     color: '#111827',
                     paddingRight: passwordToggle ? 44 * w1px : 12 * w1px,
                 },
@@ -72,7 +74,7 @@ const TextInputComponent: React.FC<Props> = ({
                     marginTop: 4 * h1px,
                 },
             }),
-        [w1px, h1px, fs1px, error, passwordToggle],
+        [w1px, h1px, fs1px, error, passwordToggle, scale],
     );
 
     return (

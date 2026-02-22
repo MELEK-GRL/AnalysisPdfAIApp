@@ -132,7 +132,8 @@
     "rateLimitTitle": "Analiz Hakkı Doldu",
     "rateLimitMessage": "Günlük analiz hakkınız doldu. 24 saat içinde en fazla 2 kez PDF analizi yapabilirsiniz. Lütfen yarın tekrar deneyin.",
     "uploadError": "PDF yüklenemedi.",
-    "pleaseUploadResult": "Lütfen tahlil sonucunuzu yükleyin."
+    "pleaseUploadResult": "Lütfen tahlil PDF yükleyin.",
+    "rawValuesTitle": "Tahlil değerleri (PDF'deki gibi)"
   },
   "history": {
     "emptyTitle": "Veri bulunamadı",
@@ -148,7 +149,11 @@
     "statusLow": "Düşük",
     "statusHigh": "Yüksek",
     "statusNormal": "Normal",
+    "statusLabel": "Durum",
+    "defaultSectionTitle": "Yapılan Test",
     "noData": "Veri Bulunmamaktadır",
+    "showMore": "Daha fazla göster",
+    "showingCount": "Gösterilen: {{visible}} / {{total}}",
     "labReport": "Tahlil raporu",
     "notLabReport": "Tahlil raporu değil",
     "fetchError": "Geçmiş yüklenemedi. Lütfen tekrar deneyin.",

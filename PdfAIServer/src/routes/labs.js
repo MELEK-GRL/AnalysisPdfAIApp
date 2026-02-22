@@ -1,6 +1,7 @@
 const express = require('express');
 const LatestLabResult = require('../models/LatestLabResult');
 const LabHistory = require('../models/LabHistory');
+const { normalizeItemsSections } = require('../utils/normalizeSection');
 const router = express.Router();
 
 router.get('/history', async (req, res) => {
@@ -48,7 +49,7 @@ router.get('/history/:id', async (req, res) => {
             id: doc._id.toString(),
             pdfName: doc.pdfName || null,
             createdAt: doc.createdAt,
-            items: doc.items || [],
+            items: normalizeItemsSections(doc.items || []),
             analysis: doc.analysis || null,
         });
     } catch (e) {
@@ -79,7 +80,7 @@ router.get('/latest', async (req, res) => {
         if (!doc) {
             return res.json({ items: [], updatedAt: null });
         }
-        return res.json({ items: doc.items || [], updatedAt: doc.updatedAt });
+        return res.json({ items: normalizeItemsSections(doc.items || []), updatedAt: doc.updatedAt });
     } catch (e) {
         console.error('LABS/LATEST ERR:', e?.message || e);
         return res.status(500).json({ message: 'Labs fetch error', detail: e?.message });

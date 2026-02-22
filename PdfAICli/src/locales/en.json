@@ -132,7 +132,8 @@
     "rateLimitTitle": "Analysis Limit Reached",
     "rateLimitMessage": "You have reached your daily analysis limit. You can analyze up to 2 PDFs every 24 hours. Please try again tomorrow.",
     "uploadError": "Could not upload PDF.",
-    "pleaseUploadResult": "Please upload the analysis result."
+    "pleaseUploadResult": "Please upload a lab result PDF.",
+    "rawValuesTitle": "Lab values (as in PDF)"
   },
   "history": {
     "emptyTitle": "Data not found",
@@ -148,7 +149,11 @@
     "statusLow": "Low",
     "statusHigh": "High",
     "statusNormal": "Normal",
+    "statusLabel": "Status",
+    "defaultSectionTitle": "Tests Performed",
     "noData": "No Data Found",
+    "showMore": "Show more",
+    "showingCount": "Showing {{visible}} / {{total}}",
     "labReport": "Lab report",
     "notLabReport": "Not a lab report",
     "fetchError": "Could not load history. Please try again.",

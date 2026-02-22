@@ -41,6 +41,7 @@ const Home: React.FC = () => {
     const user = useAuthStore(s => s.user);
     const [displayName, setDisplayName] = useState<string>(user?.name || '');
     const [items, setItems] = useState<LabItem[]>([]);
+    const [rawItems, setRawItems] = useState<LabItem[]>([]);
     const [analysis, setAnalysis] = useState<string>('');
     const [selectErrorVisible, setSelectErrorVisible] = useState(false);
     const [selectErrorMessage, setSelectErrorMessage] = useState<string>('');
@@ -60,6 +61,7 @@ const Home: React.FC = () => {
         setFileName(null);
         setPickedFile(null);
         setItems([]);
+        setRawItems([]);
         setAnalysis('');
         setShowUploadArea(true);
         setSelectErrorVisible(false);
@@ -77,6 +79,7 @@ const Home: React.FC = () => {
         useCallback(() => {
             useSessionStore.getState().touch();
             setItems([]);
+            setRawItems([]);
             setAnalysis('');
             setShowUploadArea(true);
         }, []),
@@ -243,18 +246,33 @@ const Home: React.FC = () => {
             } as any);
 
             const data = await uploadPdf(form);
-            // TEST: PDF vs API karşılaştırması için — cevabı kopyalayıp paylaş
-            if (__DEV__) {
-                console.log('[PDF_TEST] upload response:', JSON.stringify(data, null, 2));
+            // TEST: PDF vs API karşılaştırması — terminalde (Metro) çıktıyı görün
+            console.log('\n========== PDF TEST – API Cevabı ==========');
+            console.log(JSON.stringify(data, null, 2));
+            if (data.type === 'lab' && Array.isArray(data.items) && data.items.length > 0) {
+                console.log('\n---------- Uygulamada gösterilen lab değerleri (PDF ile kıyaslayın) ----------');
+                data.items.forEach((it: any, i: number) => {
+                    console.log(
+                        `[${i + 1}] test: "${it.test}" | value: ${it.value} | unit: ${it.unit ?? '-'} | ref: ${it.refLow ?? '-'} - ${it.refHigh ?? '-'} | resultLabel: ${it.resultLabel ?? '-'}`
+                    );
+                });
+                console.log('---------- Toplam', data.items.length, 'satır ----------\n');
+            }
+            if (data.analysis) {
+                console.log('---------- Analiz metni ----------');
+                console.log(data.analysis);
+                console.log('--------------------------------\n');
             }
             if (data.type === 'lab') {
                 setItems(data.items || []);
+                setRawItems(data.rawItems ?? data.items ?? []);
                 setAnalysis(data.analysis || '');
                 setPhase('result');
                 setShowUploadArea(false);
                 setUploadSuccessVisible(true);
             } else {
                 setItems([]);
+                setRawItems([]);
                 setAnalysis('');
                 setPhase('idle');
                 setNotLabVisible(true);
@@ -267,6 +285,7 @@ const Home: React.FC = () => {
                 setUploadErrorVisible(true);
             }
             setItems([]);
+            setRawItems([]);
             setAnalysis('');
             setPhase('idle');
         } finally {
@@ -303,6 +322,7 @@ const Home: React.FC = () => {
                                     }}
                                     onShowUploadArea={() => {
                                         setItems([]);
+                                        setRawItems([]);
                                         setAnalysis('');
                                         setShowUploadArea(true);
                                     }}

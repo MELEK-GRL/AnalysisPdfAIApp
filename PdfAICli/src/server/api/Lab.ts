@@ -11,14 +11,19 @@ export type LabItem = {
     refHigh?: number | null;
     flag?: 'L' | 'N' | 'H';
     resultLabel?: string | null;
+    /** Ölçüm sınırı altı/üstü için tam metin (örn. "<0.5", ">500") */
+    valueDisplay?: string | null;
+    /** Tahlil başlığı (İDRAR TETKİKİ, HEMOGRAM, BİYOKİMYA (ACİL) vb.) – kartları bu başlık altında gruplamak için */
+    section?: string | null;
 };
 export type UploadResponse =
-    | { type: 'lab'; confidence: number; items: LabItem[]; analysis?: string }
+    | { type: 'lab'; confidence: number; items: LabItem[]; rawItems?: LabItem[]; analysis?: string }
     | {
         type: 'non-lab';
         confidence?: number;
         reason?: string;
         items: [];
+        rawItems?: LabItem[];
         analysis?: string;
     };
 

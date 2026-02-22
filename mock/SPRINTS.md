@@ -489,3 +489,30 @@
 - [ ] Yayın öncesi akış: Login → Sözleşme → PDF yükle → Analiz → Geçmiş; Çıkış; Dil değişimi; farklı ekran boyutları
 
 **→ Tamamlandıktan sonra Faz 12 biter. Play Store yüklemesi yapılabilir.**
+
+---
+
+## Sonraki Sprint – 4 Aşamalı Analiz Revizyonu
+
+> Bir sonraki sprintte analiz akışı aşağıdaki 4 aşamaya göre revize edilecek.
+
+### Sprint – 4 Aşamalı Tahlil Akışı ✓ Tamamlandı
+
+**1. Aşama – Değerleri aynen çıkar ve göster**
+- [x] AI’dan talep: PDF’deki tüm değerleri **değiştirmeden aynen** döndür (tüm parametreler). (API `rawItems` döndürüyor.)
+- [x] UI’da PDF’deki değerlerin **bire bir aynısı** gösterilsin; normalizasyon/düzeltme bu aşamada uygulanmasın (veya sadece ham çıktı sunulsun). (ResultSection’da "Tahlil değerleri (PDF'deki gibi)" bloğu `rawItems` ile gösteriliyor.)
+
+**2. Aşama – Her tahlil sonucu için status (normal / yüksek / düşük)**
+- [x] Her bir tahlil parametresinin sonucu yorumlansın: değer referans aralığına göre **Normal**, **Yüksek** veya **Düşük** olarak işaretlensin.
+- [x] UI’da her parametre için bu status (ve varsa renk/pil) gösterilsin. (Chart bileşeninde status pil + renk zaten var.)
+
+**3. Aşama – Tüm tahlil PDF’i için metin yorumu**
+- [x] AI, yüklenen tahlil PDF’inin tamamı için **metin halinde özet/yorum** üretsin.
+- [x] Bu metin uygulamada (mevcut analiz alanında) kullanıcıya gösterilsin. (Yorumla butonu → modal’da analysis metni.)
+
+**4. Aşama – Tahlil PDF değilse uyarı**
+- [x] Kullanıcının gönderdiği PDF içeriği **tahlil raporu değilse** (ör. CV, fatura, başka belge):
+  - [x] Uygun mesaj gösterilsin: **"Lütfen tahlil PDF yükle"** (veya eşdeğer çeviri). (home.pleaseUploadResult güncellendi.)
+  - [x] Lab ekranında bu durum net şekilde anlaşılsın (modal/toast vb.). (PopupModal ile notLabVisible.)
+
+**→ Bu sprint tamamlandı. Analiz akışı 4 aşamaya göre çalışıyor.**

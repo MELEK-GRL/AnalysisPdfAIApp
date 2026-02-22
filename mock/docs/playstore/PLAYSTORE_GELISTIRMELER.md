@@ -72,5 +72,6 @@ Bu liste, yayında red veya gecikme yaşamamak için tamamlanması gereken madde
 5. versionCode artır, release build al, test et.
 6. Store listesi (isim, açıklama, ikon 512x512, feature graphic, ekran görüntüleri).
 7. Play Console: Veri güvenliği + içerik derecelendirmesi.
+8. **Sürüm çıktıktan sonra (zorunlu):** `mock/data/releases.json` güncelle; yeni kaydı `releases` dizisinin en başına ekle. Detay: `mock/docs/playstore/RELEASES.md`.
 
 Bu maddeler tamamlandığında Play Store’a yüklemede teknik ve politika kaynaklı sorunlar büyük ölçüde önlenir.

@@ -85,6 +85,7 @@ Detaylı adımlar: **mock/docs/playstore/PLAYSTORE_GELISTIRMELER.md**
 
 ## Yayın Sonrası
 
+- [ ] **Sürüm kaydı (zorunlu):** Her yeni sürüm (dahili test / kapalı test / üretim) çıktığında `mock/data/releases.json` güncellenir. Yeni satır `releases` dizisinin **en başına** eklenir. Detay: `mock/docs/playstore/RELEASES.md`
 - [ ] Canlı ortamda API erişilebilir
 - [ ] MongoDB Atlas production ayarları
 - [ ] İlk kullanıcı geri bildirimleri takip

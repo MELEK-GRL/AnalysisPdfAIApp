@@ -211,13 +211,11 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
                     </TouchableOpacity>
                 </View>
 
-                {__DEV__ ? (
-                    <View style={styles.section}>
-                        <T size={fontSize.caption} weight="500" color="#6B7280" numberOfLines={1}>
-                            Backend: {API_BASE_URL || '(yok)'}
-                        </T>
-                    </View>
-                ) : null}
+                <View style={styles.section}>
+                    <T size={fontSize.caption} weight="500" color="#6B7280" numberOfLines={2}>
+                        Backend: {API_BASE_URL || '(yok)'}
+                    </T>
+                </View>
             </View>
 
             <PopupModal

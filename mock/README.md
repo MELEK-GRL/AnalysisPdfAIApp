@@ -37,7 +37,8 @@ mock/
 └── data/                 # Mock/test verileri
     ├── users.json
     ├── labResults.json
-    └── analyses.json
+    ├── analyses.json
+    └── releases.json     # Çıkan sürüm kaydı (versionCode, branch, track, tarih)
 ```
 
 ## Projeyi Çalıştırma (Yarn)

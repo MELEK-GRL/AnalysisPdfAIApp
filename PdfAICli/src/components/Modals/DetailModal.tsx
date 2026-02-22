@@ -38,27 +38,38 @@ const DetailModal: React.FC<Props> = ({
                     top: 0,
                     width,
                     height,
-                    backgroundColor: colors.white,
+                    backgroundColor: colors.backgroundLight,
                 },
                 box: {
                     flex: 1,
                     width: '100%',
                     backgroundColor: colors.white,
-                    paddingVertical: 18 * h1px,
-                    paddingHorizontal: 16 * w1px,
+                    paddingVertical: 20 * h1px,
+                    paddingHorizontal: 20 * w1px,
                     alignItems: 'stretch',
+                },
+                titleWrap: {
+                    marginBottom: 16 * h1px,
+                    paddingBottom: 14 * h1px,
+                    borderBottomWidth: 3,
+                    borderBottomColor: colors.backgroundPurpleSoft,
+                    alignItems: 'center',
                 },
                 buttonRow: {
                     flexDirection: 'row',
-                    justifyContent: 'space-between',
+                    justifyContent: 'center',
                     width: '100%',
                     gap: 12 * w1px,
                     marginTop: 20 * h1px,
+                    paddingTop: 16 * h1px,
+                    borderTopWidth: 1,
+                    borderTopColor: '#F3F4F6',
                 },
                 contentWrap: {
                     flex: 1,
-                    marginTop: 6 * h1px,
+                    marginTop: 4 * h1px,
                     width: '100%',
+                    paddingVertical: 8 * h1px,
                 },
             });
     }, [w1px, h1px, fs1px]);
@@ -75,20 +86,22 @@ const DetailModal: React.FC<Props> = ({
             presentationStyle="fullScreen">
             <View style={styles.overlay}>
                 <View style={styles.box}>
-                        <T
-                            size={fontSize.title}
-                            weight="700"
-                            align="center"
-                            style={{ marginBottom: 10 * h1px }}>
-                            {title}
-                        </T>
+                        <View style={styles.titleWrap}>
+                            <T
+                                size={fontSize.titleXl}
+                                weight="700"
+                                align="center"
+                                color={colors.textDark}>
+                                {title}
+                            </T>
+                        </View>
 
                         {/* İçerik */}
                         <View style={styles.contentWrap}>
                             {children ? (
                                 children
                             ) : (
-                                <T size={fontSize.body} color="#374151" align="center">
+                                <T size={fontSize.body} color={colors.textGraySoft} align="center">
                                     {message}
                                 </T>
                             )}

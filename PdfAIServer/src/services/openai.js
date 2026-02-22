@@ -577,7 +577,12 @@ function reduceToLikelyLabLines(text) {
 
     const keepRx = /[A-Za-zÇÖŞÜĞİıçöşüğ\-\/() ]{2,}\s+[<>≈~]?\s*\d/;
     const rangeRx = /\d+(?:[.,]\d+)?\s*[-–~]\s*\d+(?:[.,]\d+)?/;
-    const kept = lines.filter(l => keepRx.test(l) || rangeRx.test(l));
+    /** HPV, tarama testleri: parametre adı + Negatif/Pozitif (sayı olmayabilir) */
+    const categoricalLabRx = /\b(Negatif|Pozitif|Reaktif|Negative|Positive)\b/i;
+    const labParamRx = /HPV|HBsAg|Anti\s*HCV|HIV|tip\s*\d+|referans|tahlil|sonuç/i;
+    const kept = lines.filter(l =>
+        keepRx.test(l) || rangeRx.test(l) || (categoricalLabRx.test(l) && labParamRx.test(l))
+    );
 
     const trimmed = kept.map(l =>
         l.replace(/\u00A0/g, ' ')
@@ -735,6 +740,9 @@ function itemsToBulletedText(items) {
         .map((it) => {
             const parts = [];
             parts.push(it.test);
+            if (it.resultLabel && String(it.resultLabel).trim()) {
+                parts.push(`sonuç: ${String(it.resultLabel).trim()}`);
+            }
             parts.push(`değer: ${it.value}${it.unit ? ' ' + it.unit : ''}`);
             if (Number.isFinite(it.refLow) && Number.isFinite(it.refHigh)) {
                 parts.push(`ref: ${it.refLow}–${it.refHigh}${it.unit ? ' ' + it.unit : ''}`);
@@ -828,17 +836,19 @@ CRITICAL – Set isLab: false for anything that is NOT a medical lab report. Exa
 - General documents, invoices, forms
 - Any text without clear medical lab parameters (e.g. HGB, glucose, creatinine, WBC, RBC, referans aralığı, tahlil sonucu)
 
-Set isLab: true ONLY when the document is clearly a medical laboratory result report: patient lab values with parameter names, numeric results, units (mg/dl, mmol/L, etc.) and reference ranges. Typical content: hemogram, biyokimya, idrar tahlili, kan tahlili, etc.
+Set isLab: true when the document is clearly a medical laboratory result report. This includes:
+- Reports with numeric results, units (mg/dl, mmol/L, etc.) and reference ranges: hemogram, biyokimya, idrar tahlili, kan tahlili.
+- Reports with categorical results only (e.g. Negatif, Pozitif, Positive, Negative, Reaktif) and parameter names, even without numeric values or reference ranges: e.g. HPV (Human Papilloma Virus) tip sonuçları, HIV, HBsAg, Anti HCV gibi tarama testleri. For such rows use value 0, put the exact result in resultLabel (e.g. "Negatif", "Pozitif"), and refLow/refHigh as null if not given.
 
 Your task:
 1. Decide if the text is a lab report (isLab: true) or not. When in doubt or for CVs/resumes/certificates, use isLab: false.
 2. For each lab test row you find (only when isLab is true), extract EXACTLY as written in the PDF:
-   - test: the parameter name exactly as in the document (e.g. "Yassı Epitel", "HCT", "HGB")
-   - value: the patient's numeric result EXACTLY as shown (same number, use decimal point; e.g. 0.10, 12.5, 140). Do not use numbers that are part of the test name (e.g. in "HIV 1/2" the 1 and 2 are not the result—the result is the separate number such as 0.10). Do not round or approximate.
-   - unit: if present, exactly as written (e.g. HPF, %, mg/dl, g/dl, BIRIM)
-   - refLow and refHigh: the reference range for this parameter only. If the PDF shows a range next to this test (e.g. "Amilaz: 56 IU/L (28 - 100)"), set refLow and refHigh to that range (28 and 100). If the PDF does not show a range for this row, use null for both. Never use another parameter's reference range: each row must have only the ref that belongs to that test in the PDF.
+   - test: the parameter name exactly as in the document (e.g. "Yassı Epitel", "HCT", "HGB", "HR HPV Tip 16")
+   - value: the patient's numeric result if present (same number, decimal point; e.g. 0.10, 12.5, 140). For categorical-only results (e.g. HPV with only "Negatif"/"Pozitif"), use 0. Do not use numbers that are part of the test name (e.g. in "HR HPV Tip 16" the 16 is the type—use value 0 and put "Negatif"/"Pozitif" in resultLabel).
+   - unit: if present, exactly as written (e.g. HPF, %, mg/dl, g/dl, BIRIM). For categorical tests without unit, use null.
+   - refLow and refHigh: the reference range for this parameter only if present in the PDF. If no range (common for HPV/screening), use null for both.
 3. Copy every lab parameter you can identify with its value and reference range. Do not skip rows. Do not alter or interpret values—extract them literally.
-4. When the PDF explicitly states a result status for a test (e.g. "Negatif", "Pozitif", "Reaktif", "Negative", "Positive"), put that exact word in resultLabel for that item; otherwise use null. This is important for screening tests (HIV, HBsAg, Anti HCV, etc.).
+4. When the PDF explicitly states a result status for a test (e.g. "Negatif", "Pozitif", "Reaktif", "Negative", "Positive"), put that exact word in resultLabel for that item; otherwise use null. This is required for HPV and other screening tests (HIV, HBsAg, Anti HCV, etc.).
 5. When the result is below or above detection limit (e.g. "<0,5", "<0.5", ">500"), set value to the numeric threshold and set valueDisplay to the exact string as in the PDF (e.g. "<0.5", ">500"). Otherwise leave valueDisplay null.
 6. Each parameter must use only its own reference range from the same row in the PDF; do not use another parameter's range (e.g. MPV has its own ref, do not use PDW's range for MPV).
 7. When the PDF has section headers (e.g. "İDRAR TETKİKİ", "HEMOGRAM", "BİYOKİMYA (ACİL)", "Tam Kan Sayımı"), set section for each item to the section header under which that test appears. Use the exact header text as in the PDF. If no clear section, use null.

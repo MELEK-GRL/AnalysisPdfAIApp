@@ -10,9 +10,9 @@ import colors from '../../theme/colors';
 import { useResponsive } from '../../utils/deviceStore/device';
 
 const SECTION_HEADER_COLOR = colors.backgroundPurpleDark;
-const BULLET_COLOR = '#6B7280';
-const HIGHLIGHT_BG = '#FEF2F2'; // referans dışı vurgusu için hafif kırmızı
-const SECTION_BG = '#F9FAFB';
+const BULLET_COLOR = colors.textGraySoft;
+const HIGHLIGHT_BG = colors.backgroundPinkSoft; // referans dışı vurgusu
+const SECTION_BG = colors.backgroundPurpleSoft;
 
 /** Metni **kalın** parçalara böler; segments: [{ text, bold }] */
 function parseBold(text: string): { text: string; bold: boolean }[] {
@@ -78,40 +78,45 @@ const AnalysisContent: React.FC<AnalysisContentProps> = ({ content, style }) => 
         () =>
             StyleSheet.create({
                 section: {
-                    marginTop: 20 * h1px,
-                    marginBottom: 10 * h1px,
-                    paddingVertical: 10 * h1px,
-                    paddingHorizontal: 14 * w1px,
+                    marginTop: 16 * h1px,
+                    marginBottom: 8 * h1px,
+                    paddingVertical: 12 * h1px,
+                    paddingHorizontal: 16 * w1px,
                     backgroundColor: SECTION_BG,
-                    borderRadius: 12 * w1px,
+                    borderRadius: 14 * w1px,
+                    borderLeftWidth: 4,
+                    borderLeftColor: colors.backgroundPurple,
                 },
                 sectionFirst: { marginTop: 0 },
-                sectionTitle: { marginBottom: 4 * h1px },
+                sectionTitle: { marginBottom: 6 * h1px },
                 bulletRow: {
                     flexDirection: 'row',
                     alignItems: 'flex-start',
-                    marginBottom: 8 * h1px,
+                    marginBottom: 10 * h1px,
                     paddingLeft: 4 * w1px,
                 },
                 bulletDot: {
                     width: 6,
                     height: 6,
                     borderRadius: 3,
-                    backgroundColor: SECTION_HEADER_COLOR,
+                    backgroundColor: colors.backgroundPurple,
                     marginTop: 8 * h1px,
-                    marginRight: 10 * w1px,
+                    marginRight: 12 * w1px,
                 },
                 bulletText: { flex: 1 },
                 paragraph: {
-                    marginBottom: 10 * h1px,
+                    marginBottom: 12 * h1px,
+                    lineHeight: 22,
                 },
                 inlineRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'flex-start' },
                 highlightWrap: {
                     backgroundColor: HIGHLIGHT_BG,
-                    paddingVertical: 8 * h1px,
-                    paddingHorizontal: 12 * w1px,
-                    borderRadius: 10 * w1px,
-                    marginBottom: 8 * h1px,
+                    paddingVertical: 10 * h1px,
+                    paddingHorizontal: 14 * w1px,
+                    borderRadius: 12 * w1px,
+                    marginBottom: 10 * h1px,
+                    borderLeftWidth: 3,
+                    borderLeftColor: '#E11D48',
                 },
             }),
         [h1px, w1px],
@@ -151,7 +156,7 @@ const AnalysisContent: React.FC<AnalysisContentProps> = ({ content, style }) => 
                                             key={i}
                                             size={fontSize.body}
                                             weight={seg.bold ? '700' : '400'}
-                                            color={seg.bold ? '#111827' : BULLET_COLOR}>
+                                            color={seg.bold ? colors.textDark : BULLET_COLOR}>
                                             {seg.text}
                                         </T>
                                     ))}

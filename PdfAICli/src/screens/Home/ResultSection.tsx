@@ -24,6 +24,7 @@ export type ResultSectionProps = {
     resultCard: object;
     detailModalView: object;
     pill: object;
+    pillWarning: object;
     sectionGap: object;
   };
   w1px: number;
@@ -59,33 +60,33 @@ const ResultSection: React.FC<ResultSectionProps> = ({
           <Pressable>
             <View>
               <View style={styles.pill}>
-                <T size={fontSize.label} weight="700" color="#111827">
+                <T size={fontSize.label} weight="700" color={colors.backgroundPurpleDark}>
                   {t('tabs.analysis').toUpperCase()}
                 </T>
               </View>
               {analysis ? (
                 <AnalysisContent content={analysis} />
               ) : (
-                <T size={fontSize.body} color="#111827">
+                <T size={fontSize.body} color={colors.textDark}>
                   {t('home.noAnalysis')}
                 </T>
               )}
               <View style={styles.sectionGap} />
               <View style={styles.pill}>
-                <T size={fontSize.label} weight="700" color="#111827">
+                <T size={fontSize.label} weight="700" color={colors.backgroundPurpleDark}>
                   {t('home.suggestions')}
                 </T>
               </View>
-              <T size={fontSize.body} color="#111827">
+              <T size={fontSize.body} color={colors.textDark}>
                 {t('home.suggestionsText')}
               </T>
               <View style={styles.sectionGap} />
-              <View style={[styles.pill, {backgroundColor: '#FEF2F2'}]}>
-                <T size={fontSize.label} weight="700" color="#991B1B">
+              <View style={styles.pillWarning}>
+                <T size={fontSize.label} weight="700" color="#B91C1C">
                   {t('home.importantWarning')}
                 </T>
               </View>
-              <T size={fontSize.body} color="#991B1B">
+              <T size={fontSize.body} color="#B91C1C">
                 {t('home.disclaimer')}
               </T>
             </View>

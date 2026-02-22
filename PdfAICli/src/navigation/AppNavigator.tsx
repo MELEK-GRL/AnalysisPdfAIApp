@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Platform, StyleSheet } from 'react-native';
+import { View, Platform, StyleSheet, Dimensions } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -142,11 +142,18 @@ const MainTabs = () => {
     );
 };
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
     loaderContainer: {
-        flex: 1,
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: '#FFFFFF',
     },
     loaderLottie: {
         width: 200,

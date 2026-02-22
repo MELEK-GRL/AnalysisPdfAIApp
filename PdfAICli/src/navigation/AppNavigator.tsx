@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Platform, StyleSheet, Dimensions } from 'react-native';
+import { View, Platform, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -9,10 +9,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfile } from '../server/api/User';
-import { useTypography } from '../theme/useTypography';
-import { iconSize } from '../constants/icons';
 import { AUTH_TOKEN, CONSENT_GIVEN_ONCE, LANGUAGE_SPLASH_SEEN } from '../constants/storageKeys';
 import { useAuthStore } from '../store/useAuthStore';
 import colors from '../theme/colors';
@@ -50,94 +49,124 @@ const Tab = createBottomTabNavigator();
 
 const ProfileTab = () => <Profile />;
 
-const TAB_BAR_CONTENT_HEIGHT = 64;
+const TAB_BAR_CONTENT_HEIGHT = 72;
 const HOME_INDICATOR_HEIGHT_IOS = 34;
 
-const MainTabs = () => {
-    const t = useT();
+const tabIcons: Record<string, { active: string; inactive: string }> = {
+    Analiz: { active: 'document-text', inactive: 'document-text-outline' },
+    Geçmiş: { active: 'time', inactive: 'time-outline' },
+    Profil: { active: 'person', inactive: 'person-outline' },
+};
+
+const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
     const insets = useSafeAreaInsets();
-    const { fontSize: scaledFontSize } = useTypography();
     const bottomSafe = Platform.OS === 'ios'
         ? Math.max(insets.bottom, HOME_INDICATOR_HEIGHT_IOS)
         : Math.max(insets.bottom, 12);
     const tabBarHeight = TAB_BAR_CONTENT_HEIGHT + bottomSafe;
 
     return (
+        <View style={[tabBarStyles.wrapper, { paddingBottom: bottomSafe }]}>
+            <View style={[tabBarStyles.container, { minHeight: TAB_BAR_CONTENT_HEIGHT }]}>
+                <View style={tabBarStyles.row}>
+                    {state.routes.map((route, index) => {
+                        const { options } = descriptors[route.key];
+                        const focused = state.index === index;
+                        const label = options.title ?? route.name;
+                        const iconSet = tabIcons[route.name] ?? { active: 'ellipse-outline', inactive: 'ellipse-outline' };
+
+                        const onPress = () => {
+                            const event = navigation.emit({
+                                type: 'tabPress',
+                                target: route.key,
+                                canPreventDefault: true,
+                            });
+                            if (!event.defaultPrevented) {
+                                navigation.navigate(route.name);
+                            }
+                        };
+
+                        return (
+                            <TouchableOpacity
+                                key={route.key}
+                                accessibilityRole="button"
+                                accessibilityLabel={label}
+                                accessibilityState={focused ? { selected: true } : {}}
+                                onPress={onPress}
+                                activeOpacity={0.7}
+                                style={tabBarStyles.tabItem}>
+                                <View style={tabBarStyles.iconWrap}>
+                                    <Ionicons
+                                        name={focused ? iconSet.active : iconSet.inactive}
+                                        size={26}
+                                        color={focused ? colors.backgroundPurple : '#A1A1AA'}
+                                    />
+                                    {focused ? <View style={tabBarStyles.indicator} /> : null}
+                                </View>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+            </View>
+        </View>
+    );
+};
+
+const tabBarStyles = StyleSheet.create({
+    wrapper: {
+        paddingHorizontal: 0,
+        paddingTop: 0,
+        alignItems: 'stretch',
+        justifyContent: 'flex-end',
+    },
+    container: {
+        width: '100%',
+        backgroundColor: '#FFFFFF',
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: 'rgba(0,0,0,0.08)',
+        paddingVertical: 14,
+        paddingHorizontal: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+    },
+    row: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+    },
+    tabItem: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    iconWrap: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    indicator: {
+        width: 24,
+        height: 3,
+        borderRadius: 1.5,
+        backgroundColor: colors.backgroundPurple,
+        marginTop: 6,
+    },
+});
+
+const MainTabs = () => {
+    const t = useT();
+    return (
         <Tab.Navigator
+            tabBar={(props) => <CustomTabBar {...props} />}
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: colors.backgroundPurple,
-                tabBarInactiveTintColor: '#6B7280',
-                tabBarLabelStyle: {
-                    fontSize: scaledFontSize.body,
-                    fontWeight: '600',
-                },
-                tabBarStyle: {
-                    backgroundColor: '#FFFFFF',
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: 'rgba(0,0,0,0.08)',
-                    height: tabBarHeight,
-                    paddingTop: 24,
-                    paddingBottom: bottomSafe,
-                    elevation: 0,
-                    shadowColor: 'transparent',
-                },
-                tabBarItemStyle: {
-                    paddingVertical: 6,
-                },
-                tabBarIconStyle: {
-                    marginBottom: 16,
-                },
-                tabBarShowLabel: true,
+                tabBarShowLabel: false,
+                tabBarStyle: { display: 'none' },
             }}>
-            <Tab.Screen
-                name="Analiz"
-                component={Home}
-                options={{
-                    title: t('tabs.analysis'),
-                    tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 26, height: 26, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-                            <Ionicons
-                                name={focused ? 'document-text' : 'document-text-outline'}
-                                size={24}
-                                color={color}
-                            />
-                        </View>
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="Geçmiş"
-                component={History}
-                options={{
-                    title: t('tabs.history'),
-                    tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 26, height: 26, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-                            <Ionicons
-                                name={focused ? 'time' : 'time-outline'}
-                                size={24}
-                                color={color}
-                            />
-                        </View>
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="Profil"
-                component={ProfileTab}
-                options={{
-                    title: t('tabs.profile'),
-                    tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 26, height: 26, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-                            <Ionicons
-                                name={focused ? 'person' : 'person-outline'}
-                                size={24}
-                                color={color}
-                            />
-                        </View>
-                    ),
-                }}
-            />
+            <Tab.Screen name="Analiz" component={Home} options={{ title: t('tabs.analysis') }} />
+            <Tab.Screen name="Geçmiş" component={History} options={{ title: t('tabs.history') }} />
+            <Tab.Screen name="Profil" component={ProfileTab} options={{ title: t('tabs.profile') }} />
         </Tab.Navigator>
     );
 };

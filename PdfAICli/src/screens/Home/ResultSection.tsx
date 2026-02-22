@@ -102,7 +102,7 @@ const ResultSection: React.FC<ResultSectionProps> = ({
       <T
         size={fontSize.title}
         weight="700"
-        color={colors.backgroundPurpleDark}
+        color={colors.textDark}
         style={{marginBottom: 8 * h1px}}>
         {t('home.analysisResult')}
       </T>

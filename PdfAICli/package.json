@@ -11,7 +11,9 @@
     "test": "jest",
     "env:dev": "cp env-examples/env.development .env",
     "env:uat": "cp env-examples/env.uat .env",
-    "env:prod": "cp env-examples/env.production .env"
+    "env:prod": "cp env-examples/env.production .env",
+    "android:release": "cd android && ./gradlew bundleRelease && cd ..",
+    "release:android": "cp env-examples/env.production .env && cd android && ./gradlew bundleRelease && cd .."
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

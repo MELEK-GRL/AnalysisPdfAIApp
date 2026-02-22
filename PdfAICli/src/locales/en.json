@@ -10,6 +10,7 @@
     "error": "Error",
     "warning": "Warning",
     "loading": "Loading...",
+    "dataLoading": "Loading data...",
     "back": "Back",
     "retry": "Retry"
   },
@@ -139,8 +140,9 @@
     "emptyTitle": "Data not found",
     "emptySub": "Your history will appear here as you upload and analyze PDFs",
     "detailTitle": "Detail",
-    "labValues": "LAB VALUES",
+    "labValues": "Lab Values",
     "analysis": "ANALYSIS",
+    "analysisComment": "Analysis Comment",
     "noRecord": "This record is not a lab report or analysis not found.",
     "paramCount": "parameters",
     "yourResult": "your result",

@@ -41,6 +41,8 @@ export type LabHistoryDetail = {
     createdAt: string;
     items: LabItem[];
     analysis: string | null;
+    /** PDF'den gelen tahlil sahibi adı (varsa) */
+    patientName?: string | null;
 };
 
 export async function getLatestLabs(): Promise<LabItem[]> {

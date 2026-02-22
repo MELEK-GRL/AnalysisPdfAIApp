@@ -10,6 +10,7 @@
     "error": "Hata",
     "warning": "Uyarı",
     "loading": "Yükleniyor...",
+    "dataLoading": "Veriler Yükleniyor...",
     "back": "Geri",
     "retry": "Tekrar Dene"
   },
@@ -139,8 +140,9 @@
     "emptyTitle": "Veri bulunamadı",
     "emptySub": "PDF yükleyip analiz ettikçe geçmiş burada görünecek",
     "detailTitle": "Detay",
-    "labValues": "TAHLİL DEĞERLERİ",
+    "labValues": "Tahlil Değerleri",
     "analysis": "ANALİZ",
+    "analysisComment": "Tahlil Analizi Yorumu",
     "noRecord": "Bu kayıt tahlil raporu değil veya analiz bulunamadı.",
     "paramCount": "parametre",
     "yourResult": "sizin sonucunuz",

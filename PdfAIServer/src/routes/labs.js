@@ -51,6 +51,7 @@ router.get('/history/:id', async (req, res) => {
             createdAt: doc.createdAt,
             items: normalizeItemsSections(doc.items || []),
             analysis: doc.analysis || null,
+            patientName: doc.patientName || null,
         });
     } catch (e) {
         console.error('LABS/HISTORY/:id ERR:', e?.message || e);

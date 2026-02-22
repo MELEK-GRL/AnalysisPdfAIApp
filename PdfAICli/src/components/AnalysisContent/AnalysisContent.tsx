@@ -59,7 +59,7 @@ const AnalysisContent: React.FC<AnalysisContentProps> = ({ content, style }) => 
         const lines = normalizeLines(content);
         const result: { type: 'section'; text: string } | { type: 'bullet'; text: string } | { type: 'paragraph'; text: string }[] = [];
         for (const line of lines) {
-            const sectionMatch = line.match(/^###\s+(.+)$/);
+            const sectionMatch = line.match(/^#{2,3}\s+(.+)$/);
             if (sectionMatch) {
                 result.push({ type: 'section', text: sectionMatch[1].trim() });
                 continue;
@@ -78,12 +78,16 @@ const AnalysisContent: React.FC<AnalysisContentProps> = ({ content, style }) => 
         () =>
             StyleSheet.create({
                 section: {
-                    marginTop: 10 * h1px,
-                    marginBottom: 4 * h1px,
+                    marginTop: 18 * h1px,
+                    marginBottom: 8 * h1px,
+                    paddingBottom: 10 * h1px,
+                    borderBottomWidth: 1,
+                    borderBottomColor: colors.backgroundPurpleSoft,
                 },
                 sectionFirst: { marginTop: 0 },
                 sectionTitle: {
-                    marginBottom: 6 * h1px,
+                    marginBottom: 0,
+                    letterSpacing: 0.3,
                 },
                 bulletRow: {
                     flexDirection: 'row',
@@ -130,9 +134,9 @@ const AnalysisContent: React.FC<AnalysisContentProps> = ({ content, style }) => 
                             key={`s-${idx}`}
                             style={[s.section, idx === 0 && s.sectionFirst]}>
                             <T
-                                size={fontSize.subtitle}
+                                size={fontSize.title}
                                 weight="700"
-                                color={SECTION_HEADER_COLOR}
+                                color={colors.textDark}
                                 style={s.sectionTitle}>
                                 {block.text}
                             </T>

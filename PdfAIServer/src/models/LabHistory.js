@@ -17,6 +17,8 @@ const LabHistorySchema = new mongoose.Schema(
         items: { type: [LabItemSchema], default: [] },
         analysis: { type: String, default: null },
         pdfName: { type: String, default: null, trim: true },
+        /** PDF'den çıkarılan tahlil sahibi adı (varsa) */
+        patientName: { type: String, default: null, trim: true },
     },
     { timestamps: true, strict: true }
 );

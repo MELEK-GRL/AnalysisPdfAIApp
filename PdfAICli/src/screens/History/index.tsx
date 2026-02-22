@@ -50,6 +50,7 @@ const History: React.FC = () => {
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [searchQuery, setSearchQuery] = useState('');
+    const [detailTab, setDetailTab] = useState<'values' | 'analysis'>('values');
     const t = useT();
     const locale = useLocaleStore((s) => s.locale);
     const { w1px, h1px, fs1px } = useResponsive();
@@ -106,6 +107,7 @@ const History: React.FC = () => {
         setDetailLoading(true);
         setDetailModal(true);
         setSelectedDetail(null);
+        setDetailTab('values');
         try {
             const detail = await getLabHistoryItem(id);
             setSelectedDetail(detail);
@@ -213,6 +215,13 @@ const History: React.FC = () => {
                 cardChevron: {
                     marginLeft: 8 * w1px,
                 },
+                detailDateRow: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 12 * h1px,
+                    gap: 12 * w1px,
+                },
                 detailModalView: {
                     height: h1px * 500,
                     width: '100%',
@@ -285,6 +294,31 @@ const History: React.FC = () => {
                 },
                 checkboxWrap: {
                     marginRight: 12 * w1px,
+                },
+                detailTabRow: {
+                    flexDirection: 'row',
+                    marginBottom: 16 * h1px,
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: 10 * w1px,
+                    padding: 4 * w1px,
+                },
+                detailTab: {
+                    flex: 1,
+                    paddingVertical: 10 * h1px,
+                    borderRadius: 8 * w1px,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                },
+                detailTabActive: {
+                    backgroundColor: colors.white,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 3,
+                    elevation: 2,
+                },
+                detailTabInactive: {
+                    backgroundColor: 'transparent',
                 },
             }),
         [w1px, h1px, fs1px],
@@ -463,33 +497,52 @@ const History: React.FC = () => {
                         <ActivityIndicator style={{ marginTop: 40 }} />
                     ) : selectedDetail ? (
                         <>
-                            <T size={fontSize.label} color="#6B7280" style={{ marginBottom: 8 }}>
-                                {formatDate(selectedDetail.createdAt)}
-                            </T>
-                            {selectedDetail.items.length > 0 ? (
-                                <>
-                                    <View style={styles.pill}>
-                                        <T size={fontSize.label} weight="700" color="#111827">
-                                            {t('history.labValues')}
-                                        </T>
-                                    </View>
-                                    <Chart items={selectedDetail.items} />
-                                    <View style={styles.sectionGap} />
-                                </>
-                            ) : null}
-                            {selectedDetail.analysis ? (
-                                <>
-                                    <View style={styles.pill}>
-                                        <T size={fontSize.label} weight="700" color="#111827">
-                                            {t('history.analysis')}
-                                        </T>
-                                    </View>
-                                    <AnalysisContent content={selectedDetail.analysis} />
-                                </>
-                            ) : (
-                                <T size={fontSize.body} color="#6B7280">
-                                    {t('history.noRecord')}
+                            <View style={styles.detailDateRow}>
+                                {selectedDetail.patientName?.trim() ? (
+                                    <T size={fontSize.body} weight="600" color="#374151" numberOfLines={1} style={{ flex: 1 }}>
+                                        {selectedDetail.patientName.trim()}
+                                    </T>
+                                ) : (
+                                    <View style={{ flex: 1 }} />
+                                )}
+                                <T size={fontSize.body} weight="700" color="#374151">
+                                    {formatDate(selectedDetail.createdAt)}
                                 </T>
+                            </View>
+                            <View style={styles.detailTabRow}>
+                                <TouchableOpacity
+                                    style={[styles.detailTab, detailTab === 'values' ? styles.detailTabActive : styles.detailTabInactive]}
+                                    onPress={() => setDetailTab('values')}
+                                    activeOpacity={0.7}>
+                                    <T
+                                        size={fontSize.body}
+                                        weight={detailTab === 'values' ? '700' : '500'}
+                                        color={detailTab === 'values' ? colors.backgroundPurpleDark : '#6B7280'}>
+                                        {t('history.labValues')}
+                                    </T>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.detailTab, detailTab === 'analysis' ? styles.detailTabActive : styles.detailTabInactive]}
+                                    onPress={() => setDetailTab('analysis')}
+                                    activeOpacity={0.7}>
+                                    <T
+                                        size={fontSize.body}
+                                        weight={detailTab === 'analysis' ? '700' : '500'}
+                                        color={detailTab === 'analysis' ? colors.backgroundPurpleDark : '#6B7280'}>
+                                        {t('history.analysisComment')}
+                                    </T>
+                                </TouchableOpacity>
+                            </View>
+                            {detailTab === 'values' ? (
+                                selectedDetail.items.length > 0 ? (
+                                    <Chart items={selectedDetail.items} />
+                                ) : (
+                                    <T size={fontSize.body} color="#6B7280">{t('history.noRecord')}</T>
+                                )
+                            ) : selectedDetail.analysis ? (
+                                <AnalysisContent content={selectedDetail.analysis} />
+                            ) : (
+                                <T size={fontSize.body} color="#6B7280">{t('history.noRecord')}</T>
                             )}
                         </>
                     ) : null}

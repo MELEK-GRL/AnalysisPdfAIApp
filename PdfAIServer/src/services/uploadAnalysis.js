@@ -9,6 +9,30 @@ const LabHistory = require('../models/LabHistory');
 const { MAX_LAB_HISTORY_PER_USER } = require('../constants');
 
 /**
+ * PDF metninden tahlil sahibi/hasta adını çıkarır (yaygın etiketlere göre).
+ * @param {string} text - PDF'den çıkan ham metin
+ * @returns {string|null}
+ */
+function extractPatientName(text) {
+    if (!text || typeof text !== 'string') return null;
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const labelPatterns = [
+        /^(?:Hasta\s+Adı|Ad\s+Soyad|Adı\s+Soyadı|Hasta|İsim)\s*[:\s]+(.+)$/i,
+        /^(?:Patient\s+Name|Name|Patient)\s*[:\s]+(.+)$/i,
+    ];
+    for (const line of lines) {
+        for (const re of labelPatterns) {
+            const m = line.match(re);
+            if (m && m[1]) {
+                const name = m[1].trim().replace(/\s+/g, ' ');
+                if (name.length > 0 && name.length < 120 && !/^\d+$/.test(name)) return name;
+            }
+        }
+    }
+    return null;
+}
+
+/**
  * PDF dosyasını analiz eder; metin çıkarır, OpenAI ile sınıflandırır.
  * @param {string} tmpPath - Geçici PDF dosya yolu
  * @returns {Promise<{ type: string, confidence?: number, reason?: string, items: array, analysis?: string }>}
@@ -40,6 +64,8 @@ async function runAnalysis(tmpPath) {
 
     try {
         const result = await classifyAndExtract(text || '');
+        const patientName = extractPatientName(text);
+        if (patientName) result.patientName = patientName;
         // TEST: API'nin uygulamaya döndüreceği lab maddeleri — terminalde görün
         if (result?.items?.length) {
             console.log('\n========== PDF TEST – Sunucunun döndürdüğü lab verileri ==========');
@@ -105,6 +131,7 @@ async function persistResult(userId, result, pdfName) {
             items: result.items,
             analysis: result.analysis ?? null,
             pdfName,
+            patientName: result.patientName ?? null,
         });
         await trimLabHistoryForUser(userId);
     } catch (ex) {

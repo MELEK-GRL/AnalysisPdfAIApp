@@ -41,11 +41,6 @@ async function runAnalysis(tmpPath) {
     let text = '';
     try {
         text = await extractTextFromPdf(tmpPath);
-        // TEST: PDF'den çıkan ham metin — terminalde görün, orijinal PDF ile kıyaslayın
-        const preview = text.length > 3000 ? text.slice(0, 3000) + '\n... (kesildi, toplam ' + text.length + ' karakter)' : text;
-        console.log('\n========== PDF TEST – PDF\'den okunan ham metin ==========');
-        console.log(preview);
-        console.log('========== Ham metin sonu ==========\n');
     } catch (ex) {
         const msg = String(ex?.message || '');
         if (/No extractable text/i.test(msg)) {
@@ -66,14 +61,6 @@ async function runAnalysis(tmpPath) {
         const result = await classifyAndExtract(text || '');
         const patientName = extractPatientName(text);
         if (patientName) result.patientName = patientName;
-        // TEST: API'nin uygulamaya döndüreceği lab maddeleri — terminalde görün
-        if (result?.items?.length) {
-            console.log('\n========== PDF TEST – Sunucunun döndürdüğü lab verileri ==========');
-            result.items.forEach((it, i) => {
-                console.log(`[${i + 1}] test: "${it.test}" | value: ${it.value} | unit: ${it.unit ?? '-'} | refLow: ${it.refLow ?? '-'} | refHigh: ${it.refHigh ?? '-'} | resultLabel: ${it.resultLabel ?? '-'}`);
-            });
-            console.log('========== Toplam', result.items.length, 'satır ==========\n');
-        }
         return result;
     } catch (ex) {
         const err = new Error(String(ex?.message || 'Analiz servisi hatası'));

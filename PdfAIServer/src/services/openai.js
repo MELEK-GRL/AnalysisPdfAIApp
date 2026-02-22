@@ -972,9 +972,6 @@ async function classifyAndExtract(text) {
     /* On LLM timeout: do not treat as lab from regex alone – CVs can match numbers. Prefer non-lab. */
     const local = local0;
     const items = local.items || [];
-    if (process.env.NODE_ENV !== 'production') {
-        console.log('[LAB_FALLBACK] textLen=', (text || '').length, 'regexItems=', items.length, 'reducedLen=', reduced.length, 'permissiveTried=', permissiveCount);
-    }
     const hasManyLabLikeItems = items.length >= 5 || items.length >= 1;
     const hasExplicitMedicalUnits = items.some(
         (it) => it?.unit && /(mg\/dl|mmol\/l|g\/l|%|fl|HPF|10\^9|referans)/i.test(String(it.unit))

@@ -79,7 +79,7 @@
 6. [ ] **Store listesi**: İsim, açıklama, ikon 512x512, feature graphic, ekran görüntüleri
 7. [ ] **Play Console**: Veri güvenliği formu + içerik derecelendirmesi
 
-Detaylı adımlar: **mock/PLAYSTORE_GELISTIRMELER.md**
+Detaylı adımlar: **mock/docs/playstore/PLAYSTORE_GELISTIRMELER.md**
 
 ---
 

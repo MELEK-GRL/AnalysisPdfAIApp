@@ -446,10 +446,10 @@
 
 ## FAZ 12 – Play Store Yayın Eksikleri
 
-> Bu faz **mock/EKSIKLER.md** listesine göre yapılır. Detay: **mock/PLAYSTORE_GELISTIRMELER.md**, **mock/PLAYSTORE_CHECKLIST.md**.
+> Bu faz **mock/docs/planning/EKSIKLER.md** listesine göre yapılır. Detay: **mock/docs/playstore/PLAYSTORE_GELISTIRMELER.md**, **mock/docs/playstore/PLAYSTORE_CHECKLIST.md**.
 
 ### Sprint 12.1 – Zorunlu teknik (yayın için)
-- [x] **Release keystore**: `android/app/build.gradle` içinde `signingConfigs.release` tanımlı; keystore oluşturma ve ortam değişkenleri: mock/FAZ12-RELEASE.md
+- [x] **Release keystore**: `android/app/build.gradle` içinde `signingConfigs.release` tanımlı; keystore oluşturma ve ortam değişkenleri: mock/docs/planning/FAZ12-RELEASE.md
 - [ ] **Gizlilik politikası URL**: mock/PRIVACY_POLICY.md’yi GitHub Pages veya hosting’de yayınla; `.env` ve env-examples’ta `PRIVACY_POLICY_URL` gerçek adres
 - [ ] **Production API**: Backend canlıya alındı; client `.env` / build’de `API_BASE_URL` canlı URL
 - [x] **targetSdkVersion 35**: `android/build.gradle` – compileSdk ve targetSdk 35 (2025 Play Store gereksinimi)
@@ -460,7 +460,7 @@
 ---
 
 ### Sprint 12.2 – Store listesi (Play Console)
-- Şablon: `mock/PLAYSTORE_STORE_LISTING.md` (kısa/uzun açıklama TR-EN, görsel boyutları)
+- Şablon: `mock/docs/playstore/PLAYSTORE_STORE_LISTING.md` (kısa/uzun açıklama TR-EN, görsel boyutları)
 - [ ] Uygulama adı ve açıklamalar: kısa (max 80 kr), uzun (max 4000 kr); tıbbi iddia yok, “bilgilendirme amaçlı” vurgusu
 - [ ] Uygulama ikonu 512x512 (Play Console’da yükle)
 - [ ] Feature graphic 1024x500 (Android)
@@ -472,7 +472,7 @@
 ---
 
 ### Sprint 12.3 – Yasal ve Play Console formları
-- Rehber: `mock/PLAYSTORE_FORMLAR.md` (Veri güvenliği, içerik derecelendirmesi, gizlilik URL)
+- Rehber: `mock/docs/playstore/PLAYSTORE_FORMLAR.md` (Veri güvenliği, içerik derecelendirmesi, gizlilik URL)
 - [ ] **Veri güvenliği formu** (Play Console): toplanan veriler (hesap, sağlık verisi, analytics) beyanı
 - [ ] **İçerik derecelendirmesi**: anket doldurulup tamamlandı
 - [ ] Gizlilik politikası sayfasında sağlık verisi, OpenAI/üçüncü taraf açıklaması net
@@ -482,7 +482,7 @@
 ---
 
 ### Sprint 12.4 – Teknik doğrulama ve test
-- Kontrol listesi: `mock/FAZ12-TEST-CHECKLIST.md` (release build, backend, akış testi)
+- Kontrol listesi: `mock/docs/planning/FAZ12-TEST-CHECKLIST.md` (release build, backend, akış testi)
 - [ ] Release build: `./gradlew assembleRelease` veya `bundleRelease` başarılı ve test edildi
 - [ ] Production .env: backend (MONGODB_URI, JWT_SECRET, rate-limit); client (API_BASE_URL, PRIVACY_POLICY_URL)
 - [ ] İsteğe bağlı: Production’da API HTTPS ise `usesCleartextTraffic` false (AndroidManifest.xml)

@@ -6,16 +6,6 @@ const mongoose = require('mongoose');
 const app = require('./app');
 const { DEFAULT_PORT, DEFAULT_DB_NAME, RATE_LIMIT_ANALYSIS_DISABLED } = require('./constants');
 
-// Kesin kural: sadece DEV'de günlük analiz limiti kapalı; UAT ve PROD'da 2/24h zorunlu
-console.log('BOOT', {
-    cwd: process.cwd(),
-    file: __filename,
-    startedAt: new Date().toISOString(),
-    NODE_ENV: process.env.NODE_ENV || '(yok)',
-    APP_ENV: process.env.APP_ENV || '(yok)',
-    'Günlük analiz limiti (2/24h)': RATE_LIMIT_ANALYSIS_DISABLED ? 'KAPALI (dev)' : 'AÇIK (uat/prod)',
-});
-
 const PORT = Number(process.env.PORT || DEFAULT_PORT);
 const MONGODB_URI = process.env.MONGODB_URI;
 const isProduction = process.env.NODE_ENV === 'production';

@@ -35,7 +35,9 @@ async function sendPasswordResetEmail(email, token) {
         }
     }
 
-    console.log('[DEV] Password reset email (not sent – no SMTP):', { to: email, link: resetLink });
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('[DEV] Password reset email (not sent – no SMTP):', { to: email, link: resetLink });
+    }
     return { sent: false };
 }
 

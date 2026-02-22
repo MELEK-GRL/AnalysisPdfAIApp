@@ -75,35 +75,15 @@ api.interceptors.request.use(async config => {
         (config as any).headers = h;
     }
 
-    if (__DEV__) {
-        console.log(
-            '[REQ]',
-            config.method?.toUpperCase(),
-            (config.baseURL || '') + (config.url || ''),
-        );
-    }
     return config;
 });
 
 api.interceptors.response.use(
     res => {
         useSessionStore.getState().touch();
-        if (__DEV__) {
-            console.log('[RES]', res.status, res.config.url);
-        }
         return res;
     },
     async error => {
-        if (__DEV__) {
-            const msg = error?.message || 'Unknown error';
-            const status = error?.response?.status;
-            const url = error?.config?.url || '';
-            const code = (error as any)?.code;
-            const detail = [msg, code, status ? `HTTP ${status}` : null, url]
-                .filter(Boolean)
-                .join(' | ');
-            console.log('[API ERR]', detail);
-        }
         return Promise.reject(error);
     },
 );

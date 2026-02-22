@@ -6,7 +6,7 @@ Canlıya çıkmadan önce release build ve production ortamında aşağıdaki ad
 
 ## 1. Release build
 
-- [ ] **Keystore ve şifreler** ayarlandı (ortam değişkenleri: `PDFAI_RELEASE_STORE_PASSWORD`, `PDFAI_RELEASE_KEY_PASSWORD`). Bkz. `mock/FAZ12-RELEASE.md`
+- [ ] **Keystore ve şifreler** ayarlandı (ortam değişkenleri: `PDFAI_RELEASE_STORE_PASSWORD`, `PDFAI_RELEASE_KEY_PASSWORD`). Bkz. `mock/docs/planning/FAZ12-RELEASE.md`
 - [ ] **Production .env:** `yarn env:prod` çalıştırıldı; `.env` içinde `API_BASE_URL` ve `PRIVACY_POLICY_URL` canlı değerler
 - [ ] **Release build başarılı:**
   ```bash

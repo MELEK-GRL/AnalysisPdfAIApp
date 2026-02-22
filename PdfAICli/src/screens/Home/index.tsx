@@ -255,23 +255,6 @@ const Home: React.FC = () => {
             } as any);
 
             const data = await uploadPdf(form);
-            // TEST: PDF vs API karşılaştırması — terminalde (Metro) çıktıyı görün
-            console.log('\n========== PDF TEST – API Cevabı ==========');
-            console.log(JSON.stringify(data, null, 2));
-            if (data.type === 'lab' && Array.isArray(data.items) && data.items.length > 0) {
-                console.log('\n---------- Uygulamada gösterilen lab değerleri (PDF ile kıyaslayın) ----------');
-                data.items.forEach((it: any, i: number) => {
-                    console.log(
-                        `[${i + 1}] test: "${it.test}" | value: ${it.value} | unit: ${it.unit ?? '-'} | ref: ${it.refLow ?? '-'} - ${it.refHigh ?? '-'} | resultLabel: ${it.resultLabel ?? '-'}`
-                    );
-                });
-                console.log('---------- Toplam', data.items.length, 'satır ----------\n');
-            }
-            if (data.analysis) {
-                console.log('---------- Analiz metni ----------');
-                console.log(data.analysis);
-                console.log('--------------------------------\n');
-            }
             if (data.type === 'lab') {
                 setItems(data.items || []);
                 setRawItems(data.rawItems ?? data.items ?? []);

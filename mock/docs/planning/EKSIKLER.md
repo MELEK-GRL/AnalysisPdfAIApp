@@ -66,4 +66,4 @@ Projede tamamlanması gereken eksikler aşağıda kategorilere göre listelenmi�
 - **Teknik / test:** 13–15  
 - **İsteğe bağlı:** 16–17  
 
-Detaylı adımlar: **mock/PLAYSTORE_GELISTIRMELER.md** ve **mock/PLAYSTORE_CHECKLIST.md**.
+Detaylı adımlar: **mock/docs/playstore/PLAYSTORE_GELISTIRMELER.md** ve **mock/docs/playstore/PLAYSTORE_CHECKLIST.md**.

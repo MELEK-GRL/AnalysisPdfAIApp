@@ -1,6 +1,6 @@
 # Play Store’a Yüklemeden Önce Yapılması Gereken Geliştirmeler
 
-Bu liste, yayında red veya gecikme yaşamamak için tamamlanması gereken maddeleri toplar. Detaylı kontrol listesi için `mock/PLAYSTORE_CHECKLIST.md` kullanılabilir.
+Bu liste, yayında red veya gecikme yaşamamak için tamamlanması gereken maddeleri toplar. Detaylı kontrol listesi için `mock/docs/playstore/PLAYSTORE_CHECKLIST.md` kullanılabilir.
 
 ---
 

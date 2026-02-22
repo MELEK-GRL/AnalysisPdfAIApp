@@ -68,3 +68,38 @@ AAB: `PdfAICli/android/app/build/outputs/bundle/release/app-release.aab`
 - [ ] Cihaz/emülatörde release APK ile akış testi: Giriş → PDF yükle → Analiz → Geçmiş.
 
 Bunlar tamamsa Sprint 12.2 (Store listesi) ve 12.3–12.4’e geçebilirsiniz.
+
+---
+
+## 6. Dahili teste çıkış (Play Store Internal Testing)
+
+Yeni sürümü production ortamıyla build alıp **Dahili test** track’ine almak için:
+
+### 6.1 Sürüm artır
+
+- `PdfAICli/android/app/build.gradle`: `versionCode` ve `versionName` artır (her yayında versionCode bir artmalı).
+- İsteğe bağlı: `PdfAICli/package.json` → `version` ile senkronize et.
+
+### 6.2 Prod AAB build
+
+```bash
+cd PdfAICli
+export PDFAI_RELEASE_STORE_PASSWORD="keystore_şifreniz"
+export PDFAI_RELEASE_KEY_PASSWORD="key_şifreniz"
+npm run release:android
+```
+
+Bu komut `.env`’i production yapar ve `bundleRelease` çalıştırır.  
+Çıktı: `PdfAICli/android/app/build/outputs/bundle/release/app-release.aab`
+
+### 6.3 Play Console’da yükleme
+
+1. [Google Play Console](https://play.google.com/console) → Uygulamanızı seçin.
+2. **Yayınlama** → **Test etme** → **Dahili test**.
+3. **Yeni sürüm oluştur** → **Uygulama paketlerini yükle** → `app-release.aab` dosyasını seçin.
+4. Sürüm notları ekleyin (örn. "1.0.7 – Production release") → **Kaydet**.
+5. **İncelemeye gönder** / **Yayınla** ile dahili test sürümünü yayınlayın.
+
+### 6.4 Yayın sonrası (zorunlu)
+
+- **mock/data/releases.json**: Yeni sürümü en başa ekleyin (versionCode, versionName, releasedAt, branch, track, note). Detay: **mock/docs/playstore/RELEASES.md**.

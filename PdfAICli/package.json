@@ -1,6 +1,6 @@
 {
   "name": "PdfAICli",
-  "version": "0.0.1",
+  "version": "1.0.7",
   "private": true,
   "scripts": {
     "android": "REACT_NATIVE_PACKAGER_HOSTNAME=127.0.0.1 react-native run-android",

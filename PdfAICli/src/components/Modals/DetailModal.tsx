@@ -1,5 +1,6 @@
 import React, { useMemo, ReactNode } from 'react';
 import { View, StyleSheet, Modal, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
 import Button from '../Buttons/Button';
@@ -28,6 +29,7 @@ const DetailModal: React.FC<Props> = ({
     onRightPress,
 }) => {
     const { w1px, h1px, fs1px } = useResponsive();
+    const insets = useSafeAreaInsets();
 
     const styles = useMemo(() => {
         const { width, height } = Dimensions.get('screen');
@@ -62,6 +64,7 @@ const DetailModal: React.FC<Props> = ({
                     gap: 12 * w1px,
                     marginTop: 20 * h1px,
                     paddingTop: 16 * h1px,
+                    paddingBottom: Math.max(8 * h1px, insets.bottom),
                     borderTopWidth: 1,
                     borderTopColor: '#F3F4F6',
                 },
@@ -72,7 +75,7 @@ const DetailModal: React.FC<Props> = ({
                     paddingVertical: 8 * h1px,
                 },
             });
-    }, [w1px, h1px, fs1px]);
+    }, [w1px, h1px, fs1px, insets.bottom]);
 
     if (!visible) {
         return null;

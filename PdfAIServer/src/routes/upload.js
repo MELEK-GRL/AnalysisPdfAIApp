@@ -17,7 +17,7 @@ const router = express.Router();
 const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, TMP_DIR),
     filename: (_req, file, cb) => {
-        const safe = (file.originalname || 'upload.pdf').replace(/\s+/g, '_');
+        const safe = (file.originalname || 'upload.pdf').replace(/[()\s]+/g, '_').replace(/_+/g, '_') || 'upload.pdf';
         cb(null, `${Date.now()}_${safe}`);
     },
 });
@@ -26,9 +26,12 @@ const upload = multer({
     storage,
     limits: { fileSize: MAX_UPLOAD_BYTES },
     fileFilter: (_req, file, cb) => {
-        const ok = file.mimetype === 'application/pdf' ||
-            (file.originalname && file.originalname.toLowerCase().endsWith('.pdf'));
-        if (ok) return cb(null, true);
+        const mimeOk = file.mimetype === 'application/pdf';
+        const nameNorm = (file.originalname || '')
+            .replace(/[()\s]+/g, '_')
+            .toLowerCase();
+        const nameOk = nameNorm.endsWith('.pdf');
+        if (mimeOk || nameOk) return cb(null, true);
         cb(null, false);
     },
 });

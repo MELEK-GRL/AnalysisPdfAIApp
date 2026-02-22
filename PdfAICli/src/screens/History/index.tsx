@@ -275,24 +275,24 @@ const History: React.FC = () => {
                     backgroundColor: colors.white,
                     borderWidth: 1.5,
                     borderColor: colors.backgroundPurple,
-                    borderRadius: 10 * w1px,
-                    paddingVertical: 10 * h1px,
-                    paddingHorizontal: 16 * w1px,
+                    borderRadius: 8 * w1px,
+                    paddingVertical: 7 * h1px,
+                    paddingHorizontal: 12 * w1px,
                 },
                 deleteButtonRed: {
                     backgroundColor: '#DC2626',
                     borderWidth: 0,
-                    borderRadius: 10 * w1px,
-                    paddingVertical: 10 * h1px,
-                    paddingHorizontal: 16 * w1px,
+                    borderRadius: 8 * w1px,
+                    paddingVertical: 7 * h1px,
+                    paddingHorizontal: 12 * w1px,
                 },
                 deleteAllButton: {
                     backgroundColor: colors.white,
                     borderWidth: 1.5,
                     borderColor: colors.backgroundPurple,
-                    borderRadius: 10 * w1px,
-                    paddingVertical: 10 * h1px,
-                    paddingHorizontal: 16 * w1px,
+                    borderRadius: 8 * w1px,
+                    paddingVertical: 7 * h1px,
+                    paddingHorizontal: 12 * w1px,
                 },
                 checkboxWrap: {
                     marginRight: 12 * w1px,
@@ -425,7 +425,7 @@ const History: React.FC = () => {
                                 }}
                                 activeOpacity={0.7}>
                                 <T
-                                    size={fontSize.body}
+                                    size={fontSize.bodySmall}
                                     weight="600"
                                     color={selectionMode && selectedIds.size > 0 ? '#fff' : colors.backgroundPurple}>
                                     {t('common.delete')}
@@ -435,7 +435,7 @@ const History: React.FC = () => {
                                 style={styles.deleteAllButton}
                                 onPress={() => setDeleteAllConfirmVisible(true)}
                                 activeOpacity={0.7}>
-                                <T size={fontSize.body} weight="600" color={colors.backgroundPurple}>
+                                <T size={fontSize.bodySmall} weight="600" color={colors.backgroundPurple}>
                                     {t('history.deleteAllButton')}
                                 </T>
                             </TouchableOpacity>

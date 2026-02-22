@@ -249,9 +249,12 @@ const Home: React.FC = () => {
         useAnalysisLoadingStore.getState().setLoading(true);
         try {
             const form = new FormData();
+            const rawName = pickedFile.name ?? 'document.pdf';
+            const safeName = rawName.replace(/[()\s]+/g, '_').replace(/_+/g, '_') || 'document.pdf';
+            const nameWithPdf = safeName.toLowerCase().endsWith('.pdf') ? safeName : `${safeName}.pdf`;
             form.append('file', {
                 uri: pickedFile.fileCopyUri ?? pickedFile.uri,
-                name: pickedFile.name ?? 'document.pdf',
+                name: nameWithPdf,
                 type: pickedFile.type ?? 'application/pdf',
             } as any);
             form.append('locale', locale);

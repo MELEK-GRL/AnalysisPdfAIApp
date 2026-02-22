@@ -96,10 +96,10 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.analysis'),
                     tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 30, height: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                        <View style={{ width: 26, height: 26, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
                             <Ionicons
                                 name={focused ? 'document-text' : 'document-text-outline'}
-                                size={28}
+                                size={24}
                                 color={color}
                             />
                         </View>
@@ -112,10 +112,10 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.history'),
                     tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 30, height: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                        <View style={{ width: 26, height: 26, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
                             <Ionicons
                                 name={focused ? 'time' : 'time-outline'}
-                                size={28}
+                                size={24}
                                 color={color}
                             />
                         </View>
@@ -128,10 +128,10 @@ const MainTabs = () => {
                 options={{
                     title: t('tabs.profile'),
                     tabBarIcon: ({ focused, color }) => (
-                        <View style={{ width: 30, height: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                        <View style={{ width: 26, height: 26, alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
                             <Ionicons
                                 name={focused ? 'person' : 'person-outline'}
-                                size={28}
+                                size={24}
                                 color={color}
                             />
                         </View>

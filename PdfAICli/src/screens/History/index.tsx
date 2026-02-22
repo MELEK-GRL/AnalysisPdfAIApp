@@ -267,7 +267,7 @@ const History: React.FC = () => {
                     justifyContent: 'flex-end',
                     alignItems: 'center',
                     gap: 10 * w1px,
-                    marginBottom: 12 * h1px,
+                    marginTop:h1px*5
                 },
                 deleteButton: {
                     backgroundColor: colors.white,

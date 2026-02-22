@@ -2,6 +2,14 @@
   "description": "Play Store / dahili test çıkan sürümlerin kaydı. ZORUNLU: Her yeni sürüm çıktığında bu dosya güncellenir; yeni kayıt releases dizisinin en başına eklenir.",
   "releases": [
     {
+      "versionCode": 5,
+      "versionName": "1.0.4",
+      "releasedAt": "2026-02-22T14:00:00+03:00",
+      "branch": "dev",
+      "track": "Dahili test",
+      "note": "Sürüm çıkıldı"
+    },
+    {
       "versionCode": 4,
       "versionName": "1.0.3",
       "releasedAt": "2026-02-22T13:58:00+03:00",

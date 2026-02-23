@@ -36,12 +36,10 @@ async function connectMongo() {
         try {
             mongoose.set('strictQuery', true);
             await mongoose.connect(MONGODB_URI, mongoOptions);
-            console.log('✅ MongoDB connected');
             return true;
         } catch (err) {
             console.error(`❌ Mongo (deneme ${attempt}/${MONGO_RETRY_COUNT}):`, err?.message || err);
             if (attempt < MONGO_RETRY_COUNT) {
-                console.log(`   ${MONGO_RETRY_DELAY_MS / 1000}s sonra tekrar denenecek...`);
                 await new Promise((r) => setTimeout(r, MONGO_RETRY_DELAY_MS));
             } else {
                 if (err?.stack) console.error('❌ Mongo stack:', err.stack);
@@ -72,15 +70,7 @@ async function start() {
     }
 
     const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`🚀 Server listening on port ${PORT}`);
-        if (hasSmtp) {
-            console.log('📧 SMTP: Yapılandırıldı – şifre sıfırlama e-postaları gönderilecek.');
-        } else {
-            console.log('📧 SMTP: Yapılandırılmadı – şifre sıfırlama kodları development\'ta uygulama içinde gösterilecek.');
-            console.log('   Gerçek mail için .env dosyasına SMTP_HOST, SMTP_USER, SMTP_PASS ekleyin. Test: node scripts/check-smtp.js');
-        }
-    });
+    app.listen(PORT, '0.0.0.0');
 }
 
 start();

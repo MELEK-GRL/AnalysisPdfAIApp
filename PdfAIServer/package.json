@@ -6,7 +6,8 @@
     "start:dev": "NODE_ENV=development node src/index.js",
     "start": "node src/index.js",
     "test": "jest",
-    "check-mongo": "node scripts/check-mongo-uri.js"
+    "check-mongo": "node scripts/check-mongo-uri.js",
+    "clear-attempts": "node scripts/clear-forgot-password-attempts.js"
   },
   "dependencies": {
     "bcryptjs": "3.0.2",

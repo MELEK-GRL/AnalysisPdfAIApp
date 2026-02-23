@@ -35,9 +35,6 @@ async function sendPasswordResetEmail(email, token) {
         }
     }
 
-    if (process.env.NODE_ENV !== 'production') {
-        console.log('[DEV] Password reset email (not sent – no SMTP):', { to: email, link: resetLink });
-    }
     return { sent: false };
 }
 
@@ -55,7 +52,6 @@ async function sendPasswordResetCodeEmail(email, code) {
 
     if (host && user && pass) {
         try {
-            console.log('[Mail] Şifre sıfırlama kodu gönderiliyor:', email);
             const nodemailer = require('nodemailer');
             const port = Number(process.env.SMTP_PORT) || 587;
             const secure = process.env.SMTP_SECURE === 'true';
@@ -71,7 +67,6 @@ async function sendPasswordResetCodeEmail(email, code) {
                 subject,
                 text,
             });
-            console.log('[Mail] Şifre sıfırlama kodu gönderildi:', email);
             return { sent: true };
         } catch (err) {
             console.error('[Mail] Gönderim hatası:', err?.message || err);
@@ -80,9 +75,6 @@ async function sendPasswordResetCodeEmail(email, code) {
         }
     }
 
-    if (process.env.NODE_ENV !== 'production') {
-        console.log('[DEV] Password reset code email (not sent – no SMTP):', { to: email, code });
-    }
     return { sent: false, smtpConfigured: false };
 }
 

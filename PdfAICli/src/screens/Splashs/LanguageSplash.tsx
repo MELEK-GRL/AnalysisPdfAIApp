@@ -13,6 +13,12 @@ import GradientLayout from '../../components/Layout/GradientLayout';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
+import {
+    SPLASH_LOGO_SIZE,
+    SPLASH_CONTAINER_PADDING_TOP,
+    SPLASH_LOGO_MARGIN_BOTTOM,
+    SPLASH_CONTAINER_PADDING_HORIZONTAL,
+} from '../../constants/splashLayout';
 
 type LocaleCode = 'tr' | 'en';
 
@@ -30,20 +36,20 @@ const LanguageSplash: React.FC = () => {
                 container: {
                     flex: 1,
                     justifyContent: 'space-between',
-                    paddingTop: 24 * h1px,
+                    paddingTop: SPLASH_CONTAINER_PADDING_TOP * h1px,
                     paddingBottom: 56 * h1px,
-                    paddingHorizontal: 20 * w1px,
+                    paddingHorizontal: SPLASH_CONTAINER_PADDING_HORIZONTAL * w1px,
                 },
                 topBlock: {
                     flex: 1,
                 },
                 logoWrap: {
                     alignItems: 'center',
-                    marginBottom: 20 * h1px,
+                    marginBottom: SPLASH_LOGO_MARGIN_BOTTOM * h1px,
                 },
                 logo: {
-                    width: 200 * w1px,
-                    height: 200 * h1px,
+                    width: SPLASH_LOGO_SIZE * w1px,
+                    height: SPLASH_LOGO_SIZE * h1px,
                     resizeMode: 'contain',
                 },
                 card: {

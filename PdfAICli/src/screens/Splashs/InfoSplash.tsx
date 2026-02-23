@@ -12,6 +12,12 @@ import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
+import {
+    SPLASH_LOGO_SIZE,
+    SPLASH_CONTAINER_PADDING_TOP,
+    SPLASH_LOGO_MARGIN_BOTTOM,
+    SPLASH_CONTAINER_PADDING_HORIZONTAL,
+} from '../../constants/splashLayout';
 
 const InfoSplash: React.FC = () => {
     const navigation = useNavigation<any>();
@@ -69,7 +75,7 @@ const InfoSplash: React.FC = () => {
                                         <View style={s.stepIconWrap}>
                                             <Ionicons name={icon} size={iconSize.medium} color={colors.backgroundPurple} />
                                         </View>
-                                        <T size={fontSize.caption} weight="600" color={colors.textDark} numberOfLines={1}>
+                                        <T size={fontSize.label} weight="600" color={colors.textDark} numberOfLines={1}>
                                             {t(`splash.${key}`)}
                                         </T>
                                     </View>
@@ -110,9 +116,9 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
     StyleSheet.create({
         container: {
             flex: 1,
-            paddingTop: 56 * h1px,
+            paddingTop: SPLASH_CONTAINER_PADDING_TOP * h1px,
             paddingBottom: 56 * h1px,
-            paddingHorizontal: 20 * w1px,
+            paddingHorizontal: SPLASH_CONTAINER_PADDING_HORIZONTAL * w1px,
         },
         scroll: {
             flex: 1,
@@ -122,11 +128,11 @@ const styles = (w1px: number, h1px: number, _fs1px: number) =>
         },
         centerWrap: {
             alignItems: 'center',
-            marginBottom: 20 * h1px,
+            marginBottom: SPLASH_LOGO_MARGIN_BOTTOM * h1px,
         },
         logo: {
-            width: 180 * w1px,
-            height: 180 * h1px,
+            width: SPLASH_LOGO_SIZE * w1px,
+            height: SPLASH_LOGO_SIZE * h1px,
             resizeMode: 'contain',
         },
         card: {

@@ -81,7 +81,7 @@ const TextInputComponent: React.FC<Props> = ({
         <View style={[styles.container, containerStyle]}>
             {label && (
                 <T
-                    size={fontSize.title}
+                    size={fontSize.subtitle}
                     weight="400"
                     color={colors.textGraySoft}
                     style={styles.label}>

@@ -18,6 +18,7 @@ const endpoints = {
     me: '/auth/me',
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
+    resetPasswordByCode: '/auth/reset-password-by-code',
     resetPasswordByEmail: '/auth/reset-password-by-email',
     deleteAccount: '/auth/account',
 };
@@ -47,9 +48,20 @@ export async function getProfile(): Promise<User> {
 
 export async function forgotPassword(
     email: string,
-    name: string,
-): Promise<{ ok: true; email: string }> {
-    return post<{ ok: true; email: string }>(endpoints.forgotPassword, { email, name });
+): Promise<{ ok: true; email: string; devCode?: string }> {
+    return post<{ ok: true; email: string; devCode?: string }>(endpoints.forgotPassword, { email });
+}
+
+export async function resetPasswordByCode(
+    email: string,
+    code: string,
+    newPassword: string,
+): Promise<{ message: string }> {
+    return post<{ message: string }>(endpoints.resetPasswordByCode, {
+        email,
+        code,
+        newPassword,
+    });
 }
 
 export async function resetPasswordByEmail(

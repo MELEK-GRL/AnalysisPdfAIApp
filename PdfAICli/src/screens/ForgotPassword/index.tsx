@@ -26,7 +26,6 @@ const ForgotPassword: React.FC = () => {
     const t = useT();
     const { w1px, h1px } = useResponsive();
     const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(false);
     const [modal, setModal] = useState<{
         visible: boolean;
@@ -34,6 +33,7 @@ const ForgotPassword: React.FC = () => {
         message: string;
         type?: 'error' | 'warning' | 'success';
     }>({ visible: false, title: '', message: '' });
+    const [pendingReset, setPendingReset] = useState<{ email: string; devCode?: string } | null>(null);
 
     const s = useMemo(
         () =>
@@ -76,16 +76,6 @@ const ForgotPassword: React.FC = () => {
 
     const handleSubmit = async () => {
         const trimmedEmail = email.trim().toLowerCase();
-        const trimmedName = username.trim();
-        if (!trimmedName) {
-            setModal({
-                visible: true,
-                title: t('common.warning'),
-                message: t('forgotPassword.warnUsername'),
-                type: 'warning',
-            });
-            return;
-        }
         if (!trimmedEmail) {
             setModal({
                 visible: true,
@@ -107,9 +97,18 @@ const ForgotPassword: React.FC = () => {
 
         try {
             setLoading(true);
-            const res = await forgotPassword(trimmedEmail, trimmedName);
+            setPendingReset(null);
+            const res = await forgotPassword(trimmedEmail);
             if (res?.ok && res?.email) {
-                nav.replace('ResetPassword', { email: res.email });
+                setPendingReset({ email: res.email, devCode: res.devCode });
+                setModal({
+                    visible: true,
+                    title: t('forgotPassword.codeSentTitle'),
+                    message: res.devCode
+                        ? t('forgotPassword.devCodeMessage')
+                        : t('forgotPassword.codeSentMessage'),
+                    type: 'success',
+                });
                 return;
             }
             setModal({
@@ -121,17 +120,21 @@ const ForgotPassword: React.FC = () => {
         } catch (e: any) {
             const status = e?.response?.status;
             const serverMsg = e?.response?.data?.message || '';
+            const code = e?.response?.data?.code;
+            const is503 = status === 503 || code === 'EMAIL_SERVICE_UNAVAILABLE' || e?.message === 'EMAIL_SERVICE_UNAVAILABLE';
+            const is429 = status === 429 || code === 'FORGOT_PASSWORD_LIMIT_REACHED' || e?.message === 'FORGOT_PASSWORD_LIMIT_REACHED';
             const is404 = status === 404;
-            const is400Mismatch = status === 400 && /username|kullanıcı|match|eşleşm/i.test(serverMsg);
             setModal({
                 visible: true,
-                title: is404 || is400Mismatch ? t('common.warning') : t('common.error'),
-                message: is404
-                    ? t('forgotPassword.emailNotRegistered')
-                    : is400Mismatch
-                        ? t('forgotPassword.emailUsernameMismatch')
-                        : e?.message || t('common.genericError'),
-                type: is404 || is400Mismatch ? 'warning' : 'error',
+                title: is503 ? t('forgotPassword.emailNotSentTitle') : is429 ? t('forgotPassword.limitReachedTitle') : is404 ? t('forgotPassword.emailNotRegisteredTitle') : t('common.error'),
+                message: is503
+                    ? t('forgotPassword.emailNotSentMessage')
+                    : is429
+                        ? t('forgotPassword.limitReachedMessage')
+                        : is404
+                            ? t('forgotPassword.emailNotRegistered')
+                            : e?.message || t('common.genericError'),
+                type: is503 ? 'warning' : is429 ? 'warning' : is404 ? 'warning' : 'error',
             });
         } finally {
             setLoading(false);
@@ -139,7 +142,16 @@ const ForgotPassword: React.FC = () => {
     };
 
     const closeModal = () => {
+        const wasCodeSentSuccess = modal.type === 'success';
+        const pending = pendingReset;
         setModal({ visible: false, title: '', message: '' });
+        if (wasCodeSentSuccess && pending) {
+            nav.replace('ResetPassword', {
+                email: pending.email,
+                ...(pending.devCode ? { devCode: pending.devCode } : {}),
+            });
+            setPendingReset(null);
+        }
     };
 
     return (
@@ -165,17 +177,8 @@ const ForgotPassword: React.FC = () => {
                         size={fontSize.body}
                         color={colors.textDark}
                         style={{ marginBottom: 16 * h1px, textAlign: 'center' }}>
-                        {t('forgotPassword.subtitleNoCode')}
+                        {t('forgotPassword.subtitle')}
                     </T>
-                            <TextInputComponent
-                                label={t('forgotPassword.usernameLabel')}
-                                placeholder={t('forgotPassword.usernamePlaceholder')}
-                                value={username}
-                                onChangeText={setUsername}
-                                autoCapitalize="none"
-                                returnKeyType="next"
-                                containerStyle={{ marginBottom: 12 * h1px }}
-                            />
                             <TextInputComponent
                                 label={t('forgotPassword.emailLabel')}
                                 placeholder={t('register.emailPlaceholder')}
@@ -201,7 +204,7 @@ const ForgotPassword: React.FC = () => {
                                         buttonText={t('forgotPassword.continueButton')}
                                         onPress={handleSubmit}
                                         activityIndicatorLoading={loading}
-                                        disabled={loading || !email.trim() || !username.trim()}
+                                        disabled={loading || !email.trim()}
                                     />
                                 </View>
                             </View>

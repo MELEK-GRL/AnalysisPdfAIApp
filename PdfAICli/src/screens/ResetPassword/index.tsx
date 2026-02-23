@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
-import { resetPasswordByToken, resetPasswordByEmail } from '../../server/api/User';
+import { resetPasswordByToken, resetPasswordByCode } from '../../server/api/User';
 import Button from '../../components/Buttons/Button';
 import T from '../../components/Text/T';
 import PopupModal from '../../components/Modals/PopupModal';
@@ -13,15 +13,17 @@ import { fontSize } from '../../constants/typography';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { useT } from '../../store/useLocaleStore';
 
-type ResetPasswordRoute = { ResetPassword: { token?: string; email?: string } };
+type ResetPasswordRoute = { ResetPassword: { token?: string; email?: string; devCode?: string } };
 
 const ResetPassword: React.FC = () => {
     const nav = useNavigation<any>();
     const route = useRoute<RouteProp<ResetPasswordRoute, 'ResetPassword'>>();
     const tokenFromRoute = route.params?.token ?? '';
     const emailFromRoute = route.params?.email ?? '';
+    const devCodeFromRoute = route.params?.devCode ?? '';
     const t = useT();
     const { w1px, h1px } = useResponsive();
+    const [code, setCode] = useState(devCodeFromRoute);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -31,6 +33,14 @@ const ResetPassword: React.FC = () => {
         message: string;
         type?: 'error' | 'warning' | 'success';
     }>({ visible: false, title: '', message: '' });
+    const [showExpiryHint, setShowExpiryHint] = useState(false);
+
+    useEffect(() => {
+        if (emailFromRoute) {
+            const t = setTimeout(() => setShowExpiryHint(true), 400);
+            return () => clearTimeout(t);
+        }
+    }, [emailFromRoute]);
 
     const s = useMemo(
         () =>
@@ -62,6 +72,18 @@ const ResetPassword: React.FC = () => {
     );
 
     const handleSubmit = async () => {
+        if (emailFromRoute) {
+            const trimmedCode = code.trim();
+            if (!trimmedCode || !/^\d{6}$/.test(trimmedCode)) {
+                setModal({
+                    visible: true,
+                    title: t('common.warning'),
+                    message: t('resetPassword.warnCode'),
+                    type: 'warning',
+                });
+                return;
+            }
+        }
         if (!newPassword) {
             setModal({
                 visible: true,
@@ -93,7 +115,7 @@ const ResetPassword: React.FC = () => {
         try {
             setLoading(true);
             if (emailFromRoute) {
-                await resetPasswordByEmail(emailFromRoute, newPassword);
+                await resetPasswordByCode(emailFromRoute, code.trim(), newPassword);
             } else {
                 await resetPasswordByToken(tokenFromRoute, newPassword);
             }
@@ -185,16 +207,35 @@ const ResetPassword: React.FC = () => {
                         size={fontSize.body}
                         color={colors.textDark}
                         style={{ marginBottom: 16 * h1px, textAlign: 'center' }}>
-                        {t('resetPassword.subtitleLink')}
+                        {emailFromRoute ? t('resetPassword.subtitle') : t('resetPassword.subtitleLink')}
                     </T>
                     {emailFromRoute ? (
-                        <TextInputComponent
-                            label={t('forgotPassword.emailLabel')}
-                            placeholder={t('register.emailPlaceholder')}
-                            value={emailFromRoute}
-                            editable={false}
-                            containerStyle={{ marginBottom: 12 * h1px }}
-                        />
+                        <>
+                            <TextInputComponent
+                                label={t('forgotPassword.emailLabel')}
+                                placeholder={t('register.emailPlaceholder')}
+                                value={emailFromRoute}
+                                editable={false}
+                                containerStyle={{ marginBottom: 12 * h1px }}
+                            />
+                            <TextInputComponent
+                                label={t('resetPassword.codeLabel')}
+                                placeholder={t('resetPassword.codePlaceholder')}
+                                value={code}
+                                onChangeText={v => setCode(v.replace(/\D/g, '').slice(0, 6))}
+                                keyboardType="number-pad"
+                                maxLength={6}
+                                containerStyle={{ marginBottom: devCodeFromRoute ? 4 * h1px : 12 * h1px }}
+                            />
+                            {devCodeFromRoute ? (
+                                <T
+                                    size={fontSize.caption}
+                                    color={colors.textLight}
+                                    style={{ marginBottom: 12 * h1px }}>
+                                    {t('resetPassword.devCodeHint')}
+                                </T>
+                            ) : null}
+                        </>
                     ) : null}
                     <TextInputComponent
                         label={t('resetPassword.newPasswordLabel')}
@@ -221,7 +262,10 @@ const ResetPassword: React.FC = () => {
                         onPress={handleSubmit}
                         activityIndicatorLoading={loading}
                         disabled={
-                            loading || !newPassword || newPassword !== confirmPassword
+                            loading ||
+                            !newPassword ||
+                            newPassword !== confirmPassword ||
+                            (emailFromRoute ? code.trim().length !== 6 : false)
                         }
                         style={{ marginTop: 4 * h1px }}
                         width={h1px * 260}
@@ -237,6 +281,16 @@ const ResetPassword: React.FC = () => {
                 rightButtonText={t('common.ok')}
                 onRightPress={closeModalAndGoToLogin}
             />
+            {showExpiryHint && (
+                <PopupModal
+                    visible={showExpiryHint}
+                    title={t('resetPassword.title')}
+                    message={t('resetPassword.codeExpiryHint')}
+                    type="warning"
+                    rightButtonText={t('common.ok')}
+                    onRightPress={() => setShowExpiryHint(false)}
+                />
+            )}
         </GradientLayout>
     );
 };

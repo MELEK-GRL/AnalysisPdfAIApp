@@ -65,11 +65,19 @@
     "continueButton": "İleri",
     "warnEmail": "Lütfen e-posta adresinizi girin.",
     "warnUsername": "Lütfen kullanıcı adınızı girin.",
-    "emailNotRegistered": "Bu e-posta adresi kayıtlı değil.",
+    "emailNotRegisteredTitle": "Bu e-posta kayıtlı değil",
+    "emailNotRegistered": "Bu e-posta adresi sistemde kayıtlı değil. Lütfen kayıt olduğunuz e-posta adresini girin veya yeni hesap oluşturun.",
     "emailUsernameMismatch": "E-posta ve kullanıcı adı aynı hesaba ait değil.",
     "emailSentTitle": "E-posta gönderildi",
     "emailSentMessage": "Bu e-posta kayıtlıysa, size şifre sıfırlama linki gönderdik. E-postanızı kontrol edin ve linke tıklayarak yeni şifre belirleyin.",
-    "devLinkHint": "Geliştirme (e-posta gönderilmedi) – link"
+    "devLinkHint": "Geliştirme (e-posta gönderilmedi) – link",
+    "limitReachedTitle": "Kod gönderme limiti",
+    "limitReachedMessage": "24 saat içinde en fazla 4 kez şifre sıfırlama kodu gönderebilirsiniz. Limitinize ulaştınız. Lütfen 24 saat sonra tekrar deneyin.",
+    "codeSentTitle": "Kod gönderildi",
+    "codeSentMessage": "E-postanıza 6 haneli kod gönderdik. Şifrenizi yenilemek için 3 dakika içinde kodu girin; aksi halde kod geçersiz olur.",
+    "devCodeMessage": "E-posta servisi yapılandırılmadığı için kod bir sonraki ekranda gösterilecek. 3 dakika içinde kodu girip şifrenizi yenileyin.",
+    "emailNotSentTitle": "E-posta gönderilemedi",
+    "emailNotSentMessage": "E-posta servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin."
   },
   "resetPassword": {
     "title": "Yeni Şifre Belirle",
@@ -83,7 +91,9 @@
     "warnCode": "Lütfen e-postanıza gelen kodu girin.",
     "successTitle": "Şifre güncellendi",
     "successMessage": "Yeni şifrenizle giriş yapabilirsiniz.",
-    "errorInvalidCode": "Kod geçersiz veya süresi dolmuş. Lütfen yeni kod isteyin."
+    "errorInvalidCode": "Kod geçersiz veya süresi dolmuş. Lütfen yeni kod isteyin.",
+    "codeExpiryHint": "Kodunuz 3 dakika geçerlidir. Lütfen kodu ve yeni şifrenizi girin.",
+    "devCodeHint": "Geliştirme: E-posta gönderilmediği için kod yukarıda gösterildi."
   },
   "register": {
     "title": "Kayıt Ol",

@@ -97,4 +97,43 @@ describe('Auth', () => {
             expect(res.body.user.email).toBe('me@example.com');
         });
     });
+
+    describe('POST /api/auth/forgot-password', () => {
+        beforeEach(async () => {
+            await request(app)
+                .post('/api/auth/register')
+                .send({ name: 'ResetUser', email: 'reset@example.com', password: 'old123', termsAccepted: true });
+        });
+
+        it('kayıtlı email ile ok ve email döner (kod maile gider)', async () => {
+            const res = await request(app)
+                .post('/api/auth/forgot-password')
+                .send({ email: 'reset@example.com' });
+            expect(res.status).toBe(200);
+            expect(res.body).toEqual({ ok: true, email: 'reset@example.com' });
+        });
+
+        it('kayıtsız email ile 404 döner', async () => {
+            const res = await request(app)
+                .post('/api/auth/forgot-password')
+                .send({ email: 'unknown@example.com' });
+            expect(res.status).toBe(404);
+            expect(res.body.ok).toBe(false);
+        });
+    });
+
+    describe('POST /api/auth/reset-password-by-code', () => {
+        it('email/code/newPassword olmadan 400 döner', async () => {
+            const res = await request(app).post('/api/auth/reset-password-by-code').send({});
+            expect(res.status).toBe(400);
+        });
+
+        it('geçersiz 6 haneli olmayan kod ile 400 döner', async () => {
+            const res = await request(app)
+                .post('/api/auth/reset-password-by-code')
+                .send({ email: 'x@x.com', code: '123', newPassword: 'newpass123' });
+            expect(res.status).toBe(400);
+            expect(res.body.message).toMatch(/invalid|expired/i);
+        });
+    });
 });

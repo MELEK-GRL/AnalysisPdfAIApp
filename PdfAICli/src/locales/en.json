@@ -65,11 +65,19 @@
     "continueButton": "Forward",
     "warnEmail": "Please enter your email address.",
     "warnUsername": "Please enter your username.",
-    "emailNotRegistered": "This email address is not registered.",
+    "emailNotRegisteredTitle": "This email is not registered",
+    "emailNotRegistered": "This email address is not in our system. Please enter the email you signed up with or create a new account.",
     "emailUsernameMismatch": "Email and username do not match the same account.",
     "emailSentTitle": "Email sent",
     "emailSentMessage": "If this email is registered, we've sent you a password reset link. Check your inbox and tap the link to set a new password.",
-    "devLinkHint": "Dev (email not sent) – link"
+    "devLinkHint": "Dev (email not sent) – link",
+    "limitReachedTitle": "Code limit reached",
+    "limitReachedMessage": "You can request a password reset code at most 4 times in 24 hours. You have reached this limit. Please try again after 24 hours.",
+    "codeSentTitle": "Code sent",
+    "codeSentMessage": "We sent a 6-digit code to your email. Enter the code within 3 minutes to reset your password; otherwise the code will expire.",
+    "devCodeMessage": "Because email is not configured, the code will be shown on the next screen. Enter it within 3 minutes to reset your password.",
+    "emailNotSentTitle": "Email could not be sent",
+    "emailNotSentMessage": "The email service is currently unavailable. Please try again later or contact support."
   },
   "resetPassword": {
     "title": "Set New Password",
@@ -83,7 +91,9 @@
     "warnCode": "Please enter the code from your email.",
     "successTitle": "Password updated",
     "successMessage": "You can sign in with your new password.",
-    "errorInvalidCode": "Code is invalid or expired. Please request a new code."
+    "errorInvalidCode": "Code is invalid or expired. Please request a new code.",
+    "codeExpiryHint": "Your code is valid for 3 minutes. Please enter the code and your new password.",
+    "devCodeHint": "Development: Code is shown above because email was not sent."
   },
   "register": {
     "title": "Sign Up",

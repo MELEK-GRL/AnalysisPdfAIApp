@@ -37,7 +37,7 @@ export type RootStackParamList = {
     Login: undefined;
     Register: undefined;
     ForgotPassword: undefined;
-    ResetPassword: { token?: string; email?: string };
+    ResetPassword: { token?: string; email?: string; devCode?: string };
     MainTabs: undefined;
     Settings: undefined;
     PrivacyPolicy: undefined;

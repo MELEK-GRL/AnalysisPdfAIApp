@@ -41,4 +41,49 @@ async function sendPasswordResetEmail(email, token) {
     return { sent: false };
 }
 
-module.exports = { sendPasswordResetEmail };
+/**
+ * Şifre sıfırlama kodu (6 haneli) e-postası gönderir.
+ * Uygulama içinde kullanıcı bu kodu girerek şifresini değiştirir.
+ */
+async function sendPasswordResetCodeEmail(email, code) {
+    const subject = 'Şifre sıfırlama kodunuz';
+    const text = `Şifre sıfırlama kodunuz: ${code}\n\nBu kod 3 dakika geçerlidir. 3 dakika içinde uygulama içinde bu kodu girip şifrenizi yenilemeniz gerekir; aksi halde kod geçersiz olur.\n\nBu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.`;
+
+    const host = process.env.SMTP_HOST;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+
+    if (host && user && pass) {
+        try {
+            console.log('[Mail] Şifre sıfırlama kodu gönderiliyor:', email);
+            const nodemailer = require('nodemailer');
+            const port = Number(process.env.SMTP_PORT) || 587;
+            const secure = process.env.SMTP_SECURE === 'true';
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port,
+                secure,
+                auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+            });
+            await transporter.sendMail({
+                from: process.env.MAIL_FROM || process.env.SMTP_USER,
+                to: email,
+                subject,
+                text,
+            });
+            console.log('[Mail] Şifre sıfırlama kodu gönderildi:', email);
+            return { sent: true };
+        } catch (err) {
+            console.error('[Mail] Gönderim hatası:', err?.message || err);
+            if (err?.response) console.error('[Mail] SMTP yanıt:', err.response);
+            return { sent: false, smtpConfigured: true, error: err?.message };
+        }
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('[DEV] Password reset code email (not sent – no SMTP):', { to: email, code });
+    }
+    return { sent: false, smtpConfigured: false };
+}
+
+module.exports = { sendPasswordResetEmail, sendPasswordResetCodeEmail };

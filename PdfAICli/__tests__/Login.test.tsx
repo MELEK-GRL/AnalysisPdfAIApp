@@ -9,6 +9,9 @@ jest.mock('@react-navigation/native', () => ({
 }));
 jest.mock('../src/server/api/User', () => ({
     login: jest.fn(),
+    forgotPassword: jest.fn().mockResolvedValue({ ok: true, email: 'test@example.com' }),
+    resetPasswordByCode: jest.fn().mockResolvedValue({ message: 'Password updated. You can sign in with your new password.' }),
+    resetPasswordByToken: jest.fn().mockResolvedValue({ message: 'Password updated. You can sign in with your new password.' }),
 }));
 jest.mock('../src/server/api/Analytics', () => ({
     trackEvent: jest.fn(),

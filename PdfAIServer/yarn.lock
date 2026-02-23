@@ -915,6 +915,7 @@ __metadata:
     mongodb-memory-server: "npm:^10.0.2"
     mongoose: "npm:8.19.1"
     multer: "npm:2.0.2"
+    nodemailer: "npm:6.9.16"
     nodemon: "npm:3.1.7"
     openai: "npm:6.3.0"
     pdf-parse: "npm:1.1.1"
@@ -3711,6 +3712,13 @@ __metadata:
   version: 2.0.27
   resolution: "node-releases@npm:2.0.27"
   checksum: 10c0/f1e6583b7833ea81880627748d28a3a7ff5703d5409328c216ae57befbced10ce2c991bea86434e8ec39003bd017f70481e2e5f8c1f7e0a7663241f81d6e00e2
+  languageName: node
+  linkType: hard
+
+"nodemailer@npm:6.9.16":
+  version: 6.9.16
+  resolution: "nodemailer@npm:6.9.16"
+  checksum: 10c0/9fd73ab4ab5b81544c3c9820afbe386369aba442f997b2f58d171222a898a7aed580fc100bfe6eebc194f18ba6e169d67ee40ca64d32d69022d89e575cef97a4
   languageName: node
   linkType: hard
 

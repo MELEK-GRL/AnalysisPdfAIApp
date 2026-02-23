@@ -71,8 +71,15 @@ async function start() {
         console.warn('⚠️  MONGODB_URI yok, Mongo atlanıyor.');
     }
 
+    const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Server listening on port ${PORT}`);
+        if (hasSmtp) {
+            console.log('📧 SMTP: Yapılandırıldı – şifre sıfırlama e-postaları gönderilecek.');
+        } else {
+            console.log('📧 SMTP: Yapılandırılmadı – şifre sıfırlama kodları development\'ta uygulama içinde gösterilecek.');
+            console.log('   Gerçek mail için .env dosyasına SMTP_HOST, SMTP_USER, SMTP_PASS ekleyin. Test: node scripts/check-smtp.js');
+        }
     });
 }
 

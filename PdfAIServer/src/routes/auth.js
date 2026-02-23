@@ -4,18 +4,28 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const User = require('../models/user');
 const PasswordReset = require('../models/passwordReset');
+const ForgotPasswordAttempt = require('../models/ForgotPasswordAttempt');
 const LabHistory = require('../models/LabHistory');
 const LatestLabResult = require('../models/LatestLabResult');
 const DeviceSession = require('../models/DeviceSession');
 const Consent = require('../models/Consent');
 const AppAnalytics = require('../models/AppAnalytics');
 const requireAuth = require('../middleware/requireAuth');
-const { sendPasswordResetEmail } = require('../services/mail');
+const { sendPasswordResetEmail, sendPasswordResetCodeEmail } = require('../services/mail');
 const { JWT_EXPIRES_IN, BCRYPT_ROUNDS } = require('../constants');
 
-const RESET_CODE_EXPIRY_MS = 60 * 60 * 1000; // 1 saat
+const RESET_CODE_EXPIRY_MS = 60 * 60 * 1000; // 1 saat (link için)
+const RESET_CODE_6_DIGIT_EXPIRY_MS = 3 * 60 * 1000; // 3 dakika (6 haneli kod – süre dolunca hak düşer)
+const FORGOT_PASSWORD_MAX_ATTEMPTS_PER_24H = 4;
+const FORGOT_PASSWORD_24H_MS = 24 * 60 * 60 * 1000;
+
 function generateResetToken() {
     return crypto.randomBytes(32).toString('hex');
+}
+
+/** 6 haneli şifre sıfırlama kodu (100000–999999) */
+function generateResetCode() {
+    return String(100000 + Math.floor(Math.random() * 900000));
 }
 
 const signToken = (user) =>
@@ -91,25 +101,98 @@ router.post('/login', async (req, res) => {
 
 router.post('/forgot-password', async (req, res) => {
     try {
-        let { email, name } = req.body || {};
+        let { email } = req.body || {};
         email = typeof email === 'string' ? email.trim().toLowerCase() : '';
-        name = typeof name === 'string' ? name.trim() : '';
-        if (!email || !name) {
-            return res.status(400).json({ message: 'Email and username required' });
+        if (!email) {
+            return res.status(400).json({ message: 'Email required' });
         }
 
         const user = await User.findOne({ email }).lean();
         if (!user) {
             return res.status(404).json({ ok: false, message: 'Email not registered' });
         }
-        const userNameMatch = (user.name || '').trim().toLowerCase() === name.toLowerCase();
-        if (!userNameMatch) {
-            return res.status(400).json({ ok: false, message: 'Email and username do not match the same account' });
+
+        // 24 saatte en fazla 4 kod hakkı
+        const since = new Date(Date.now() - FORGOT_PASSWORD_24H_MS);
+        const attemptCount = await ForgotPasswordAttempt.countDocuments({ email, createdAt: { $gte: since } });
+        if (attemptCount >= FORGOT_PASSWORD_MAX_ATTEMPTS_PER_24H) {
+            return res.status(429).json({
+                ok: false,
+                message: 'FORGOT_PASSWORD_LIMIT_REACHED',
+                code: 'FORGOT_PASSWORD_LIMIT_REACHED',
+            });
         }
+
+        // Eski sıfırlama kayıtlarını temizle, 6 haneli kod üret, kaydet, maile gönder
+        await PasswordReset.deleteMany({ email });
+        const code = generateResetCode();
+        const expiresAt = new Date(Date.now() + RESET_CODE_6_DIGIT_EXPIRY_MS);
+        await PasswordReset.create({ email, token: code, expiresAt });
+        const mailResult = await sendPasswordResetCodeEmail(email, code);
+
+        if (!mailResult.sent) {
+            if (mailResult.smtpConfigured) {
+                await PasswordReset.deleteMany({ email });
+                return res.status(503).json({
+                    ok: false,
+                    message: 'EMAIL_SERVICE_UNAVAILABLE',
+                    code: 'EMAIL_SERVICE_UNAVAILABLE',
+                });
+            }
+            if (process.env.NODE_ENV !== 'production') {
+                await ForgotPasswordAttempt.create({ email });
+                return res.json({ ok: true, email, devCode: code });
+            }
+            await PasswordReset.deleteMany({ email });
+            return res.status(503).json({
+                ok: false,
+                message: 'EMAIL_SERVICE_UNAVAILABLE',
+                code: 'EMAIL_SERVICE_UNAVAILABLE',
+            });
+        }
+
+        await ForgotPasswordAttempt.create({ email });
         return res.json({ ok: true, email });
     } catch (e) {
         console.error('FORGOT-PASSWORD ERR:', e?.message || e);
         return res.status(500).json({ message: 'Request failed' });
+    }
+});
+
+/** E-posta + 6 haneli kod ile şifre sıfırlama (şifremi unuttum akışı) */
+router.post('/reset-password-by-code', async (req, res) => {
+    try {
+        let { email, code, newPassword } = req.body || {};
+        email = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        code = typeof code === 'string' ? code.trim() : '';
+        newPassword = typeof newPassword === 'string' ? newPassword : '';
+        if (!email || !code || !newPassword) {
+            return res.status(400).json({ message: 'Email, code and new password required' });
+        }
+        if (!/^\d{6}$/.test(code)) {
+            return res.status(400).json({ message: 'Invalid or expired code' });
+        }
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        }
+
+        const reset = await PasswordReset.findOne({ email, token: code }).sort({ createdAt: -1 });
+        if (!reset || reset.expiresAt < new Date()) {
+            return res.status(400).json({ message: 'Invalid or expired code' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+        user.password = hash;
+        await user.save();
+        await PasswordReset.deleteOne({ _id: reset._id });
+
+        return res.json({ message: 'Password updated. You can sign in with your new password.' });
+    } catch (e) {
+        console.error('RESET-PASSWORD-BY-CODE ERR:', e?.message || e);
+        return res.status(500).json({ message: 'Reset failed' });
     }
 });
 
@@ -198,6 +281,7 @@ router.delete('/account', requireAuth, async (req, res) => {
             Consent.updateMany({ user: userId }, { $set: { user: null } }),
             AppAnalytics.updateMany({ user: userId }, { $set: { user: null } }),
             PasswordReset.deleteMany({ email: req.user.email }),
+            ForgotPasswordAttempt.deleteMany({ email: req.user.email }),
         ]);
         await User.deleteOne({ _id: userId });
         return res.json({ success: true, message: 'Account deleted' });

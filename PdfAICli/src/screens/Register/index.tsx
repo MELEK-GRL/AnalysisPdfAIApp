@@ -412,15 +412,15 @@ const Register: React.FC = () => {
                                     />
                                 )}
                             </View>
-                            <View style={{ marginLeft: 8 * w1px, flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                                <T size={fontSize.body} color="#111827" style={{ flex: 1 }}>
+                            <View style={{ marginLeft: 8 * w1px, flex: 1, flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
+                                <T size={fontSize.body} color="#111827" style={{ flex: 1, flexShrink: 1 }}>
                                     {t('register.termsCheckbox')}
                                 </T>
                                 <TouchableOpacity
                                     onPress={() => setTermsModalVisible(true)}
                                     activeOpacity={0.7}
                                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                                    style={[s.docIconButton, { marginLeft: 8 * w1px }]}
+                                    style={[s.docIconButton, { marginLeft: 8 * w1px, flexShrink: 0 }]}
                                     accessibilityLabel={t('register.viewTerms')}
                                     accessibilityRole="button">
                                     <Ionicons
@@ -453,15 +453,15 @@ const Register: React.FC = () => {
                                     />
                                 )}
                             </View>
-                            <View style={{ marginLeft: 8 * w1px, flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                                <T size={fontSize.body} color="#111827" style={{ flex: 1 }}>
+                            <View style={{ marginLeft: 8 * w1px, flex: 1, flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
+                                <T size={fontSize.body} color="#111827" style={{ flex: 1, flexShrink: 1 }}>
                                     {t('register.openConsentCheckbox')}
                                 </T>
                                 <TouchableOpacity
                                     onPress={() => setOpenConsentModalVisible(true)}
                                     activeOpacity={0.7}
                                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                                    style={[s.docIconButton, { marginLeft: 8 * w1px }]}
+                                    style={[s.docIconButton, { marginLeft: 8 * w1px, flexShrink: 0 }]}
                                     accessibilityLabel={t('register.viewOpenConsent')}
                                     accessibilityRole="button">
                                     <Ionicons

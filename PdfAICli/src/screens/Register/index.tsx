@@ -108,20 +108,10 @@ const Register: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                 },
-                termsLinkRow: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingVertical: 6 * h1px,
-                    paddingRight: 8 * w1px,
-                },
-                termsLinksRow: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 4 * h1px,
-                    gap: 6 * w1px,
-                },
-                termsLinkItem: {
-                    flex: 1,
+                docIconButton: {
+                    padding: 6 * w1px,
+                    borderRadius: 8 * w1px,
+                    backgroundColor: colors.backgroundPurpleSoft,
                 },
             }),
         [w1px, h1px, fs1px],
@@ -422,52 +412,25 @@ const Register: React.FC = () => {
                                     />
                                 )}
                             </View>
-                            <T
-                                size={fontSize.body}
-                                color="#111827"
-                                style={{ marginLeft: 8 * w1px, flex: 1 }}>
-                                {t('register.termsCheckbox')}
-                            </T>
+                            <View style={{ marginLeft: 8 * w1px, flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                                <T size={fontSize.body} color="#111827" style={{ flex: 1 }}>
+                                    {t('register.termsCheckbox')}
+                                </T>
+                                <TouchableOpacity
+                                    onPress={() => setTermsModalVisible(true)}
+                                    activeOpacity={0.7}
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    style={[s.docIconButton, { marginLeft: 8 * w1px }]}
+                                    accessibilityLabel={t('register.viewTerms')}
+                                    accessibilityRole="button">
+                                    <Ionicons
+                                        name="document-text-outline"
+                                        size={iconSize.small}
+                                        color={colors.backgroundPurple}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </TouchableOpacity>
-
-                        <View style={s.termsLinksRow}>
-                            <TouchableOpacity
-                                onPress={() => setTermsModalVisible(true)}
-                                activeOpacity={0.8}
-                                style={[s.termsLinkRow, s.termsLinkItem]}>
-                                <T
-                                    size={fontSize.body}
-                                    weight="600"
-                                    color={colors.backgroundPurple}
-                                    numberOfLines={1}>
-                                    {t('register.viewTerms')}
-                                </T>
-                                <Ionicons
-                                    name="open-outline"
-                                    size={iconSize.small}
-                                    color={colors.backgroundPurple}
-                                    style={{ marginLeft: 4 * w1px }}
-                                />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={() => setOpenConsentModalVisible(true)}
-                                activeOpacity={0.8}
-                                style={[s.termsLinkRow, s.termsLinkItem]}>
-                                <T
-                                    size={fontSize.body}
-                                    weight="600"
-                                    color={colors.backgroundPurple}
-                                    numberOfLines={1}>
-                                    {t('register.viewOpenConsent')}
-                                </T>
-                                <Ionicons
-                                    name="open-outline"
-                                    size={iconSize.small}
-                                    color={colors.backgroundPurple}
-                                    style={{ marginLeft: 4 * w1px }}
-                                />
-                            </TouchableOpacity>
-                        </View>
 
                         <TouchableOpacity
                             onPress={() => setOpenConsentAccepted(!openConsentAccepted)}
@@ -490,12 +453,24 @@ const Register: React.FC = () => {
                                     />
                                 )}
                             </View>
-                            <T
-                                size={fontSize.body}
-                                color="#111827"
-                                style={{ marginLeft: 8 * w1px, flex: 1 }}>
-                                {t('register.openConsentCheckbox')}
-                            </T>
+                            <View style={{ marginLeft: 8 * w1px, flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                                <T size={fontSize.body} color="#111827" style={{ flex: 1 }}>
+                                    {t('register.openConsentCheckbox')}
+                                </T>
+                                <TouchableOpacity
+                                    onPress={() => setOpenConsentModalVisible(true)}
+                                    activeOpacity={0.7}
+                                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                    style={[s.docIconButton, { marginLeft: 8 * w1px }]}
+                                    accessibilityLabel={t('register.viewOpenConsent')}
+                                    accessibilityRole="button">
+                                    <Ionicons
+                                        name="document-text-outline"
+                                        size={iconSize.small}
+                                        color={colors.backgroundPurple}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </TouchableOpacity>
 
                         <Button

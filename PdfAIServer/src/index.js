@@ -1,7 +1,9 @@
 const path = require('path');
-// Production'da (Railway vb.) ortam değişkenleri platformdan gelir; dotenv gerekmez.
-if (process.env.NODE_ENV !== 'production') {
+// .env yükle (lokal). Railway vb. production'da dotenv yüklü olmayabilir; yoksa sessizce devam et.
+try {
     require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+} catch (_) {
+    /* dotenv yok (production); ortam değişkenleri platformdan gelir */
 }
 
 const mongoose = require('mongoose');

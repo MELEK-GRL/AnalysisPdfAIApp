@@ -88,12 +88,12 @@ const LanguageSplash: React.FC = () => {
                 },
                 langRow: {
                     flexDirection: 'row',
-                    gap: 12 * w1px,
+                    gap: 8 * w1px,
                 },
                 langOption: {
                     flex: 1,
-                    borderRadius: 16 * w1px,
-                    paddingVertical: 16 * h1px,
+                    borderRadius: 12 * w1px,
+                    paddingVertical: 10 * h1px,
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: 2,
@@ -183,7 +183,7 @@ const LanguageSplash: React.FC = () => {
                                     onPress={() => setSelected('tr')}
                                     activeOpacity={0.8}>
                                     <T
-                                        size={fontSize.subtitle}
+                                        size={fontSize.body}
                                         weight="700"
                                         color={selected === 'tr' ? colors.backgroundPurple : colors.textDark}>
                                         Türkçe
@@ -197,7 +197,7 @@ const LanguageSplash: React.FC = () => {
                                     onPress={() => setSelected('en')}
                                     activeOpacity={0.8}>
                                     <T
-                                        size={fontSize.subtitle}
+                                        size={fontSize.body}
                                         weight="700"
                                         color={selected === 'en' ? colors.backgroundPurple : colors.textDark}>
                                         English

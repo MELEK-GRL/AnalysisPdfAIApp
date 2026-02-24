@@ -99,15 +99,19 @@ router.post('/login', async (req, res) => {
     }
 });
 
+/** Şifremi unuttum: sadece e-posta yeterli, kullanıcı adı gerekmez. */
 router.post('/forgot-password', async (req, res) => {
     try {
+        console.log('[forgot-password] req.body:', JSON.stringify(req.body));
         let { email } = req.body || {};
         email = typeof email === 'string' ? email.trim().toLowerCase() : '';
+        console.log('[forgot-password] email:', email || '(boş)');
         if (!email) {
             return res.status(400).json({ message: 'Email required' });
         }
 
         const user = await User.findOne({ email }).lean();
+        console.log('[forgot-password] user bulundu:', !!user, user ? user.email : '-');
         if (!user) {
             return res.status(404).json({ ok: false, message: 'Email not registered' });
         }
@@ -115,6 +119,7 @@ router.post('/forgot-password', async (req, res) => {
         // 24 saatte en fazla 4 kod hakkı
         const since = new Date(Date.now() - FORGOT_PASSWORD_24H_MS);
         const attemptCount = await ForgotPasswordAttempt.countDocuments({ email, createdAt: { $gte: since } });
+        console.log('[forgot-password] son 24h deneme:', attemptCount);
         if (attemptCount >= FORGOT_PASSWORD_MAX_ATTEMPTS_PER_24H) {
             return res.status(429).json({
                 ok: false,
@@ -128,7 +133,9 @@ router.post('/forgot-password', async (req, res) => {
         const code = generateResetCode();
         const expiresAt = new Date(Date.now() + RESET_CODE_6_DIGIT_EXPIRY_MS);
         await PasswordReset.create({ email, token: code, expiresAt });
+        console.log('[forgot-password] kod oluşturuldu, mail gönderiliyor:', email);
         const mailResult = await sendPasswordResetCodeEmail(email, code);
+        console.log('[forgot-password] mail sonucu:', mailResult?.sent, mailResult?.smtpConfigured, mailResult?.error || '-');
 
         if (!mailResult.sent) {
             if (mailResult.smtpConfigured) {
@@ -140,6 +147,7 @@ router.post('/forgot-password', async (req, res) => {
                 });
             }
             if (process.env.NODE_ENV !== 'production') {
+                console.log('[forgot-password] dev mod: kod döndürülüyor, devCode:', code);
                 await ForgotPasswordAttempt.create({ email });
                 return res.json({ ok: true, email, devCode: code });
             }
@@ -152,6 +160,7 @@ router.post('/forgot-password', async (req, res) => {
         }
 
         await ForgotPasswordAttempt.create({ email });
+        console.log('[forgot-password] başarılı, 200 dönülüyor');
         return res.json({ ok: true, email });
     } catch (e) {
         console.error('FORGOT-PASSWORD ERR:', e?.message || e);

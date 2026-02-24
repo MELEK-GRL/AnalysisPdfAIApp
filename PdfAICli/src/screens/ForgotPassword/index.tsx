@@ -76,6 +76,7 @@ const ForgotPassword: React.FC = () => {
 
     const handleSubmit = async () => {
         const trimmedEmail = email.trim().toLowerCase();
+        console.log('[ForgotPassword] handleSubmit, email:', trimmedEmail || '(boş)');
         if (!trimmedEmail) {
             setModal({
                 visible: true,
@@ -98,7 +99,9 @@ const ForgotPassword: React.FC = () => {
         try {
             setLoading(true);
             setPendingReset(null);
+            console.log('[ForgotPassword] API çağrılıyor:', trimmedEmail);
             const res = await forgotPassword(trimmedEmail);
+            console.log('[ForgotPassword] API yanıtı:', res?.ok, res ? { ...res } : res);
             if (res?.ok && res?.email) {
                 setPendingReset({ email: res.email, devCode: res.devCode });
                 setModal({
@@ -119,11 +122,13 @@ const ForgotPassword: React.FC = () => {
             });
         } catch (e: any) {
             const status = e?.response?.status;
-            const serverMsg = e?.response?.data?.message || '';
+            const serverMsg = (e?.response?.data?.message || e?.message || '').toString().toLowerCase();
+            console.log('[ForgotPassword] Hata:', status, serverMsg, e?.response?.data);
             const code = e?.response?.data?.code;
             const is503 = status === 503 || code === 'EMAIL_SERVICE_UNAVAILABLE' || e?.message === 'EMAIL_SERVICE_UNAVAILABLE';
             const is429 = status === 429 || code === 'FORGOT_PASSWORD_LIMIT_REACHED' || e?.message === 'FORGOT_PASSWORD_LIMIT_REACHED';
             const is404 = status === 404;
+            const isEmailUsernameRequired = serverMsg.includes('username') && serverMsg.includes('required') && serverMsg.includes('email');
             setModal({
                 visible: true,
                 title: is503 ? t('forgotPassword.emailNotSentTitle') : is429 ? t('forgotPassword.limitReachedTitle') : is404 ? t('forgotPassword.emailNotRegisteredTitle') : t('common.error'),
@@ -133,7 +138,9 @@ const ForgotPassword: React.FC = () => {
                         ? t('forgotPassword.limitReachedMessage')
                         : is404
                             ? t('forgotPassword.emailNotRegistered')
-                            : e?.message || t('common.genericError'),
+                            : isEmailUsernameRequired
+                                ? t('forgotPassword.emailOnlyHint')
+                                : e?.message || t('common.genericError'),
                 type: is503 ? 'warning' : is429 ? 'warning' : is404 ? 'warning' : 'error',
             });
         } finally {

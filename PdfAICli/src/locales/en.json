@@ -77,7 +77,8 @@
     "codeSentMessage": "We sent a 6-digit code to your email. Enter the code within 3 minutes to reset your password; otherwise the code will expire.",
     "devCodeMessage": "Because email is not configured, the code will be shown on the next screen. Enter it within 3 minutes to reset your password.",
     "emailNotSentTitle": "Email could not be sent",
-    "emailNotSentMessage": "The email service is currently unavailable. Please try again later or contact support."
+    "emailNotSentMessage": "The email service is currently unavailable. Please try again later or contact support.",
+    "emailOnlyHint": "Forgot password only requires your email. Please enter your email and try again."
   },
   "resetPassword": {
     "title": "Set New Password",

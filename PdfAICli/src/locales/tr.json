@@ -77,7 +77,8 @@
     "codeSentMessage": "E-postanıza 6 haneli kod gönderdik. Şifrenizi yenilemek için 3 dakika içinde kodu girin; aksi halde kod geçersiz olur.",
     "devCodeMessage": "E-posta servisi yapılandırılmadığı için kod bir sonraki ekranda gösterilecek. 3 dakika içinde kodu girip şifrenizi yenileyin.",
     "emailNotSentTitle": "E-posta gönderilemedi",
-    "emailNotSentMessage": "E-posta servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin."
+    "emailNotSentMessage": "E-posta servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin veya destek ile iletişime geçin.",
+    "emailOnlyHint": "Şifremi unuttum için sadece e-posta yeterlidir. Lütfen e-posta adresinizi girip tekrar deneyin."
   },
   "resetPassword": {
     "title": "Yeni Şifre Belirle",

@@ -90,6 +90,26 @@ app.get('/privacy', (_req, res) => {
     }
 });
 
+// Hesap silme sayfası – Play Store Hesap silme URL'si gereksinimi
+app.get('/delete-account', (_req, res) => {
+    try {
+        const candidates = [
+            path.join(__dirname, '..', 'public', 'delete-account.html'),
+            path.join(process.cwd(), 'public', 'delete-account.html'),
+        ];
+        for (const htmlPath of candidates) {
+            if (fs.existsSync(htmlPath)) {
+                return res.type('html').send(fs.readFileSync(htmlPath, 'utf8'));
+            }
+        }
+        const fallback = '<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hesap Silme</title></head><body style="font-family:sans-serif;max-width:720px;margin:2rem auto;padding:0 1rem;"><h1>Hesap ve Veri Silme</h1><p><strong>PDF Tahlil Analizi</strong> uygulamasında hesabınızı silmek için: Uygulamayı açın → Profil → 「Hesabımı sil」. Hesap ve ilişkili veriler kalıcı olarak silinir. Detay için <a href="/privacy">Gizlilik Politikası</a>.</p></body></html>';
+        return res.type('html').send(fallback);
+    } catch (e) {
+        console.error('Delete-account route error', e?.message || e);
+        res.status(500).type('html').send('<!DOCTYPE html><html><body><h1>Geçici hata</h1><p>Lütfen daha sonra tekrar deneyin.</p></body></html>');
+    }
+});
+
 // Merkezi hata yakalayıcı (route'lardan next(err) veya yakalanmamış hatalar)
 app.use((err, _req, res, _next) => {
     const isProd = process.env.NODE_ENV === 'production';

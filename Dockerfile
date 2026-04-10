@@ -1,5 +1,5 @@
-# Lokal: docker build -f Dockerfile .  (PdfAIServer klasöründen, context=.)
-# Railway: depo kökündeki /Dockerfile kullanılır (railway.json). Bu dosya sadece lokal PdfAIServer-context için.
+# PdfAIServer – Railway: build context = repo kökü (Root Directory boş olmalı).
+# PdfAIServer/package.json kökte değil; COPY yolları bu yüzden PdfAIServer/ ile başlar.
 FROM node:20-bookworm-slim
 
 WORKDIR /app
@@ -9,13 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
     && mkdir -p .yarn/releases \
     && curl -fsSL https://repo.yarnpkg.com/4.9.2/packages/yarnpkg-cli/bin/yarn.js -o .yarn/releases/yarn-4.9.2.cjs
 
-COPY package.json yarn.lock .yarnrc.yml ./
+COPY PdfAIServer/package.json PdfAIServer/yarn.lock PdfAIServer/.yarnrc.yml ./
 
-# Dev bağımlılığı mongodb-memory-server postinstall’da Mongo indirir; imajda gerek yok.
 RUN YARN_ENABLE_SCRIPTS=0 node .yarn/releases/yarn-4.9.2.cjs install --immutable
 
-# .dockerignore’da .yarn var; burada indirilen Yarn silinmez.
-COPY . .
+COPY PdfAIServer/ ./
 
 EXPOSE 4000
 

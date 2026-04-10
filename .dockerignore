@@ -1,0 +1,10 @@
+.git
+PdfAICli
+PdfAICli/node_modules
+mock
+PdfAIServer/node_modules
+PdfAIServer/.yarn
+PdfAIServer/.env
+PdfAIServer/.env.*
+PdfAIServer/coverage
+PdfAIServer/__tests__

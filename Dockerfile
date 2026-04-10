@@ -15,6 +15,8 @@ RUN YARN_ENABLE_SCRIPTS=0 node .yarn/releases/yarn-4.9.2.cjs install --immutable
 
 COPY PdfAIServer/ ./
 
+ENV NODE_ENV=production
+
 EXPOSE 4000
 
 CMD ["node", "src/index.js"]

@@ -43,6 +43,7 @@ async function connectMongo() {
         try {
             mongoose.set('strictQuery', true);
             await mongoose.connect(MONGODB_URI, mongoOptions);
+            console.log('✅ MongoDB bağlandı (db:', mongoOptions.dbName + ')');
             return true;
         } catch (err) {
             console.error(`❌ Mongo (deneme ${attempt}/${MONGO_RETRY_COUNT}):`, err?.message || err);

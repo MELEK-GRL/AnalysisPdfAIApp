@@ -7,7 +7,7 @@ import { API_BASE_URL as ENV_API_BASE_URL } from '@env';
  * Release build'de .env'deki API_BASE_URL kullanılır.
  */
 export const getApiBaseUrl = (): string => {
-    const envUrl = ENV_API_BASE_URL?.trim();
+    const envUrl = ENV_API_BASE_URL?.trim().replace(/\/+$/, '');
     if (__DEV__) {
         if (envUrl) return envUrl;
         return Platform.OS === 'ios'

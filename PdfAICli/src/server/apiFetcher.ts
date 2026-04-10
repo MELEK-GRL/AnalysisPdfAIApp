@@ -108,6 +108,11 @@ export async function apiFetcher<T>(
         const res = await api.request<T>({ method, url, data, ...config });
         return res.data;
     } catch (err) {
+        // AxiosError'ı olduğu gibi ilet; aksi halde response/code kaybolur ve
+        // isNetworkError her zaman "bağlantı yok" sanır (4xx/5xx bile olsa).
+        if (axios.isAxiosError(err)) {
+            throw err;
+        }
         throw new Error(normalizeError(err));
     }
 }

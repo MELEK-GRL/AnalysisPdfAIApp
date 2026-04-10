@@ -1,10 +1,17 @@
 
 const OpenAI = require('openai');
 
-if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY missing');
+let _openaiClient;
+function getOpenAIClient() {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key || !String(key).trim()) {
+        throw new Error('OPENAI_API_KEY missing');
+    }
+    if (!_openaiClient) {
+        _openaiClient = new OpenAI({ apiKey: String(key).trim() });
+    }
+    return _openaiClient;
 }
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const DEV = process.env.NODE_ENV !== 'production';
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
@@ -716,7 +723,7 @@ const LAB_EXTRACTION_FORMAT = {
 
 async function callOpenAI({ instructions, input, timeoutMs = TIMEOUT_PRIMARY, model = MODEL }) {
     const resp = await withTimeout(
-        openai.responses.create({
+        getOpenAIClient().responses.create({
             model,
             instructions: `${instructions}\n\nIMPORTANT: Output valid JSON matching the schema.`,
             input: `TEXT:\n${input}\n\nReturn only JSON.`,
@@ -804,7 +811,7 @@ ${bullet}
 
     try {
         const resp = await withTimeout(
-            openai.responses.create({
+            getOpenAIClient().responses.create({
                 model: MODEL,
                 instructions: systemInstr,
                 input: userInput,

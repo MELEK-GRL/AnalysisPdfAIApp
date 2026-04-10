@@ -1,16 +1,13 @@
-# PdfAIServer – Railway Docker build (Yarn 4, Corepack).
-# Alpine + corepack prepare sık kırılıyor; bookworm-slim ile Yarn indirmesi güvenilir.
-FROM node:20-bookworm-slim
+# PdfAIServer – Railway Docker (Yarn 4, Corepack yok: .yarn/releases ile).
+FROM node:20-alpine
 
 WORKDIR /app
 
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-
-RUN corepack enable && corepack prepare yarn@4.9.2 --activate
-
 COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn/releases ./.yarn/releases/
 
-RUN yarn install --immutable
+# Dev bağımlılığı mongodb-memory-server postinstall’da Mongo indirir; imajda gerek yok.
+RUN YARN_ENABLE_SCRIPTS=0 node .yarn/releases/yarn-4.9.2.cjs install --immutable
 
 COPY . .
 

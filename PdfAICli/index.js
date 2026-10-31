@@ -1,6 +1,5 @@
-
 import { AppRegistry } from 'react-native';
 import App from './App';
-import { name as appName } from './app.json';
 
-AppRegistry.registerComponent(appName, () => App);
+// Hardcoded Latin "i" — app.json import + TR locale can break native/JS name match.
+AppRegistry.registerComponent('PdfAICli', () => App);

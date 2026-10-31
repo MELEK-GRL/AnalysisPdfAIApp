@@ -41,6 +41,10 @@ export function useInactivityTimeout(): void {
 
         const onAppStateChange = (nextState: AppStateStatus) => {
             if (nextState === 'background') {
+                // Dev'de emulator/IDE geçişinde logout uygulama "crash" gibi görünür.
+                if (__DEV__) {
+                    return;
+                }
                 // Analiz sürerken çıkarma; aksi halde kapatma / başka app = logout
                 if (useAnalysisLoadingStore.getState().loading) {
                     return;

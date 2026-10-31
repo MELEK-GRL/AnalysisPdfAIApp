@@ -1,10 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Platform } from 'react-native';
-import mobileAds, {
-    AdEventType,
-    RewardedAd,
-    RewardedAdEventType,
-} from 'react-native-google-mobile-ads';
+import { View, StyleSheet, ScrollView } from 'react-native';
 
 import DocumentPicker, {
     type DocumentPickerResponse,
@@ -13,7 +8,7 @@ import { useResponsive } from '../../utils/deviceStore/device';
 import { getProfile } from '../../server/api/User';
 import { getToken } from '../../server/apiFetcher';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { uploadPdf, reportAdReward, LabItem, type AdsRewardResponse } from '../../server/api/Lab';
+import { uploadPdf, LabItem } from '../../server/api/Lab';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useAnalizResetStore } from '../../store/useAnalizResetStore';
@@ -31,90 +26,11 @@ import PageHeader from '../../components/PageHeader/PageHeader';
 import { MESSAGES } from '../../constants/messages';
 import { useSessionStore } from '../../store/useSessionStore';
 import { TEST_REWARDED_UNIT_ID } from '../../constants/limits';
+import { showRewardedAdForCredit } from '../../utils/ads/rewardedAd';
 import PdfUploadSection from './PdfUploadSection';
 import ResultSection from './ResultSection';
 
 type Phase = 'idle' | 'loading' | 'result';
-
-let adsSdkReady: Promise<void> | null = null;
-
-async function ensureAdsInitialized(): Promise<boolean> {
-    if (!adsSdkReady) {
-        adsSdkReady = mobileAds()
-            .initialize()
-            .then(() => undefined)
-            .catch(err => {
-                adsSdkReady = null;
-                if (__DEV__) console.warn('AdMob init failed', err);
-                throw err;
-            });
-    }
-    await adsSdkReady;
-    return true;
-}
-
-/** Rewarded reklam; EARNED_REWARD sonrası sunucuya bildirir. Unit ID sunucudan. */
-function showRewardedAdForCredit(
-    unitId: string,
-): Promise<AdsRewardResponse | null> {
-    return new Promise(async resolve => {
-        const adUnit = (unitId || '').trim() || TEST_REWARDED_UNIT_ID;
-        try {
-            await ensureAdsInitialized();
-        } catch {
-            resolve(null);
-            return;
-        }
-
-        const rewarded = RewardedAd.createForAdRequest(adUnit, {
-            requestNonPersonalizedAdsOnly: Platform.OS === 'ios',
-        });
-
-        let settled = false;
-        let earned = false;
-
-        const finish = async (ok: boolean) => {
-            if (settled) return;
-            settled = true;
-            unsub();
-            if (!ok || !earned) {
-                resolve(null);
-                return;
-            }
-            try {
-                resolve(await reportAdReward());
-            } catch (e) {
-                if (__DEV__) console.warn('reportAdReward failed', e);
-                resolve(null);
-            }
-        };
-
-        const unsubLoaded = rewarded.addAdEventListener(RewardedAdEventType.LOADED, () => {
-            rewarded.show().catch(() => finish(false));
-        });
-        const unsubEarned = rewarded.addAdEventListener(
-            RewardedAdEventType.EARNED_REWARD,
-            () => {
-                earned = true;
-            },
-        );
-        const unsubClosed = rewarded.addAdEventListener(AdEventType.CLOSED, () => {
-            finish(earned);
-        });
-        const unsubError = rewarded.addAdEventListener(AdEventType.ERROR, () => {
-            finish(false);
-        });
-
-        const unsub = () => {
-            unsubLoaded();
-            unsubEarned();
-            unsubClosed();
-            unsubError();
-        };
-
-        rewarded.load();
-    });
-}
 
 const Home: React.FC = () => {
     const nav = useNavigation<any>();

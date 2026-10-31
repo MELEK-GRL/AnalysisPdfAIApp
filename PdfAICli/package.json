@@ -25,7 +25,7 @@
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-document-picker": "9.3.1",
-    "react-native-google-mobile-ads": "^14.11.0",
+    "react-native-google-mobile-ads": "14.7.2",
     "react-native-linear-gradient": "2.8.3",
     "react-native-safe-area-context": "5.6.1",
     "react-native-screens": "3.37.0",

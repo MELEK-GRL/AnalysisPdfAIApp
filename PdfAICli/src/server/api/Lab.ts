@@ -68,15 +68,31 @@ export async function deleteAllLabHistory(): Promise<void> {
     await api.delete('/labs/history');
 }
 
+export type RateLimitError = Error & {
+    isRateLimit: true;
+    adsEnabled?: boolean;
+    rewardedUnitId?: string | null;
+};
+
+function throwRateLimit(data?: {
+    message?: string;
+    adsEnabled?: boolean;
+    rewardedUnitId?: string | null;
+}): never {
+    const e = new Error(
+        data?.message ||
+            'Günlük analiz hakkınız doldu. 24 saat içinde en fazla 2 kez PDF analizi yapabilirsiniz.',
+    ) as RateLimitError;
+    e.isRateLimit = true;
+    e.adsEnabled = data?.adsEnabled === true;
+    e.rewardedUnitId = data?.rewardedUnitId ?? null;
+    throw e;
+}
+
 export async function uploadPdf(form: FormData): Promise<UploadResponse> {
     const handleError = (err: any): never => {
         if (err?.response?.status === 429) {
-            const e = new Error(
-                err?.response?.data?.message ||
-                    'Günlük analiz hakkınız doldu. 24 saat içinde en fazla 2 kez PDF analizi yapabilirsiniz.',
-            ) as Error & { isRateLimit?: boolean };
-            e.isRateLimit = true;
-            throw e;
+            throwRateLimit(err?.response?.data);
         }
         const msg = err?.response?.data?.message || err?.message || 'PDF yüklenemedi.';
         throw new Error(msg);
@@ -106,14 +122,30 @@ export async function uploadPdf(form: FormData): Promise<UploadResponse> {
                 if (j?.message) msg = j.message;
             } catch (_) {}
             if (r.status === 429) {
-                const e = new Error(
-                    msg || 'Günlük analiz hakkınız doldu. 24 saat içinde en fazla 2 kez PDF analizi yapabilirsiniz.',
-                ) as Error & { isRateLimit?: boolean };
-                e.isRateLimit = true;
-                throw e;
+                let adsEnabled = false;
+                let rewardedUnitId: string | null = null;
+                try {
+                    const j = JSON.parse(text);
+                    adsEnabled = j?.adsEnabled === true;
+                    rewardedUnitId = j?.rewardedUnitId || null;
+                } catch (_) {}
+                throwRateLimit({ message: msg, adsEnabled, rewardedUnitId });
             }
             throw new Error(msg);
         }
         return (await r.json()) as UploadResponse;
     }
+}
+
+export type AdsRewardResponse = {
+    ok: boolean;
+    creditGranted: boolean;
+    pendingAdWatches: number;
+    adsNeededForNextCredit: number;
+};
+
+/** Rewarded reklam tamamlandıktan sonra sunucuya bildir (2 izleme → +1 hak). */
+export async function reportAdReward(): Promise<AdsRewardResponse> {
+    const res = await api.post<AdsRewardResponse>('/ads/reward');
+    return res.data;
 }

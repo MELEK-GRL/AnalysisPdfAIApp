@@ -41,6 +41,8 @@ local.properties
 node_modules/
 npm-debug.log
 yarn-error.log
+.npm-cache/
+package-lock.json
 
 # fastlane
 #

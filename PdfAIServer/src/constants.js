@@ -20,6 +20,18 @@ function isDevEnvironment() {
 /** DEV'de limit kapalı; UAT/PROD'da açık (2 analiz/24h). */
 const RATE_LIMIT_ANALYSIS_DISABLED = isDevEnvironment();
 
+/**
+ * AdMob: 2 rewarded → +1 analiz hakkı.
+ * Aç/kapa sadece sunucu (ADS_ENABLED). Client rebuild gerekmez.
+ * Kota hesabı sunucu saatiyle.
+ */
+const ADS_ENABLED = String(process.env.ADS_ENABLED || '').toLowerCase() === 'true';
+const ADS_WATCHES_PER_CREDIT = Math.max(1, Number(process.env.ADS_WATCHES_PER_CREDIT) || 2);
+/** Boşsa Google test rewarded unit (canlıda gerçek unit koy). */
+const ADMOB_REWARDED_UNIT_ID =
+    (process.env.ADMOB_REWARDED_UNIT_ID || '').trim() ||
+    'ca-app-pub-3940256099942544/5224354917';
+
 /** Geçici dosyalar için dizin */
 const TMP_DIR = path.join(__dirname, '..', 'tmp');
 
@@ -52,6 +64,9 @@ module.exports = {
     RATE_LIMIT_ANALYSIS_MAX,
     RATE_LIMIT_ANALYSIS_DISABLED,
     isDevEnvironment,
+    ADS_ENABLED,
+    ADS_WATCHES_PER_CREDIT,
+    ADMOB_REWARDED_UNIT_ID,
     TMP_DIR,
     DEFAULT_PORT,
     DEFAULT_DB_NAME,

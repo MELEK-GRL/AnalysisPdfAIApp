@@ -60,12 +60,14 @@ const consentRoutes = require('./routes/consents');
 const uploadRoutes = require('./routes/upload');
 const labsRoutes = require('./routes/labs');
 const analyticsRoutes = require('./routes/analytics');
+const adsRoutes = require('./routes/ads');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/consents', consentRoutes);
 app.use('/api/upload', requireAuth, uploadRoutes);
 app.use('/api/labs', requireAuth, labsRoutes);
 app.use('/api/analytics', optionalAuth, analyticsRateLimit, analyticsRoutes);
+app.use('/api/ads', adsRoutes);
 
 app.get('/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 

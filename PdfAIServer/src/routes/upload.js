@@ -1,15 +1,15 @@
 const fs = require('fs');
 const express = require('express');
 const multer = require('multer');
-const LabHistory = require('../models/LabHistory');
 const requireAuth = require('../middleware/requireAuth');
 const { analyzeAndSave } = require('../services/uploadAnalysis');
+const { assertCanAnalyze, consumeBonusIfNeeded } = require('../services/adsQuota');
 const {
-    RATE_LIMIT_ANALYSIS_WINDOW_MS,
-    RATE_LIMIT_ANALYSIS_MAX,
     RATE_LIMIT_ANALYSIS_DISABLED,
     TMP_DIR,
     MAX_UPLOAD_BYTES,
+    ADS_ENABLED,
+    ADMOB_REWARDED_UNIT_ID,
 } = require('../constants');
 
 const router = express.Router();
@@ -41,19 +41,21 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'PDF gerekli' });
 
-        // Sadece DEV'de limit kapalı; UAT ve PROD'da 2 analiz/24h zorunlu
+        let usedBonus = false;
         if (!RATE_LIMIT_ANALYSIS_DISABLED) {
-            const since = new Date(Date.now() - RATE_LIMIT_ANALYSIS_WINDOW_MS);
-            const count = await LabHistory.countDocuments({
-                user: req.user._id,
-                createdAt: { $gte: since },
-            });
-            if (count >= RATE_LIMIT_ANALYSIS_MAX) {
+            const gate = await assertCanAnalyze(req.user._id);
+            if (!gate.ok) {
                 return res.status(429).json({
-                    message: 'Günlük analiz limitine ulaştınız. 24 saat içinde en fazla 2 PDF analiz edebilirsiniz.',
+                    message:
+                        'Günlük analiz limitine ulaştınız. 24 saat içinde en fazla 2 PDF analiz edebilirsiniz' +
+                        (ADS_ENABLED ? ' (2 reklam izleyerek +1 hak kazanabilirsiniz).' : '.'),
                     code: 'RATE_LIMIT_EXCEEDED',
+                    adsEnabled: ADS_ENABLED,
+                    rewardedUnitId: ADS_ENABLED ? ADMOB_REWARDED_UNIT_ID : null,
+                    quota: gate.quota,
                 });
             }
+            usedBonus = gate.usedBonus;
         }
 
         tmpPath = req.file.path;
@@ -71,6 +73,12 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
                 return res.status(502).json({ message: 'Analiz servisi hatası', detail: err.message });
             }
             throw err;
+        }
+
+        try {
+            await consumeBonusIfNeeded(req.user._id, usedBonus);
+        } catch (_) {
+            /* ignore */
         }
 
         return res.json(result);

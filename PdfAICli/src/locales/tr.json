@@ -143,6 +143,12 @@
     "disclaimer": "Bu içerik bilgilendirme amaçlıdır ve tıbbi tavsiye değildir. Nihai yorum ve tedavi planı için lütfen **doktorunuza danışın**.",
     "rateLimitTitle": "Analiz Hakkı Doldu",
     "rateLimitMessage": "Günlük analiz hakkınız doldu. 24 saat içinde en fazla 2 kez PDF analizi yapabilirsiniz. Lütfen yarın tekrar deneyin.",
+    "rateLimitMessageWithAds": "Günlük 2 analiz hakkınız doldu. 2 reklam izleyerek +1 analiz hakkı kazanabilirsiniz.",
+    "watchAd": "Reklam İzle",
+    "adProgress": "{{pending}}/2 reklam izlendi. Bir reklam daha izleyin.",
+    "adCreditGranted": "Tebrikler! +1 analiz hakkı kazandınız.",
+    "adFailed": "Reklam tamamlanamadı. Lütfen tekrar deneyin.",
+    "adLoading": "Reklam yükleniyor…",
     "uploadError": "PDF yüklenemedi.",
     "pleaseUploadResult": "Lütfen tahlil PDF yükleyin.",
     "rawValuesTitle": "Tahlil değerleri (PDF'deki gibi)"

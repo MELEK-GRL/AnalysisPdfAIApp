@@ -55,8 +55,11 @@ async function getQuotaForUser(userId) {
         ADS_WATCHES_PER_CREDIT - 1,
         Math.max(0, progress?.pendingWatches || 0)
     );
-    const allowed = RATE_LIMIT_ANALYSIS_MAX + bonusUnused;
-    const remaining = Math.max(0, allowed - analysesUsed);
+    // Kalan = (baz haktan kalan) + kullanılmamış reklam bonusları.
+    // Önceden limit kapalıyken yapılan fazla analizlerde bile +1 bonus 1 sorgu hakkı verir.
+    const baseRemaining = Math.max(0, RATE_LIMIT_ANALYSIS_MAX - analysesUsed);
+    const remaining = baseRemaining + bonusUnused;
+    const allowed = analysesUsed + remaining;
 
     return {
         adsEnabled: ADS_ENABLED,
@@ -77,9 +80,10 @@ async function assertCanAnalyze(userId) {
         return { ok: true, usedBonus: false, quota: await getQuotaForUser(userId) };
     }
     const quota = await getQuotaForUser(userId);
-    if (quota.analysesUsed >= quota.allowed) {
+    if (quota.remaining <= 0) {
         return { ok: false, usedBonus: false, quota };
     }
+    // Baz hak (2) dolduysa bu analiz bir bonus hakkını tüketir
     const usedBonus = quota.analysesUsed >= RATE_LIMIT_ANALYSIS_MAX;
     return { ok: true, usedBonus, quota };
 }

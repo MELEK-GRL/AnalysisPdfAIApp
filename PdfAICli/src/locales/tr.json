@@ -146,6 +146,7 @@
     "rateLimitMessageWithAds": "Günlük 2 analiz hakkınız doldu. 2 reklam izleyerek +1 analiz hakkı kazanabilirsiniz.",
     "watchAd": "Reklam İzle",
     "adProgress": "{{pending}}/2 reklam izlendi. Sonraki reklam yükleniyor…",
+    "adCreditTitle": "Hakkınız Yenilendi",
     "adCreditGranted": "Tebrikler! +1 analiz hakkı kazandınız.",
     "adFailed": "Reklam tamamlanamadı. Lütfen tekrar deneyin.",
     "adLoading": "Reklam yükleniyor…",

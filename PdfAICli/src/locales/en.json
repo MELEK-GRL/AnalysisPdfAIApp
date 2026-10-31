@@ -146,6 +146,7 @@
     "rateLimitMessageWithAds": "You've used your 2 daily analyses. Watch 2 ads to earn +1 analysis credit.",
     "watchAd": "Watch Ad",
     "adProgress": "{{pending}}/2 ads watched. Loading next ad…",
+    "adCreditTitle": "Credit Earned",
     "adCreditGranted": "Congrats! You earned +1 analysis credit.",
     "adFailed": "Ad could not be completed. Please try again.",
     "adLoading": "Loading ad…",

@@ -56,6 +56,7 @@ const Home: React.FC = () => {
     const [rateLimitAdsOffer, setRateLimitAdsOffer] = useState(false);
     const [rewardedUnitId, setRewardedUnitId] = useState(TEST_REWARDED_UNIT_ID);
     const [rateLimitMessage, setRateLimitMessage] = useState('');
+    const [rateLimitCreditGranted, setRateLimitCreditGranted] = useState(false);
     const [adWatching, setAdWatching] = useState(false);
     const [showUploadArea, setShowUploadArea] = useState(true);
     const [noPdfWarningVisible, setNoPdfWarningVisible] = useState(false);
@@ -78,6 +79,7 @@ const Home: React.FC = () => {
         setUploadErrorVisible(false);
         setRateLimitModalVisible(false);
         setRateLimitAdsOffer(false);
+        setRateLimitCreditGranted(false);
         setRewardedUnitId(TEST_REWARDED_UNIT_ID);
         setAdWatching(false);
     }, []);
@@ -288,6 +290,7 @@ const Home: React.FC = () => {
             if (err?.isRateLimit) {
                 const offerAds = err?.adsEnabled === true;
                 setRateLimitAdsOffer(offerAds);
+                setRateLimitCreditGranted(false);
                 if (offerAds && err?.rewardedUnitId) {
                     setRewardedUnitId(String(err.rewardedUnitId));
                 }
@@ -315,6 +318,7 @@ const Home: React.FC = () => {
     const closeRateLimitModal = useCallback(() => {
         setRateLimitModalVisible(false);
         setRateLimitAdsOffer(false);
+        setRateLimitCreditGranted(false);
         setAdWatching(false);
     }, []);
 
@@ -322,6 +326,7 @@ const Home: React.FC = () => {
         if (adWatching || !rateLimitAdsOffer) return;
         setAdWatching(true);
         setRateLimitModalVisible(false);
+        setRateLimitCreditGranted(false);
         try {
             void trackButtonClick('watch_rewarded_ad', 'Home');
             // 2 reklam peş peşe; ara popup'a tekrar tıklamaya gerek yok
@@ -335,6 +340,7 @@ const Home: React.FC = () => {
                 }
                 if (result.creditGranted) {
                     setRateLimitAdsOffer(false);
+                    setRateLimitCreditGranted(true);
                     setRateLimitMessage(t('home.adCreditGranted'));
                     setRateLimitModalVisible(true);
                     return;
@@ -446,9 +452,13 @@ const Home: React.FC = () => {
 
                     <PopupModal
                         visible={rateLimitModalVisible}
-                        title={t('home.rateLimitTitle')}
+                        title={
+                            rateLimitCreditGranted
+                                ? t('home.adCreditTitle')
+                                : t('home.rateLimitTitle')
+                        }
                         message={rateLimitMessage || t('home.rateLimitMessage')}
-                        type="warning"
+                        type={rateLimitCreditGranted ? 'success' : 'warning'}
                         leftButtonText={
                             rateLimitAdsOffer ? t('common.close') : undefined
                         }

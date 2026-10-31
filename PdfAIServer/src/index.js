@@ -19,6 +19,7 @@ const JWT_SECRET = (process.env.JWT_SECRET || '').trim();
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Teşhis: değer yazmadan sadece varlık/uzunluk (Railway Variables debug)
+const railwayInjected = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME);
 console.log(
     '[env]',
     'NODE_ENV=',
@@ -28,8 +29,16 @@ console.log(
     'MONGODB_URI set=',
     !!MONGODB_URI,
     'OPENAI set=',
-    !!(process.env.OPENAI_API_KEY || '').trim()
+    !!(process.env.OPENAI_API_KEY || '').trim(),
+    'RAILWAY_injected=',
+    railwayInjected
 );
+if (isProduction && !JWT_SECRET) {
+    const interesting = Object.keys(process.env)
+        .filter((k) => /JWT|MONGO|OPENAI|RAILWAY_|SECRET|URI/i.test(k))
+        .sort();
+    console.error('[env] ilgili key isimleri:', interesting.join(', ') || '(hiçbiri)');
+}
 
 // Production'da zorunlu env kontrolleri
 if (isProduction) {

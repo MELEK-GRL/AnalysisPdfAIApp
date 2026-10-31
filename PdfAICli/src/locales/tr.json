@@ -15,7 +15,13 @@
     "retry": "Tekrar Dene"
   },
   "header": {
-    "welcome": "Hoş geldin"
+    "welcome": "Hoş geldin",
+    "quotaLeft": "{{count}} adet",
+    "quotaEmpty": "0 adet",
+    "quotaUnlimited": "Sınırsız",
+    "quotaInfoLeft": "Bugün {{count}} analiz adediniz kaldı.",
+    "quotaInfoEmpty": "Analiz adediniz kalmadı. Reklam izleyerek +1 adet kazanabilirsiniz.",
+    "quotaInfoUnlimited": "Geliştirme ortamında analiz limiti yoktur."
   },
   "settings": {
     "title": "Ayarlar",

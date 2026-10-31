@@ -13,6 +13,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useAnalizResetStore } from '../../store/useAnalizResetStore';
 import { useAnalysisLoadingStore } from '../../store/useAnalysisLoadingStore';
+import { useQuotaStore } from '../../store/useQuotaStore';
 import { trackButtonClick } from '../../server/api/Analytics';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import PopupModal from '../../components/Modals/PopupModal';
@@ -272,6 +273,7 @@ const Home: React.FC = () => {
             form.append('locale', locale);
 
             const data = await uploadPdf(form);
+            void useQuotaStore.getState().refresh();
             if (data.type === 'lab') {
                 setItems(data.items || []);
                 setRawItems(data.rawItems ?? data.items ?? []);
@@ -288,6 +290,7 @@ const Home: React.FC = () => {
             }
         } catch (err: any) {
             if (err?.isRateLimit) {
+                void useQuotaStore.getState().refresh();
                 const offerAds = err?.adsEnabled === true;
                 setRateLimitAdsOffer(offerAds);
                 setRateLimitCreditGranted(false);
@@ -343,6 +346,7 @@ const Home: React.FC = () => {
                     setRateLimitCreditGranted(true);
                     setRateLimitMessage(t('home.adCreditGranted'));
                     setRateLimitModalVisible(true);
+                    void useQuotaStore.getState().refresh();
                     return;
                 }
                 setRateLimitMessage(

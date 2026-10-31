@@ -15,7 +15,13 @@
     "retry": "Retry"
   },
   "header": {
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "quotaLeft": "{{count}} left",
+    "quotaEmpty": "0 left",
+    "quotaUnlimited": "Unlimited",
+    "quotaInfoLeft": "You have {{count}} analysis left today.",
+    "quotaInfoEmpty": "No analyses left. Watch ads to earn +1.",
+    "quotaInfoUnlimited": "Analysis limit is disabled in development."
   },
   "settings": {
     "title": "Settings",

@@ -144,6 +144,26 @@ export type AdsRewardResponse = {
     adsNeededForNextCredit: number;
 };
 
+export type AdsStatusResponse = {
+    ok: boolean;
+    adsEnabled: boolean;
+    limitDisabled?: boolean;
+    baseLimit?: number;
+    analysesUsed?: number;
+    bonusUnused?: number;
+    remaining?: number;
+    allowed?: number;
+    pendingAdWatches?: number;
+    adsNeededForNextCredit?: number;
+    rewardedUnitId?: string | null;
+};
+
+/** Günlük analiz kotası (header chip). */
+export async function getAdsStatus(): Promise<AdsStatusResponse> {
+    const res = await api.get<AdsStatusResponse>('/ads/status');
+    return res.data;
+}
+
 /** Rewarded reklam tamamlandıktan sonra sunucuya bildir (2 izleme → +1 hak). */
 export async function reportAdReward(): Promise<AdsRewardResponse> {
     const res = await api.post<AdsRewardResponse>('/ads/reward');

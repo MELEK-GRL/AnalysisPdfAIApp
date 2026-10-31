@@ -14,19 +14,38 @@ const app = require('./app');
 const { DEFAULT_PORT, DEFAULT_DB_NAME, RATE_LIMIT_ANALYSIS_DISABLED } = require('./constants');
 
 const PORT = Number(process.env.PORT || DEFAULT_PORT);
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = (process.env.MONGODB_URI || '').trim();
+const JWT_SECRET = (process.env.JWT_SECRET || '').trim();
 const isProduction = process.env.NODE_ENV === 'production';
+
+// Teşhis: değer yazmadan sadece varlık/uzunluk (Railway Variables debug)
+console.log(
+    '[env]',
+    'NODE_ENV=',
+    process.env.NODE_ENV || '(yok)',
+    'JWT_SECRET len=',
+    JWT_SECRET.length,
+    'MONGODB_URI set=',
+    !!MONGODB_URI,
+    'OPENAI set=',
+    !!(process.env.OPENAI_API_KEY || '').trim()
+);
 
 // Production'da zorunlu env kontrolleri
 if (isProduction) {
-    if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 16) {
+    if (!JWT_SECRET || JWT_SECRET.length < 16) {
         console.error('❌ Production için JWT_SECRET zorunludur (en az 16 karakter).');
+        console.error('   Railway → bu servis → Variables → JWT_SECRET ekle, sonra Redeploy.');
+        console.error('   Root Directory boş olmalı (kök Dockerfile kullanıyorsan).');
         process.exit(1);
     }
+    // Trim edilmiş değeri process.env'e geri yaz (jwt.sign aynı kaynağı kullansın)
+    process.env.JWT_SECRET = JWT_SECRET;
     if (!MONGODB_URI) {
         console.error('❌ Production için MONGODB_URI zorunludur.');
         process.exit(1);
     }
+    process.env.MONGODB_URI = MONGODB_URI;
 }
 
 const mongoOptions = {

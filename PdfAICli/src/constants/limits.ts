@@ -3,7 +3,7 @@
 /** Günlük PDF analiz hakkı (backend ile uyumlu) */
 export const DAILY_ANALYSIS_LIMIT = 2;
 
-/** Hareketsizlik sonrası otomatik çıkış süresi (ms) */
+/** Ön planda hareketsizlik sonrası otomatik çıkış süresi (ms). Arka plana geçişte hemen logout. */
 export const SESSION_TIMEOUT_MS = 20 * 60 * 1000;
 
 /** Hareketsizlik kontrolü aralığı (ms) */

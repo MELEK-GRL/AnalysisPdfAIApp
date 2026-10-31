@@ -209,6 +209,13 @@ const AppNavigator = () => {
     const storeToken = useAuthStore((s) => s.token);
     const analysisLoading = useAnalysisLoadingStore((s) => s.loading);
 
+    // Otomatik logout sonrası Login'e düşmesi için hasToken'ı store ile senkron tut
+    useEffect(() => {
+        if (!storeToken) {
+            setHasToken(false);
+        }
+    }, [storeToken]);
+
     useEffect(() => {
         (async () => {
             try {
@@ -224,7 +231,20 @@ const AppNavigator = () => {
                     setHasToken(false);
                 } else {
                     try {
-                        await getProfile();
+                        const profile = await getProfile();
+                        // Persist henüz hydrate olmamışsa store'u doldur (cold start)
+                        if (!useAuthStore.getState().token) {
+                            useAuthStore.setState({
+                                token,
+                                user: profile
+                                    ? {
+                                          _id: profile._id,
+                                          name: profile.name,
+                                          email: profile.email,
+                                      }
+                                    : null,
+                            });
+                        }
                         setHasToken(true);
                     } catch {
                         const { logout: doLogout } = useAuthStore.getState();
@@ -242,11 +262,12 @@ const AppNavigator = () => {
         return <Loader />;
     }
     // İlk açılışta önce splash akışı (dil → bilgi → onay), sonra login/token
+    // Logout sonrası storeToken null → hemen Login (hasToken ile OR yapma)
     const initialRouteName: keyof RootStackParamList = !hasSeenLanguageSplash
         ? 'LanguageSplash'
         : !hasConsentOnce
           ? 'InfoSplash'
-          : hasToken
+          : storeToken
             ? 'MainTabs'
             : 'Login';
 

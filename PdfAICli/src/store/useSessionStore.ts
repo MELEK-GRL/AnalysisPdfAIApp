@@ -1,7 +1,7 @@
 /**
- * Oturum hareketsizlik süresi – 20 dk işlem yoksa çıkış için.
+ * Oturum hareketsizlik süresi – ön planda 20 dk işlem yoksa çıkış için.
  * lastActivityAt: son aktivite zamanı (timestamp).
- * touch(): aktivite olduğunda çağrılır (App ön plana gelince, API isteği vb.).
+ * touch(): gerçek kullanıcı/API aktivitesinde çağrılır (ön plana gelince çağrılmaz).
  */
 import { create } from 'zustand';
 

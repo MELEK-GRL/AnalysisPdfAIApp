@@ -22,10 +22,6 @@ import Button from '../../components/Buttons/Button';
 import T from '../../components/Text/T';
 import PopupModal from '../../components/Modals/PopupModal';
 import TextInputComponent from '../../components/Inputs/TextInputComponent';
-import {
-    capitalizeFirst,
-    capitalizeFirstTyping,
-} from '../../utils/capitalizeFirst';
 import { useResponsive } from '../../utils/deviceStore/device';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
@@ -175,6 +171,14 @@ const Register: React.FC = () => {
                 type: 'warning',
             });
         }
+        if (/\s/.test(nameT)) {
+            return setModal({
+                visible: true,
+                title: t('common.warning'),
+                message: t('register.warnNameNoSpace'),
+                type: 'warning',
+            });
+        }
         if (!emailT) {
             return setModal({
                 visible: true,
@@ -253,7 +257,7 @@ const Register: React.FC = () => {
         setLoading(true);
         try {
             const payload = {
-                name: capitalizeFirst(form.name),
+                name: form.name.trim(),
                 email: form.email.trim(),
                 password: form.password.trim(),
                 passwordConfirm: form.confirm.trim(),
@@ -313,13 +317,15 @@ const Register: React.FC = () => {
             setTimeout(() => nav.replace('Login'), 600);
         } catch (err: any) {
             const status = err?.response?.status;
+            const serverMsg = String(err?.response?.data?.message || '');
+            const conflictMsg = /username/i.test(serverMsg)
+                ? t('register.nameInUse')
+                : t('register.emailInUse');
             const msg = isNetworkError(err)
                 ? t('common.networkError')
                 : status === 409
-                  ? t('register.emailInUse')
-                  : err?.response?.data?.message ||
-                    err?.message ||
-                    t('register.error');
+                  ? conflictMsg
+                  : serverMsg || err?.message || t('register.error');
             setModal({
                 visible: true,
                 title: status === 409 ? t('common.warning') : t('common.error'),
@@ -356,10 +362,15 @@ const Register: React.FC = () => {
                             placeholder={t('register.namePlaceholder')}
                             value={form.name}
                             onChangeText={v =>
-                                handleChange('name', capitalizeFirstTyping(v))
+                                handleChange('name', v.replace(/\s/g, ''))
                             }
-                            autoCapitalize="sentences"
+                            autoCapitalize="none"
                             autoCorrect={false}
+                            spellCheck={false}
+                            textContentType="username"
+                            autoComplete="username"
+                            // Android: görünür şifre klavyesi autocap’i kapatır
+                            keyboardType="visible-password"
                             returnKeyType="next"
                             containerStyle={{ marginBottom: 10 * h1px }}
                         />
@@ -368,7 +379,9 @@ const Register: React.FC = () => {
                             label={t('register.emailPlaceholder')}
                             placeholder={t('register.emailPlaceholder')}
                             value={form.email}
-                            onChangeText={v => handleChange('email', v)}
+                            onChangeText={v =>
+                                handleChange('email', v.replace(/\s/g, ''))
+                            }
                             autoCapitalize="none"
                             keyboardType="email-address"
                             returnKeyType="next"
@@ -379,7 +392,9 @@ const Register: React.FC = () => {
                             label={t('register.passwordPlaceholder')}
                             placeholder={t('register.passwordPlaceholder')}
                             value={form.password}
-                            onChangeText={v => handleChange('password', v)}
+                            onChangeText={v =>
+                                handleChange('password', v.replace(/\s/g, ''))
+                            }
                             secureTextEntry
                             passwordToggle
                             returnKeyType="next"
@@ -390,7 +405,9 @@ const Register: React.FC = () => {
                             label={t('register.confirmPlaceholder')}
                             placeholder={t('register.confirmPlaceholder')}
                             value={form.confirm}
-                            onChangeText={v => handleChange('confirm', v)}
+                            onChangeText={v =>
+                                handleChange('confirm', v.replace(/\s/g, ''))
+                            }
                             secureTextEntry
                             passwordToggle
                             returnKeyType="done"

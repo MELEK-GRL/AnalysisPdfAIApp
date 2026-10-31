@@ -29,6 +29,9 @@ const TextInputComponent: React.FC<Props> = ({
     containerStyle,
     passwordToggle = false,
     secureTextEntry,
+    autoCapitalize = 'none',
+    autoCorrect = false,
+    spellCheck = false,
     ...props
 }) => {
     const { w1px, h1px, fs1px } = useResponsive();
@@ -93,8 +96,12 @@ const TextInputComponent: React.FC<Props> = ({
                 <TextInput
                     placeholderTextColor={colors.buttonGray}
                     style={styles.input}
-                    secureTextEntry={isPassword ? !showPassword : secureTextEntry}
                     {...props}
+                    // Android klavye ilk harfi büyütmesin (props sonrası zorla)
+                    autoCapitalize={autoCapitalize}
+                    autoCorrect={autoCorrect}
+                    spellCheck={spellCheck}
+                    secureTextEntry={isPassword ? !showPassword : secureTextEntry}
                 />
                 {passwordToggle && (
                     <TouchableOpacity

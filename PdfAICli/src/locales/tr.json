@@ -56,6 +56,7 @@
     "register": "Kayıt ol",
     "forgotPassword": "Şifremi unuttum",
     "warnEmpty": "Lütfen e-posta/kullanıcı adı ve şifreyi girin.",
+    "warnNameNoSpace": "Kullanıcı adı tek kelime olmalı; boşluk kullanılamaz.",
     "errorTitle": "Giriş Hatası",
     "serverError": "Giriş işlemi şu an yapılamıyor. Lütfen daha sonra tekrar deneyin.",
     "invalidCredentials": "E-posta veya kullanıcı adı ile şifre hatalı. Lütfen kontrol edip tekrar deneyin."
@@ -112,6 +113,7 @@
     "hasAccount": "Hesabın var mı?",
     "login": "Giriş yap",
     "warnName": "Kullanıcı adı gerekli.",
+    "warnNameNoSpace": "Kullanıcı adı tek kelime olmalı; boşluk kullanılamaz.",
     "warnEmail": "E-posta gerekli.",
     "warnPassword": "Şifre gerekli.",
     "warnConfirm": "Şifre tekrar gerekli.",
@@ -128,7 +130,8 @@
     "successTitle": "Başarılı",
     "success": "Kayıt tamamlandı.",
     "error": "Kayıt başarısız. Lütfen tekrar deneyin.",
-    "emailInUse": "Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin veya farklı bir e-posta kullanın."
+    "emailInUse": "Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin veya farklı bir e-posta kullanın.",
+    "nameInUse": "Bu kullanıcı adı zaten kullanılıyor. Lütfen farklı bir ad deneyin."
   },
   "home": {
     "dragOrSelect": "Sürükle veya Seç",

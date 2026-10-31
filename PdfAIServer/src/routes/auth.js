@@ -37,7 +37,6 @@ router.post('/register', async (req, res) => {
     try {
         let { name, email, password, termsAccepted } = req.body || {};
         name = typeof name === 'string' ? name.trim() : '';
-        if (name) name = name.charAt(0).toUpperCase() + name.slice(1);
         email = typeof email === 'string' ? email.trim().toLowerCase() : '';
         password = typeof password === 'string' ? password : '';
         const accepted = termsAccepted === true || termsAccepted === 'true';
@@ -45,12 +44,24 @@ router.post('/register', async (req, res) => {
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Missing fields' });
         }
+        if (/\s/.test(name)) {
+            return res.status(400).json({
+                message: 'Username must be a single word (no spaces)',
+                code: 'USERNAME_NO_SPACE',
+            });
+        }
         if (!accepted) {
             return res.status(400).json({ message: 'Terms must be accepted' });
         }
 
         const exists = await User.findOne({ email }).lean();
         if (exists) return res.status(409).json({ message: 'Email in use' });
+
+        // Kullanıcı adı büyük/küçük harf duyarsız benzersiz
+        const nameTaken = await User.findOne({
+            name: { $regex: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+        }).lean();
+        if (nameTaken) return res.status(409).json({ message: 'Username in use' });
 
         const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
         const user = await User.create({
@@ -81,12 +92,22 @@ router.post('/login', async (req, res) => {
         }
 
         const isEmail = identifier.includes('@');
+        if (!isEmail && /\s/.test(identifier)) {
+            return res.status(400).json({
+                message: 'Username must be a single word (no spaces)',
+                code: 'USERNAME_NO_SPACE',
+            });
+        }
         const query = isEmail
             ? { email: identifier.toLowerCase() }
             : {
-                  name: identifier
-                      ? identifier.charAt(0).toUpperCase() + identifier.slice(1)
-                      : identifier,
+                  // Kullanıcı adı: büyük/küçük harf duyarsız
+                  name: {
+                      $regex: new RegExp(
+                          `^${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
+                          'i',
+                      ),
+                  },
               };
 
         const user = await User.findOne(query).select('_id name email password');

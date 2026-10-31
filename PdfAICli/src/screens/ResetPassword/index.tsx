@@ -241,7 +241,7 @@ const ResetPassword: React.FC = () => {
                         label={t('resetPassword.newPasswordLabel')}
                         placeholder={t('register.passwordPlaceholder')}
                         value={newPassword}
-                        onChangeText={setNewPassword}
+                        onChangeText={v => setNewPassword(v.replace(/\s/g, ''))}
                         secureTextEntry
                         passwordToggle
                         containerStyle={{ marginBottom: 12 * h1px }}
@@ -250,7 +250,9 @@ const ResetPassword: React.FC = () => {
                         label={t('register.confirmPlaceholder')}
                         placeholder={t('register.confirmPlaceholder')}
                         value={confirmPassword}
-                        onChangeText={setConfirmPassword}
+                        onChangeText={v =>
+                            setConfirmPassword(v.replace(/\s/g, ''))
+                        }
                         secureTextEntry
                         passwordToggle
                         returnKeyType="done"

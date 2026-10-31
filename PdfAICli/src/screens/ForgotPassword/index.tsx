@@ -190,7 +190,7 @@ const ForgotPassword: React.FC = () => {
                                 label={t('forgotPassword.emailLabel')}
                                 placeholder={t('register.emailPlaceholder')}
                                 value={email}
-                                onChangeText={setEmail}
+                                onChangeText={v => setEmail(v.replace(/\s/g, ''))}
                                 autoCapitalize="none"
                                 keyboardType="email-address"
                                 returnKeyType="done"

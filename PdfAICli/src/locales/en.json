@@ -56,6 +56,7 @@
     "register": "Sign Up",
     "forgotPassword": "Forgot password",
     "warnEmpty": "Please enter email/username and password.",
+    "warnNameNoSpace": "Username must be a single word; spaces are not allowed.",
     "errorTitle": "Sign In Error",
     "serverError": "Sign in is temporarily unavailable. Please try again later.",
     "invalidCredentials": "Email/username or password is incorrect. Please check and try again."
@@ -112,6 +113,7 @@
     "hasAccount": "Already have an account?",
     "login": "Sign In",
     "warnName": "Username is required.",
+    "warnNameNoSpace": "Username must be a single word; spaces are not allowed.",
     "warnEmail": "Email is required.",
     "warnPassword": "Password is required.",
     "warnConfirm": "Confirm password is required.",
@@ -128,7 +130,8 @@
     "successTitle": "Success",
     "success": "Registration completed.",
     "error": "Registration failed. Please try again.",
-    "emailInUse": "This email is already registered. Try signing in or use a different email."
+    "emailInUse": "This email is already registered. Try signing in or use a different email.",
+    "nameInUse": "This username is already taken. Please try a different name."
   },
   "home": {
     "dragOrSelect": "Drag or Select",

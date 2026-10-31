@@ -25,10 +25,6 @@ import {
     HAS_EVER_LOGGED_IN,
 } from '../../constants/storageKeys';
 import { isNetworkError } from '../../utils/errorUtils';
-import {
-    capitalizeFirst,
-    capitalizeFirstTyping,
-} from '../../utils/capitalizeFirst';
 
 const Login: React.FC = () => {
     const nav = useNavigation<any>();
@@ -87,12 +83,22 @@ const Login: React.FC = () => {
             return;
         }
 
+        const idRaw = identifier.trim();
+        if (!idRaw.includes('@') && /\s/.test(idRaw)) {
+            setModal({
+                visible: true,
+                title: t('common.warning'),
+                message: t('login.warnNameNoSpace'),
+                type: 'warning',
+            });
+            return;
+        }
+
         try {
             setLoading(true);
-            const idRaw = identifier.trim();
             const idNormalized = idRaw.includes('@')
                 ? idRaw.toLowerCase()
-                : capitalizeFirst(idRaw);
+                : idRaw;
             const res = await login({
                 identifier: idNormalized,
                 password: password.trim(),
@@ -176,9 +182,13 @@ const Login: React.FC = () => {
                         label={t('login.emailPlaceholder')}
                         placeholder={t('login.emailPlaceholder')}
                         value={identifier}
-                        onChangeText={v => setIdentifier(capitalizeFirstTyping(v))}
-                        autoCapitalize="sentences"
+                        onChangeText={v => setIdentifier(v.replace(/\s/g, ''))}
+                        autoCapitalize="none"
                         autoCorrect={false}
+                        spellCheck={false}
+                        textContentType="username"
+                        autoComplete="username"
+                        keyboardType="email-address"
                         returnKeyType="next"
                         containerStyle={{ marginBottom: 12 * h1px }}
                     />
@@ -187,7 +197,7 @@ const Login: React.FC = () => {
                         label={t('login.passwordPlaceholder')}
                         placeholder={t('login.passwordPlaceholder')}
                         value={password}
-                        onChangeText={setPassword}
+                        onChangeText={v => setPassword(v.replace(/\s/g, ''))}
                         autoCapitalize="none"
                         secureTextEntry
                         passwordToggle

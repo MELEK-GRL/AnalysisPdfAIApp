@@ -16,11 +16,11 @@
   },
   "header": {
     "welcome": "Hoş geldin",
-    "quotaLeft": "{{count}} adet",
-    "quotaEmpty": "0 adet",
+    "quotaLeft": "{{count}} analiz",
+    "quotaEmpty": "0 analiz",
     "quotaUnlimited": "Sınırsız",
-    "quotaInfoLeft": "Bugün {{count}} analiz adediniz kaldı.",
-    "quotaInfoEmpty": "Analiz adediniz kalmadı. Reklam izleyerek +1 adet kazanabilirsiniz.",
+    "quotaInfoLeft": "Bugün {{count}} tahlil analizi yapabilirsiniz.",
+    "quotaInfoEmpty": "Bugünkü analizleriniz bitti. Reklam izleyerek +1 analiz kazanabilirsiniz.",
     "quotaInfoUnlimited": "Geliştirme ortamında analiz limiti yoktur."
   },
   "settings": {

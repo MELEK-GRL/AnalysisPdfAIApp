@@ -37,6 +37,7 @@ router.post('/register', async (req, res) => {
     try {
         let { name, email, password, termsAccepted } = req.body || {};
         name = typeof name === 'string' ? name.trim() : '';
+        if (name) name = name.charAt(0).toUpperCase() + name.slice(1);
         email = typeof email === 'string' ? email.trim().toLowerCase() : '';
         password = typeof password === 'string' ? password : '';
         const accepted = termsAccepted === true || termsAccepted === 'true';
@@ -82,7 +83,11 @@ router.post('/login', async (req, res) => {
         const isEmail = identifier.includes('@');
         const query = isEmail
             ? { email: identifier.toLowerCase() }
-            : { name: identifier };
+            : {
+                  name: identifier
+                      ? identifier.charAt(0).toUpperCase() + identifier.slice(1)
+                      : identifier,
+              };
 
         const user = await User.findOne(query).select('_id name email password');
         if (!user) return res.status(401).json({ message: 'Invalid credentials' });

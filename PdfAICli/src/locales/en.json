@@ -16,11 +16,11 @@
   },
   "header": {
     "welcome": "Welcome",
-    "quotaLeft": "{{count}} left",
-    "quotaEmpty": "0 left",
+    "quotaLeft": "{{count}} analyses",
+    "quotaEmpty": "0 analyses",
     "quotaUnlimited": "Unlimited",
-    "quotaInfoLeft": "You have {{count}} analysis left today.",
-    "quotaInfoEmpty": "No analyses left. Watch ads to earn +1.",
+    "quotaInfoLeft": "You can run {{count}} lab analyses today.",
+    "quotaInfoEmpty": "You’re out of analyses for today. Watch ads to earn +1 analysis.",
     "quotaInfoUnlimited": "Analysis limit is disabled in development."
   },
   "settings": {

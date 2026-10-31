@@ -25,6 +25,10 @@ import {
     HAS_EVER_LOGGED_IN,
 } from '../../constants/storageKeys';
 import { isNetworkError } from '../../utils/errorUtils';
+import {
+    capitalizeFirst,
+    capitalizeFirstTyping,
+} from '../../utils/capitalizeFirst';
 
 const Login: React.FC = () => {
     const nav = useNavigation<any>();
@@ -85,8 +89,12 @@ const Login: React.FC = () => {
 
         try {
             setLoading(true);
+            const idRaw = identifier.trim();
+            const idNormalized = idRaw.includes('@')
+                ? idRaw.toLowerCase()
+                : capitalizeFirst(idRaw);
             const res = await login({
-                identifier: identifier.trim(),
+                identifier: idNormalized,
                 password: password.trim(),
             });
 
@@ -168,9 +176,9 @@ const Login: React.FC = () => {
                         label={t('login.emailPlaceholder')}
                         placeholder={t('login.emailPlaceholder')}
                         value={identifier}
-                        onChangeText={setIdentifier}
-                        autoCapitalize="none"
-                        keyboardType="email-address"
+                        onChangeText={v => setIdentifier(capitalizeFirstTyping(v))}
+                        autoCapitalize="sentences"
+                        autoCorrect={false}
                         returnKeyType="next"
                         containerStyle={{ marginBottom: 12 * h1px }}
                     />

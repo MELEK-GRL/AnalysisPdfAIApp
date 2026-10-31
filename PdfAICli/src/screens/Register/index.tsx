@@ -22,6 +22,10 @@ import Button from '../../components/Buttons/Button';
 import T from '../../components/Text/T';
 import PopupModal from '../../components/Modals/PopupModal';
 import TextInputComponent from '../../components/Inputs/TextInputComponent';
+import {
+    capitalizeFirst,
+    capitalizeFirstTyping,
+} from '../../utils/capitalizeFirst';
 import { useResponsive } from '../../utils/deviceStore/device';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
@@ -249,7 +253,7 @@ const Register: React.FC = () => {
         setLoading(true);
         try {
             const payload = {
-                name: form.name.trim(),
+                name: capitalizeFirst(form.name),
                 email: form.email.trim(),
                 password: form.password.trim(),
                 passwordConfirm: form.confirm.trim(),
@@ -351,7 +355,11 @@ const Register: React.FC = () => {
                             label={t('register.namePlaceholder')}
                             placeholder={t('register.namePlaceholder')}
                             value={form.name}
-                            onChangeText={v => handleChange('name', v)}
+                            onChangeText={v =>
+                                handleChange('name', capitalizeFirstTyping(v))
+                            }
+                            autoCapitalize="sentences"
+                            autoCorrect={false}
                             returnKeyType="next"
                             containerStyle={{ marginBottom: 10 * h1px }}
                         />

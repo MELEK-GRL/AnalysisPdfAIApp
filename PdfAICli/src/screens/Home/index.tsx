@@ -321,18 +321,24 @@ const Home: React.FC = () => {
     const handleWatchAd = useCallback(async () => {
         if (adWatching || !rateLimitAdsOffer) return;
         setAdWatching(true);
+        setRateLimitModalVisible(false);
         try {
             void trackButtonClick('watch_rewarded_ad', 'Home');
-            const result = await showRewardedAdForCredit(rewardedUnitId);
-            if (!result) {
-                setRateLimitMessage(t('home.adFailed'));
-                setRateLimitModalVisible(true);
-                return;
-            }
-            if (result.creditGranted) {
-                setRateLimitAdsOffer(false);
-                setRateLimitMessage(t('home.adCreditGranted'));
-            } else {
+            // 2 reklam peş peşe; ara popup'a tekrar tıklamaya gerek yok
+            const maxAds = 2;
+            for (let i = 0; i < maxAds; i++) {
+                const result = await showRewardedAdForCredit(rewardedUnitId);
+                if (!result) {
+                    setRateLimitMessage(t('home.adFailed'));
+                    setRateLimitModalVisible(true);
+                    return;
+                }
+                if (result.creditGranted) {
+                    setRateLimitAdsOffer(false);
+                    setRateLimitMessage(t('home.adCreditGranted'));
+                    setRateLimitModalVisible(true);
+                    return;
+                }
                 setRateLimitMessage(
                     t('home.adProgress').replace(
                         '{{pending}}',

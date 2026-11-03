@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 
-import DocumentPicker, {
-    type DocumentPickerResponse,
-} from 'react-native-document-picker';
+import {
+    pickPdfDocument,
+    isPdfPickCanceled,
+    type PickedPdfFile,
+} from '../../utils/pickPdfDocument';
 import { useResponsive } from '../../utils/deviceStore/device';
 import { getProfile } from '../../server/api/User';
 import { getToken } from '../../server/apiFetcher';
@@ -38,9 +40,7 @@ const Home: React.FC = () => {
     useScreenTime('Home');
     const [phase, setPhase] = useState<Phase>('idle');
     const [fileName, setFileName] = useState<string | null>(null);
-    const [pickedFile, setPickedFile] = useState<DocumentPickerResponse | null>(
-        null,
-    );
+    const [pickedFile, setPickedFile] = useState<PickedPdfFile | null>(null);
     const user = useAuthStore(s => s.user);
     const [displayName, setDisplayName] = useState<string>(user?.name || '');
     const [items, setItems] = useState<LabItem[]>([]);
@@ -233,18 +233,14 @@ const Home: React.FC = () => {
     // PDF seç
     const handleSelectPdf = useCallback(async () => {
         try {
-            const res = await DocumentPicker.pickSingle({
-                type: [DocumentPicker.types.pdf],
-                presentationStyle: 'fullScreen',
-                copyTo: 'cachesDirectory',
-            });
+            const res = await pickPdfDocument();
             setPickedFile(res);
             setFileName(res.name ?? 'document.pdf');
             setItems([]);
             setAnalysis('');
             setShowUploadArea(true);
         } catch (err: any) {
-            if (DocumentPicker.isCancel(err)) {
+            if (isPdfPickCanceled(err)) {
                 return;
             }
             setSelectErrorMessage(err?.message || 'PDF seçilemedi.');

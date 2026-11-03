@@ -6,20 +6,21 @@ import {
     TouchableOpacity,
     ActivityIndicator,
 } from 'react-native';
-import DocumentPicker, {
-    types,
-    DocumentPickerResponse,
-} from 'react-native-document-picker';
+import {
+    pickPdfDocument,
+    isPdfPickCanceled,
+    type PickedPdfFile,
+} from '../../utils/pickPdfDocument';
 import { useTypography } from '../../theme/useTypography';
 
 type Props = {
-    onPicked?: (file: DocumentPickerResponse) => void;
-    onUpload?: (file: DocumentPickerResponse) => Promise<void> | void;
+    onPicked?: (file: PickedPdfFile) => void;
+    onUpload?: (file: PickedPdfFile) => Promise<void> | void;
     disableUploadButton?: boolean;
 };
 
 const Pdf: React.FC<Props> = ({ onPicked, onUpload, disableUploadButton }) => {
-    const [selected, setSelected] = useState<DocumentPickerResponse | null>(null);
+    const [selected, setSelected] = useState<PickedPdfFile | null>(null);
     const [loading, setLoading] = useState(false);
     const { fontSize: scaledFontSize } = useTypography();
     const styles = useMemo(
@@ -48,14 +49,11 @@ const Pdf: React.FC<Props> = ({ onPicked, onUpload, disableUploadButton }) => {
 
     const pickPdf = async () => {
         try {
-            const file = await DocumentPicker.pickSingle({
-                type: [types.pdf],
-                copyTo: 'cachesDirectory',
-            });
+            const file = await pickPdfDocument();
             setSelected(file);
             onPicked?.(file);
         } catch (e: any) {
-            if (DocumentPicker.isCancel(e)) {
+            if (isPdfPickCanceled(e)) {
                 return;
             }
             if (__DEV__) {
@@ -87,23 +85,26 @@ const Pdf: React.FC<Props> = ({ onPicked, onUpload, disableUploadButton }) => {
                     <Text style={styles.name} numberOfLines={1}>
                         {selected.name}
                     </Text>
-                    <Text style={styles.meta}>
-                        {(selected.size ?? 0) / 1024 < 1024
-                            ? `${Math.round((selected.size ?? 0) / 1024)} KB`
-                            : `${((selected.size ?? 0) / (1024 * 1024)).toFixed(2)} MB`}
-                    </Text>
+                    {selected.size != null && (
+                        <Text style={styles.meta}>
+                            {(selected.size / 1024).toFixed(1)} KB
+                        </Text>
+                    )}
                 </View>
             )}
 
-            {!disableUploadButton && (
+            {onUpload && (
                 <TouchableOpacity
-                    style={[styles.uploadBtn, !selected && { opacity: 0.5 }]}
-                    onPress={upload}
-                    disabled={!selected || loading}>
+                    style={[
+                        styles.uploadBtn,
+                        (!selected || disableUploadButton) && { opacity: 0.5 },
+                    ]}
+                    disabled={!selected || !!disableUploadButton || loading}
+                    onPress={upload}>
                     {loading ? (
-                        <ActivityIndicator />
+                        <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.btnText}>Gönder</Text>
+                        <Text style={styles.btnText}>Yükle</Text>
                     )}
                 </TouchableOpacity>
             )}

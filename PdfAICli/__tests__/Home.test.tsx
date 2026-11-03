@@ -4,10 +4,9 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
 
-jest.mock('react-native-document-picker', () => ({
-    pickSingle: jest.fn(),
-    types: { pdf: 'application/pdf' },
-    isCancel: jest.fn(() => false),
+jest.mock('../src/utils/pickPdfDocument', () => ({
+    pickPdfDocument: jest.fn(),
+    isPdfPickCanceled: jest.fn(() => false),
 }));
 jest.mock('@react-navigation/native', () => ({
     useNavigation: () => ({ navigate: jest.fn() }),

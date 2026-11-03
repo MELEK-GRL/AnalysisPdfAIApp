@@ -4,7 +4,7 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { type DocumentPickerResponse } from 'react-native-document-picker';
+import type { PickedPdfFile } from '../../utils/pickPdfDocument';
 import T from '../../components/Text/T';
 import Button from '../../components/Buttons/Button';
 import colors from '../../theme/colors';
@@ -16,7 +16,7 @@ export type PdfUploadSectionProps = {
     phase: 'idle' | 'loading' | 'result';
     showUploadArea: boolean;
     items: LabItem[];
-    pickedFile: DocumentPickerResponse | null;
+    pickedFile: PickedPdfFile | null;
     fileName: string | null;
     onSelectPdf: () => void;
     onSendPdf: () => void;

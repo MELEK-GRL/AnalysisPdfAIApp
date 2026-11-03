@@ -4,12 +4,12 @@ import {
     StyleSheet,
     KeyboardAvoidingView,
     Platform,
-    SafeAreaView,
     TouchableOpacity,
     Modal,
     ScrollView,
     Dimensions,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { SafeAreaView, View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useResponsive } from '../../utils/deviceStore/device';
 
 type Props = {

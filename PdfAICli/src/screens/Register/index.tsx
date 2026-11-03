@@ -390,7 +390,7 @@ const Register: React.FC = () => {
 
                         <TextInputComponent
                             label={t('register.passwordPlaceholder')}
-                            placeholder={t('register.passwordPlaceholder')}
+                            placeholder={t('register.passwordHintPlaceholder')}
                             value={form.password}
                             onChangeText={v =>
                                 handleChange('password', v.replace(/\s/g, ''))

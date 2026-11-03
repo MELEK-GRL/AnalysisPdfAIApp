@@ -239,7 +239,7 @@ const ResetPassword: React.FC = () => {
                     ) : null}
                     <TextInputComponent
                         label={t('resetPassword.newPasswordLabel')}
-                        placeholder={t('register.passwordPlaceholder')}
+                        placeholder={t('register.passwordHintPlaceholder')}
                         value={newPassword}
                         onChangeText={v => setNewPassword(v.replace(/\s/g, ''))}
                         secureTextEntry

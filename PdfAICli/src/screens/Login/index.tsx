@@ -195,7 +195,7 @@ const Login: React.FC = () => {
 
                     <TextInputComponent
                         label={t('login.passwordPlaceholder')}
-                        placeholder={t('login.passwordPlaceholder')}
+                        placeholder={t('login.passwordHintPlaceholder')}
                         value={password}
                         onChangeText={v => setPassword(v.replace(/\s/g, ''))}
                         autoCapitalize="none"

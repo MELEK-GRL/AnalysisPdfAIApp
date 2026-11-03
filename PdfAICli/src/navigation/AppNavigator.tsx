@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Platform, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useT } from '../store/useLocaleStore';
+import { useT, useLocaleStore } from '../store/useLocaleStore';
 import { useAnalysisLoadingStore } from '../store/useAnalysisLoadingStore';
 import { NavigationContainer } from '@react-navigation/native';
+import {
+    navigationRef,
+    resetToLogin,
+    type RootStackParamList,
+} from './rootNavigation';
 import LoadingModal from '../components/Modals/LoadingModal';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -30,19 +35,7 @@ import InfoSplash from '../screens/Splashs/InfoSplash';
 import SplashTwo from '../screens/SplashTwo/SplashTwo';
 import Logout from '../screens/Logout';
 
-export type RootStackParamList = {
-    LanguageSplash: undefined;
-    InfoSplash: undefined;
-    SplashTwo: undefined;
-    Login: undefined;
-    Register: undefined;
-    ForgotPassword: undefined;
-    ResetPassword: { token?: string; email?: string; devCode?: string };
-    MainTabs: undefined;
-    Settings: undefined;
-    PrivacyPolicy: undefined;
-    Logout: undefined;
-};
+export type { RootStackParamList };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
@@ -60,13 +53,16 @@ const tabIcons: Record<string, { active: string; inactive: string }> = {
 
 const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
     const insets = useSafeAreaInsets();
+    const adUiLocked = useAnalysisLoadingStore(s => s.adUiLocked);
     const bottomSafe = Platform.OS === 'ios'
         ? Math.max(insets.bottom, HOME_INDICATOR_HEIGHT_IOS)
         : Math.max(insets.bottom, 12);
     const tabBarHeight = TAB_BAR_CONTENT_HEIGHT + bottomSafe;
 
     return (
-        <View style={[tabBarStyles.wrapper, { paddingBottom: bottomSafe }]}>
+        <View
+            pointerEvents={adUiLocked ? 'none' : 'auto'}
+            style={[tabBarStyles.wrapper, { paddingBottom: bottomSafe }]}>
             <View style={[tabBarStyles.container, { minHeight: TAB_BAR_CONTENT_HEIGHT }]}>
                 <View style={tabBarStyles.row}>
                     {state.routes.map((route, index) => {
@@ -76,6 +72,9 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                         const iconSet = tabIcons[route.name] ?? { active: 'ellipse-outline', inactive: 'ellipse-outline' };
 
                         const onPress = () => {
+                            if (useAnalysisLoadingStore.getState().adUiLocked) {
+                                return;
+                            }
                             const event = navigation.emit({
                                 type: 'tabPress',
                                 target: route.key,
@@ -208,13 +207,18 @@ const AppNavigator = () => {
     const [hasToken, setHasToken] = useState(false);
     const storeToken = useAuthStore((s) => s.token);
     const analysisLoading = useAnalysisLoadingStore((s) => s.loading);
+    const prevTokenRef = useRef<string | null | undefined>(undefined);
 
-    // Otomatik logout sonrası Login'e düşmesi için hasToken'ı store ile senkron tut
+    // Token varken silinirse (çıkış) Login'e düş — ilk hydrate null'ında tetikleme
     useEffect(() => {
         if (!storeToken) {
             setHasToken(false);
+            if (ready && prevTokenRef.current) {
+                resetToLogin();
+            }
         }
-    }, [storeToken]);
+        prevTokenRef.current = storeToken;
+    }, [storeToken, ready]);
 
     useEffect(() => {
         (async () => {
@@ -284,9 +288,8 @@ const AppNavigator = () => {
 
     return (
         <>
-            <NavigationContainer linking={linking}>
+            <NavigationContainer ref={navigationRef} linking={linking}>
                 <Stack.Navigator
-                    key={storeToken ?? 'logged-out'}
                     initialRouteName={initialRouteName}
                     screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="LanguageSplash" component={LanguageSplash} />
@@ -302,7 +305,14 @@ const AppNavigator = () => {
                     <Stack.Screen name="Logout" component={Logout} />
                 </Stack.Navigator>
             </NavigationContainer>
-            <LoadingModal visible={analysisLoading} />
+            <LoadingModal
+                visible={analysisLoading}
+                message={
+                    analysisLoading
+                        ? useLocaleStore.getState().t('home.analysisLoadingHint')
+                        : undefined
+                }
+            />
         </>
     );
 };

@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useFocusEffect, useNavigation, CommonActions } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { resetToLogin } from '../../navigation/rootNavigation';
 import { useSessionStore } from '../../store/useSessionStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
@@ -104,13 +105,13 @@ const Profile: React.FC = () => {
             await deleteAccount();
             setDeleteAccountModalVisible(false);
             await logout();
-            nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
+            resetToLogin();
         } catch (_) {
             setDeleteAccountModalVisible(false);
         } finally {
             setDeleteAccountLoading(false);
         }
-    }, [logout, nav]);
+    }, [logout]);
 
     return (
         <GradientLayout>

@@ -35,6 +35,8 @@ local.properties
 !debug.keystore
 # Release keystore (Faz 12) asla commit edilmez
 # android/app/release.keystore
+# Yerel debug APK (GitHub 100MB limiti)
+*.apk
 
 # node.js
 #

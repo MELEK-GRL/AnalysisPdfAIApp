@@ -23,6 +23,9 @@ ios/Pods/
 android/.gradle/
 android/app/build/
 
+# Yerel debug APK (GitHub 100MB limiti)
+*.apk
+
 # Logs
 logs/
 *.log

@@ -43,6 +43,12 @@ const Home: React.FC = () => {
     const [pickedFile, setPickedFile] = useState<PickedPdfFile | null>(null);
     const user = useAuthStore(s => s.user);
     const [displayName, setDisplayName] = useState<string>(user?.name || '');
+
+    useEffect(() => {
+        if (user?.name) {
+            setDisplayName(user.name);
+        }
+    }, [user?.name]);
     const [items, setItems] = useState<LabItem[]>([]);
     const [rawItems, setRawItems] = useState<LabItem[]>([]);
     const [analysis, setAnalysis] = useState<string>('');
@@ -223,14 +229,27 @@ const Home: React.FC = () => {
             if (!token) return;
             try {
                 const me = await getProfile();
-                if (me?.name) setDisplayName(me.name);
+                if (me?.name) {
+                    setDisplayName(me.name);
+                    const auth = useAuthStore.getState();
+                    if (!auth.user?.name || auth.user.name !== me.name) {
+                        auth.setUserAndToken(
+                            {
+                                _id: me._id,
+                                name: me.name,
+                                email: me.email,
+                            },
+                            token,
+                        );
+                    }
+                }
             } catch (e) {
                 if (__DEV__) console.error('getProfile error:', e);
             }
         })();
     }, []);
 
-    // PDF seç
+    // PDF seç (oturum hold pickPdfDocument içinde)
     const handleSelectPdf = useCallback(async () => {
         try {
             const res = await pickPdfDocument();
@@ -261,10 +280,15 @@ const Home: React.FC = () => {
             const rawName = pickedFile.name ?? 'document.pdf';
             const safeName = rawName.replace(/[()\s]+/g, '_').replace(/_+/g, '_') || 'document.pdf';
             const nameWithPdf = safeName.toLowerCase().endsWith('.pdf') ? safeName : `${safeName}.pdf`;
+            // keepLocalCopy sonrası yerel file:// URI kullan (content:// upload'da auth/body bozulabiliyor)
+            const fileUri = pickedFile.fileCopyUri || pickedFile.uri;
+            if (!fileUri) {
+                throw new Error('PDF dosya yolu alınamadı. Lütfen tekrar seçin.');
+            }
             form.append('file', {
-                uri: pickedFile.fileCopyUri ?? pickedFile.uri,
+                uri: fileUri,
                 name: nameWithPdf,
-                type: pickedFile.type ?? 'application/pdf',
+                type: 'application/pdf',
             } as any);
             form.append('locale', locale);
 
@@ -324,14 +348,30 @@ const Home: React.FC = () => {
     const handleWatchAd = useCallback(async () => {
         if (adWatching || !rateLimitAdsOffer) return;
         setAdWatching(true);
-        setRateLimitModalVisible(false);
         setRateLimitCreditGranted(false);
+        setRateLimitMessage(t('home.adLoading'));
+        // LoadingModal (root) hemen açılsın, popup kapansın, reklam yüklensin
+        const loadingStore = useAnalysisLoadingStore.getState();
+        loadingStore.setAdUiLocked(true);
+        loadingStore.acquireHold();
+        useSessionStore.getState().touch();
+        setRateLimitModalVisible(false);
         try {
             void trackButtonClick('watch_rewarded_ad', 'Home');
-            // 2 reklam peş peşe; ara popup'a tekrar tıklamaya gerek yok
             const maxAds = 2;
             for (let i = 0; i < maxAds; i++) {
+                setRateLimitMessage(
+                    i === 0
+                        ? t('home.adLoading')
+                        : t('home.adProgress').replace(
+                              '{{pending}}',
+                              String(i),
+                          ),
+                );
                 const result = await showRewardedAdForCredit(rewardedUnitId);
+                // Reklam kapandı — kilit hâlâ açık kalsın (2. reklama / sonuca kadar)
+                useAnalysisLoadingStore.getState().setAdUiLocked(true);
+                useAnalysisLoadingStore.getState().remountAdLock();
                 if (!result) {
                     setRateLimitMessage(t('home.adFailed'));
                     setRateLimitModalVisible(true);
@@ -345,15 +385,13 @@ const Home: React.FC = () => {
                     void useQuotaStore.getState().refresh();
                     return;
                 }
-                setRateLimitMessage(
-                    t('home.adProgress').replace(
-                        '{{pending}}',
-                        String(result.pendingAdWatches),
-                    ),
-                );
             }
             setRateLimitModalVisible(true);
         } finally {
+            useSessionStore.getState().touch();
+            const store = useAnalysisLoadingStore.getState();
+            store.releaseHold();
+            store.setAdUiLocked(false);
             setAdWatching(false);
         }
     }, [adWatching, rateLimitAdsOffer, rewardedUnitId, t]);

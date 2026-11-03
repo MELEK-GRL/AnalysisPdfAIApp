@@ -8,10 +8,11 @@ import {
     Pressable,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useResponsive } from '../../utils/deviceStore/device';
 import { useT } from '../../store/useLocaleStore';
 import { useQuotaStore } from '../../store/useQuotaStore';
+import { navigateToSettings } from '../../navigation/rootNavigation';
 import T from '../Text/T';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
@@ -23,7 +24,6 @@ type Props = {
 };
 
 const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
-    const nav = useNavigation<any>();
     const t = useT();
     const { w1px, h1px, fs1px } = useResponsive();
     const remaining = useQuotaStore(s => s.remaining);
@@ -226,7 +226,7 @@ const Header: React.FC<Props> = ({ title, onSettingsPress }) => {
                                 onSettingsPress ??
                                 (() => {
                                     setInfoVisible(false);
-                                    nav.navigate('Settings');
+                                    navigateToSettings();
                                 })
                             }
                             activeOpacity={0.8}>

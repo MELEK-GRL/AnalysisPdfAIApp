@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, Modal, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { View, StyleSheet, Modal } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
 import T from '../Text/T';
@@ -27,8 +27,6 @@ const TYPE_CONFIG: Record<PopupType, { accent: string; defaultTitle: string; ico
     info: { accent: '#3B82F6', defaultTitle: 'Bilgi', icon: 'information-circle' },
 };
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
-
 const PopupModal: React.FC<Props> = ({
     visible,
     title,
@@ -42,16 +40,13 @@ const PopupModal: React.FC<Props> = ({
     const { w1px, h1px } = useResponsive();
     const config = TYPE_CONFIG[type];
     const displayTitle = title ?? config.defaultTitle;
+    const locked = !leftButtonText && !rightButtonText;
 
     const styles = useMemo(
         () =>
             StyleSheet.create({
                 overlay: {
-                    position: 'absolute',
-                    left: 0,
-                    top: 0,
-                    width: SCREEN_WIDTH,
-                    height: SCREEN_HEIGHT,
+                    flex: 1,
                     backgroundColor: 'rgba(17, 24, 39, 0.45)',
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -89,62 +84,69 @@ const PopupModal: React.FC<Props> = ({
     }
 
     return (
-        <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
-            <TouchableWithoutFeedback>
-                <View style={styles.overlay}>
-                    <TouchableWithoutFeedback>
-                        <View style={styles.box}>
-                            <View style={styles.iconWrap}>
-                                <Ionicons
-                                    name={config.icon as any}
-                                    size={iconSize.xxl}
-                                    color={config.accent}
-                                />
-                            </View>
-                            <T
-                                size={fontSize.title}
-                                weight="700"
-                                align="center"
-                                color="#111827"
-                                style={{ marginBottom: 10 * h1px }}>
-                                {displayTitle}
-                            </T>
+        <Modal
+            visible={visible}
+            transparent
+            animationType="fade"
+            statusBarTranslucent
+            onRequestClose={() => {
+                // Butonsuz (kilit) modda geri tuşu ile kapanmasın
+                if (locked) return;
+                // Onay değil: iptal / kapat
+                if (onLeftPress) onLeftPress();
+                else if (onRightPress) onRightPress();
+            }}>
+            <View style={styles.overlay} pointerEvents="auto">
+                <View style={styles.box}>
+                    <View style={styles.iconWrap}>
+                        <Ionicons
+                            name={config.icon as any}
+                            size={iconSize.xxl}
+                            color={config.accent}
+                        />
+                    </View>
+                    <T
+                        size={fontSize.title}
+                        weight="700"
+                        align="center"
+                        color="#111827"
+                        style={{ marginBottom: 10 * h1px }}>
+                        {displayTitle}
+                    </T>
 
-                            <T
-                                size={fontSize.bodyMedium}
-                                color="#4B5563"
-                                align="center"
-                                style={{ lineHeight: 22 }}>
-                                {message}
-                            </T>
+                    <T
+                        size={fontSize.bodyMedium}
+                        color="#4B5563"
+                        align="center"
+                        style={{ lineHeight: 22 }}>
+                        {message}
+                    </T>
 
-                            {(leftButtonText || rightButtonText) && (
-                                <View style={styles.buttonRow}>
-                                    {leftButtonText && (
-                                        <View style={{ flex: 1 }}>
-                                            <Button
-                                                buttonText={leftButtonText}
-                                                onPress={onLeftPress}
-                                                width="100%"
-                                                backgroundColor="#94A3B8"
-                                            />
-                                        </View>
-                                    )}
-                                    {rightButtonText && (
-                                        <View style={{ flex: 1 }}>
-                                            <Button
-                                                buttonText={rightButtonText}
-                                                onPress={onRightPress}
-                                                width="100%"
-                                            />
-                                        </View>
-                                    )}
+                    {(leftButtonText || rightButtonText) && (
+                        <View style={styles.buttonRow}>
+                            {leftButtonText && (
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        buttonText={leftButtonText}
+                                        onPress={onLeftPress}
+                                        width="100%"
+                                        backgroundColor="#94A3B8"
+                                    />
+                                </View>
+                            )}
+                            {rightButtonText && (
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        buttonText={rightButtonText}
+                                        onPress={onRightPress}
+                                        width="100%"
+                                    />
                                 </View>
                             )}
                         </View>
-                    </TouchableWithoutFeedback>
+                    )}
                 </View>
-            </TouchableWithoutFeedback>
+            </View>
         </Modal>
     );
 };

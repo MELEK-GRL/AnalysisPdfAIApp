@@ -161,6 +161,7 @@
     "adCreditGranted": "Tebrikler! +1 analiz hakkı kazandınız.",
     "adFailed": "Reklam tamamlanamadı. Lütfen tekrar deneyin.",
     "adLoading": "Reklam yükleniyor…",
+    "analysisLoadingHint": "Analiz ediliyor, lütfen 1–2 dakika bekleyin…",
     "uploadError": "PDF yüklenemedi.",
     "pleaseUploadResult": "Lütfen tahlil PDF yükleyin.",
     "rawValuesTitle": "Tahlil değerleri (PDF'deki gibi)"

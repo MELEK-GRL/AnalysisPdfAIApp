@@ -5,9 +5,14 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-jest.mock('react-native-document-picker', () => ({
-  pick: jest.fn(() => Promise.resolve({})),
+jest.mock('@react-native-documents/picker', () => ({
+  pick: jest.fn(() => Promise.resolve([{}])),
   types: { pdf: 'application/pdf' },
+  keepLocalCopy: jest.fn(() =>
+    Promise.resolve([{ status: 'success', localUri: 'file:///tmp/t.pdf' }]),
+  ),
+  isErrorWithCode: jest.fn(() => false),
+  errorCodes: { OPERATION_CANCELED: 'OPERATION_CANCELED' },
 }));
 
 // Zustand store API: hook(selector), getState, setState, subscribe

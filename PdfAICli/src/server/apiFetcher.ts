@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig, Method } from 'axios';
+import axios, { AxiosError, AxiosHeaders, AxiosRequestConfig, Method } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../constants/apiBaseUrl';
 import { AUTH_TOKEN } from '../constants/storageKeys';
@@ -22,12 +22,9 @@ const d = api.defaults.headers as any;
 
 export function setAuthHeader(token?: string | null) {
     if (token) {
-        (api.defaults.headers as any).common = {
-            ...(api.defaults.headers as any).common,
-            Authorization: `Bearer ${token}`,
-        };
-    } else if ((api.defaults.headers as any).common) {
-        delete (api.defaults.headers as any).common.Authorization;
+        api.defaults.headers.common.Authorization = `Bearer ${token}`;
+    } else {
+        delete api.defaults.headers.common.Authorization;
     }
 }
 
@@ -42,25 +39,19 @@ export async function clearToken() {
 export const getToken = () => AsyncStorage.getItem(AUTH_TOKEN);
 
 api.interceptors.request.use(async config => {
-    const h: Record<string, any> = (config.headers as any) || {};
+    const headers = AxiosHeaders.from(config.headers || {});
 
-    if (!h.Authorization) {
-        const token = await AsyncStorage.getItem(AUTH_TOKEN);
-        if (token) {
-            h.Authorization = `Bearer ${token}`;
-        }
-    }
+    // FormData: boundary axios/RN tarafından set edilsin diye Content-Type'ı kaldır.
     const isFormData =
         typeof FormData !== 'undefined' &&
         (config.data instanceof FormData ||
-            String(h['Content-Type'] || h['content-type']).includes(
+            String(headers.get('Content-Type') || '').includes(
                 'multipart/form-data',
             ));
 
     if (isFormData) {
-        delete h['Content-Type'];
-        delete h['content-type'];
-        (config as any).headers = h;
+        headers.delete('Content-Type');
+        headers.delete('content-type');
 
         const defs = api.defaults.headers as any;
         ['common', 'post', 'put', 'patch'].forEach(k => {
@@ -71,10 +62,18 @@ api.interceptors.request.use(async config => {
                 delete defs[k]['content-type'];
             }
         });
-    } else {
-        (config as any).headers = h;
     }
 
+    // Authorization'ı FormData temizliği SONRASINDA her zaman yeniden yaz.
+    // Axios 1.x + multipart isteklerinde header kaybolabiliyor.
+    if (!headers.get('Authorization')) {
+        const token = await AsyncStorage.getItem(AUTH_TOKEN);
+        if (token) {
+            headers.set('Authorization', `Bearer ${token}`);
+        }
+    }
+
+    config.headers = headers;
     return config;
 });
 

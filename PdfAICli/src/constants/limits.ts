@@ -15,8 +15,14 @@ export const ADS_WATCHES_PER_CREDIT = 2;
  */
 export const TEST_REWARDED_UNIT_ID = 'ca-app-pub-3940256099942544/5224354917';
 
-/** Ön planda hareketsizlik sonrası otomatik çıkış süresi (ms). Arka plana geçişte hemen logout. */
+/** Ön planda hareketsizlik sonrası otomatik çıkış süresi (ms). */
 export const SESSION_TIMEOUT_MS = 20 * 60 * 1000;
+
+/**
+ * Arka planda kalınca logout için bekleme (ms).
+ * Anında logout PDF seçici / reklam / sistem UI yüzünden oturumu düşürüyordu.
+ */
+export const SESSION_BACKGROUND_GRACE_MS = 10 * 60 * 1000;
 
 /** Hareketsizlik kontrolü aralığı (ms) */
 export const SESSION_CHECK_INTERVAL_MS = 60 * 1000;

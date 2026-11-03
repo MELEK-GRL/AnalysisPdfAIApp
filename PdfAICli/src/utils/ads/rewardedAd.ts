@@ -4,6 +4,8 @@
 import { NativeModules, Platform } from 'react-native';
 import { reportAdReward, type AdsRewardResponse } from '../../server/api/Lab';
 import { TEST_REWARDED_UNIT_ID } from '../../constants/limits';
+import { useAnalysisLoadingStore } from '../../store/useAnalysisLoadingStore';
+import { useSessionStore } from '../../store/useSessionStore';
 
 type AdsModule = typeof import('react-native-google-mobile-ads');
 
@@ -56,8 +58,18 @@ export function showRewardedAdForCredit(
     unitId: string,
 ): Promise<AdsRewardResponse | null> {
     return new Promise(async resolve => {
+        // Reklam full-screen app'i background'a atar → oturumu tut
+        useAnalysisLoadingStore.getState().acquireHold();
+        useSessionStore.getState().touch();
+
+        const releaseSession = () => {
+            useSessionStore.getState().touch();
+            useAnalysisLoadingStore.getState().releaseHold();
+        };
+
         const ads = loadAdsModule();
         if (!ads?.RewardedAd || !ads.RewardedAdEventType || !ads.AdEventType) {
+            releaseSession();
             resolve(null);
             return;
         }
@@ -71,6 +83,7 @@ export function showRewardedAdForCredit(
             if (__DEV__) {
                 console.warn('AdMob init failed', err);
             }
+            releaseSession();
             resolve(null);
             return;
         }
@@ -87,6 +100,7 @@ export function showRewardedAdForCredit(
             if (__DEV__) {
                 console.warn('AdMob create failed', err);
             }
+            releaseSession();
             resolve(null);
             return;
         }
@@ -98,6 +112,7 @@ export function showRewardedAdForCredit(
             settled = true;
             unsub();
             if (!ok || !earned) {
+                releaseSession();
                 resolve(null);
                 return;
             }
@@ -108,6 +123,8 @@ export function showRewardedAdForCredit(
                     console.warn('reportAdReward failed', e);
                 }
                 resolve(null);
+            } finally {
+                releaseSession();
             }
         };
 

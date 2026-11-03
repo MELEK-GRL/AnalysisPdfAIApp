@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import { useNavigation, CommonActions } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { resetToLogin } from '../../navigation/rootNavigation';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useT } from '../../store/useLocaleStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
@@ -58,12 +59,12 @@ const Logout: React.FC = () => {
         try {
             setLoading(true);
             await logout();
-            nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
+            resetToLogin();
         } catch (e: any) {
             Alert.alert(t('common.error'), e?.message || t('logout.error'));
             setLoading(false);
         }
-    }, [loading, logout, nav]);
+    }, [loading, logout]);
 
     return (
         <GradientLayout>

@@ -1,12 +1,13 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useNavigation, CommonActions, useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useLocaleStore } from '../../store/useLocaleStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSessionStore } from '../../store/useSessionStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useResponsive } from '../../utils/deviceStore/device';
+import { resetToLogin } from '../../navigation/rootNavigation';
 import T from '../../components/Text/T';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
@@ -28,6 +29,8 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
     const user = useAuthStore(s => s.user);
     const logout = useAuthStore(s => s.logout);
     const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+    const [logoutBusy, setLogoutBusy] = useState(false);
+    const logoutInFlight = useRef(false);
     const { w1px, h1px, fs1px } = useResponsive();
 
     const styles = useMemo(
@@ -129,14 +132,25 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
     );
 
     const handleLogoutConfirm = useCallback(async () => {
-        setLogoutModalVisible(false);
+        if (logoutInFlight.current) {
+            return;
+        }
+        logoutInFlight.current = true;
+        setLogoutBusy(true);
         try {
+            // Önce Login'e reset (stack key remount yok — Geçmiş/Profil focus yarışını önler)
+            resetToLogin();
             await logout();
-            nav.dispatch(CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }));
         } catch (_) {
             setLogoutModalVisible(true);
+            logoutInFlight.current = false;
+            setLogoutBusy(false);
+            return;
         }
-    }, [logout, nav]);
+        setLogoutModalVisible(false);
+        logoutInFlight.current = false;
+        setLogoutBusy(false);
+    }, [logout]);
 
     return (
         <GradientLayout>
@@ -214,10 +228,15 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
             <PopupModal
                 visible={logoutModalVisible}
                 title={t('logout.title')}
+                message={logoutBusy ? t('common.loading') : undefined}
                 type="info"
                 leftButtonText={t('logout.cancel')}
                 rightButtonText={t('logout.confirm')}
-                onLeftPress={() => setLogoutModalVisible(false)}
+                onLeftPress={() => {
+                    if (!logoutInFlight.current) {
+                        setLogoutModalVisible(false);
+                    }
+                }}
                 onRightPress={handleLogoutConfirm}
             />
         </GradientLayout>

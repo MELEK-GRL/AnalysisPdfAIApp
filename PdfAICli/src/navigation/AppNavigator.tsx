@@ -19,9 +19,12 @@ import { getProfile } from '../server/api/User';
 import { AUTH_TOKEN, CONSENT_GIVEN_ONCE, LANGUAGE_SPLASH_SEEN } from '../constants/storageKeys';
 import { useAuthStore } from '../store/useAuthStore';
 import colors from '../theme/colors';
+import {iconSize} from '../constants/icons';
+import type { HistoryStackParamList } from './historyNavigation';
 
 import Home from '../screens/Home';
 import History from '../screens/History';
+import HistoryDetail from '../screens/HistoryDetail';
 import Profile from '../screens/Profile';
 import Settings from '../screens/Settings';
 import PrivacyPolicy from '../screens/PrivacyPolicy';
@@ -38,10 +41,19 @@ export type { RootStackParamList };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
+const HistoryStackNav = createNativeStackNavigator<HistoryStackParamList>();
 
 const ProfileTab = () => <Profile />;
 
-const TAB_BAR_CONTENT_HEIGHT = 72;
+/** Geçmiş listesi + detay — tab bar görünür kalsın diye tab içinde stack */
+const HistoryStack = () => (
+    <HistoryStackNav.Navigator screenOptions={{ headerShown: false }}>
+        <HistoryStackNav.Screen name="HistoryList" component={History} />
+        <HistoryStackNav.Screen name="HistoryDetail" component={HistoryDetail} />
+    </HistoryStackNav.Navigator>
+);
+
+const TAB_BAR_CONTENT_HEIGHT = 56;
 const HOME_INDICATOR_HEIGHT_IOS = 34;
 
 const tabIcons: Record<string, { active: string; inactive: string }> = {
@@ -96,7 +108,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => 
                                 <View style={tabBarStyles.iconWrap}>
                                     <Ionicons
                                         name={focused ? iconSet.active : iconSet.inactive}
-                                        size={26}
+                                        size={iconSize.large}
                                         color={focused ? colors.backgroundPurple : '#A1A1AA'}
                                     />
                                     {focused ? <View style={tabBarStyles.indicator} /> : null}
@@ -122,7 +134,7 @@ const tabBarStyles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderTopWidth: StyleSheet.hairlineWidth,
         borderTopColor: 'rgba(0,0,0,0.08)',
-        paddingVertical: 14,
+        paddingVertical: 10,
         paddingHorizontal: 8,
         flexDirection: 'row',
         alignItems: 'center',
@@ -163,7 +175,7 @@ const MainTabs = () => {
                 tabBarStyle: { display: 'none' },
             }}>
             <Tab.Screen name="Analiz" component={Home} options={{ title: t('tabs.analysis') }} />
-            <Tab.Screen name="Geçmiş" component={History} options={{ title: t('tabs.history') }} />
+            <Tab.Screen name="Geçmiş" component={HistoryStack} options={{ title: t('tabs.history') }} />
             <Tab.Screen name="Profil" component={ProfileTab} options={{ title: t('tabs.profile') }} />
         </Tab.Navigator>
     );

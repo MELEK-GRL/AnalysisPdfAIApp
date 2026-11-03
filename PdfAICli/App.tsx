@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Dimensions, AppState, AppStateStatus } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
-import AnalysisModalRoot from './src/components/Modals/AnalysisModalRoot';
 import LoadingModal from './src/components/Modals/LoadingModal';
 import useDeviceStore from './src/store/useDeviceStore';
 import { useAnalysisLoadingStore } from './src/store/useAnalysisLoadingStore';
@@ -72,7 +71,6 @@ const App = () => {
           style={{ flex: 1 }}
           pointerEvents={adUiLocked || showAnalysisLoadingUi ? 'none' : 'auto'}>
           <AppNavigator />
-          <AnalysisModalRoot />
         </View>
         {/* Analiz yükleme — root overlay (navigator Modal flaşı yok) */}
         <LoadingModal

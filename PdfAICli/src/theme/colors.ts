@@ -23,6 +23,11 @@ const colors = {
     textInput: '#f1f3f6',
     backgroundPurpleSoft: '#ECEBFD',
     backgroundPinkSoft: '#F8E8F0',
+    /** Dikkat / hata / referans dışı */
+    danger: '#DC2626',
+    dangerSoft: '#FEF2F2',
+    dangerBorder: '#F87171',
+    dangerText: '#B91C1C',
     // backgroundPrupleGradient: ['#7067F0', '#837BFA', '#5E55DB'] as [string, string, string],
     // backgroundPrupleGradient: [
     //     '#7269E5', // ana mor

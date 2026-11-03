@@ -37,8 +37,8 @@ const PageLayout: React.FC<Props> = ({
     );
 
     return (
-        // Header zaten üstte; top safe-area tekrar eklenmesin (başlık üst boşluğu şişmesin).
-        <SafeAreaView style={[styles.safe, style]} edges={['bottom', 'left', 'right']}>
+        // Header üstte, CustomTabBar alt inset’i zaten alıyor — bottom tekrar eklenmesin.
+        <SafeAreaView style={[styles.safe, style]} edges={['left', 'right']}>
             <View style={styles.container}>{children}</View>
         </SafeAreaView>
     );

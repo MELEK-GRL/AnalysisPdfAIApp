@@ -1,101 +1,114 @@
 /**
- * Home ekranı – Analiz sonucu başlığı, yorumla butonu ve grafik (Chart).
+ * Home – Analiz Sonucu: Değerler / Dikkat; Tahlil Yorumu üstte modal.
  */
-import React from 'react';
-import {View, TouchableOpacity, ScrollView, Pressable} from 'react-native';
+import React, {useMemo, useState} from 'react';
+import {View, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import T from '../../components/Text/T';
 import Chart from '../../components/Chart/Chart';
 import AnalysisContent from '../../components/AnalysisContent/AnalysisContent';
+import EmptyState from '../../components/EmptyState/EmptyState';
+import CenterModal from '../../components/Modals/CenterModal';
+import SegmentedTabs from '../../components/SegmentedTabs/SegmentedTabs';
 import colors from '../../theme/colors';
 import {fontSize} from '../../constants/typography';
 import {iconSize} from '../../constants/icons';
 import type {LabItem} from '../../server/api/Lab';
-import {useAnalysisModalStore} from '../../store/useAnalysisModalStore';
+import {filterNotableLabItems} from '../../utils/labNotable';
 
 export type ResultSectionProps = {
   items: LabItem[];
   analysis: string;
-  pickedFile: {name?: string} | null;
   onNoPdfWarning: () => void;
   trackButtonClick: (id: string, opts?: {screen?: string}) => void;
   t: (key: string) => string;
   styles: {
     resultCard: object;
-    detailModalView: object;
-    pill: object;
-    pillWarning: object;
-    sectionGap: object;
+    detailModalView?: object;
+    pill?: object;
+    pillWarning?: object;
+    sectionGap?: object;
   };
   w1px: number;
   h1px: number;
 };
 
-const ResultSection: React.FC<ResultSectionProps> = ({
+type ResultTab = 'values' | 'notable';
+
+function ResultSection({
   items,
   analysis,
-  pickedFile,
   onNoPdfWarning,
   trackButtonClick,
   t,
   styles,
   w1px,
   h1px,
-}) => {
-  const openModal = useAnalysisModalStore(s => s.open);
+}: ResultSectionProps) {
+  const [tab, setTab] = useState<ResultTab>('values');
+  const [analysisVisible, setAnalysisVisible] = useState(false);
+  const hasValues = Array.isArray(items) && items.length > 0;
+  const hasAnalysis = !!(analysis && String(analysis).trim());
+  const notableItems = useMemo(() => filterNotableLabItems(items), [items]);
 
-  const handleInterpret = () => {
-    trackButtonClick('interpret_result', {screen: 'Home'});
-    if (items.length === 0 && !analysis) {
-      onNoPdfWarning();
-      return;
-    }
-    openModal({
-      title: t('home.analysisTitle'),
-      content: (
-        <ScrollView
-          style={styles.detailModalView}
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}>
-          <Pressable>
-            <View>
-              <View style={styles.pill}>
-                <T size={fontSize.label} weight="700" color={colors.backgroundPurpleDark}>
-                  {t('tabs.analysis').toUpperCase()}
-                </T>
-              </View>
-              {analysis ? (
-                <AnalysisContent content={analysis} />
-              ) : (
-                <T size={fontSize.body} color={colors.textDark}>
-                  {t('home.noAnalysis')}
-                </T>
-              )}
-              <View style={styles.sectionGap} />
-              <View style={styles.pill}>
-                <T size={fontSize.label} weight="700" color={colors.backgroundPurpleDark}>
-                  {t('home.suggestions')}
-                </T>
-              </View>
-              <T size={fontSize.body} color={colors.textDark}>
-                {t('home.suggestionsText')}
-              </T>
-              <View style={styles.sectionGap} />
-              <View style={styles.pillWarning}>
-                <T size={fontSize.label} weight="700" color="#B91C1C">
-                  {t('home.importantWarning')}
-                </T>
-              </View>
-              <T size={fontSize.body} color="#B91C1C">
-                {t('home.disclaimer')}
-              </T>
-            </View>
-          </Pressable>
-        </ScrollView>
-      ),
-      onClose: () => {},
-    });
-  };
+  const local = useMemo(
+    () =>
+      StyleSheet.create({
+        analysisBtn: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8 * w1px,
+          marginBottom: 8 * h1px,
+          paddingVertical: 10 * h1px,
+          paddingHorizontal: 12 * w1px,
+          backgroundColor: colors.white,
+          borderRadius: 12 * w1px,
+          borderWidth: 1,
+          borderColor: 'rgba(116, 83, 224, 0.22)',
+        },
+        analysisBtnIcon: {
+          width: 32 * w1px,
+          height: 32 * w1px,
+          borderRadius: 9 * w1px,
+          backgroundColor: colors.backgroundPurpleSoft,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        tabsWrap: {
+          marginBottom: 10 * h1px,
+        },
+        emptyHint: {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8 * w1px,
+          backgroundColor: colors.backgroundPurpleSoft,
+          paddingVertical: 8 * h1px,
+          paddingHorizontal: 10 * w1px,
+          borderRadius: 12 * w1px,
+          borderWidth: 1,
+          borderColor: colors.backgroundPurple + '30',
+        },
+      }),
+    [w1px, h1px],
+  );
+
+  const resultTabs = useMemo(
+    () => [
+      {
+        key: 'values' as const,
+        label: t('history.labValues'),
+        icon: 'flask-outline',
+      },
+      {
+        key: 'notable' as const,
+        label: t('history.notableFindings'),
+        icon: 'alert-circle-outline',
+        badge: notableItems.length,
+        tone: 'alert' as const,
+      },
+    ],
+    [t, notableItems.length],
+  );
 
   return (
     <View style={styles.resultCard}>
@@ -103,49 +116,108 @@ const ResultSection: React.FC<ResultSectionProps> = ({
         size={fontSize.title}
         weight="700"
         color={colors.textDark}
-        style={{marginBottom: 8 * h1px}}>
+        style={{marginBottom: 10 * h1px}}>
         {t('home.analysisResult')}
       </T>
 
-      <TouchableOpacity
-        onPress={handleInterpret}
-        activeOpacity={0.7}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          alignSelf: 'flex-start',
-          gap: 8 * w1px,
-          marginBottom: 12 * h1px,
-          backgroundColor: colors.backgroundPurpleSoft,
-          paddingVertical: 10 * h1px,
-          paddingHorizontal: 14 * w1px,
-          borderRadius: 12 * w1px,
-          borderWidth: 1,
-          borderColor: colors.backgroundPurple + '30',
-        }}>
-        <Ionicons
-          name="document-text-outline"
-          size={iconSize.medium}
-          color={colors.backgroundPurple}
-        />
-        <T size={fontSize.body} weight="600" color={colors.backgroundPurple}>
-          {t('home.interpretButton')}
-        </T>
-        <Ionicons
-          name="chevron-forward"
-          size={iconSize.small}
-          color={colors.backgroundPurple}
-        />
-      </TouchableOpacity>
+      {!hasValues && !hasAnalysis ? (
+        <TouchableOpacity
+          onPress={() => {
+            trackButtonClick('interpret_result', {screen: 'Home'});
+            onNoPdfWarning();
+          }}
+          activeOpacity={0.7}
+          style={local.emptyHint}>
+          <Ionicons
+            name="document-text-outline"
+            size={iconSize.medium}
+            color={colors.backgroundPurple}
+          />
+          <T
+            size={fontSize.body}
+            weight="600"
+            color={colors.backgroundPurple}
+            style={{flex: 1}}>
+            {t('home.interpretButton')}
+          </T>
+          <Ionicons
+            name="chevron-forward"
+            size={iconSize.small}
+            color={colors.backgroundPurple}
+          />
+        </TouchableOpacity>
+      ) : (
+        <>
+          <TouchableOpacity
+            style={local.analysisBtn}
+            onPress={() => {
+              trackButtonClick('interpret_result', {screen: 'Home'});
+              setAnalysisVisible(true);
+            }}
+            activeOpacity={0.75}>
+            <View style={local.analysisBtnIcon}>
+              <Ionicons
+                name="chatbubble-ellipses-outline"
+                size={iconSize.medium}
+                color={colors.backgroundPurple}
+              />
+            </View>
+            <T
+              size={fontSize.body}
+              weight="600"
+              color={colors.backgroundPurpleDark}
+              style={{flex: 1}}>
+              {t('history.analysisComment')}
+            </T>
+            <Ionicons
+              name="chevron-forward"
+              size={iconSize.small}
+              color={colors.backgroundPurple}
+            />
+          </TouchableOpacity>
 
-      {/* Grafik + status (Normal/Yüksek/Düşük) */}
-      {items.length > 0 && !pickedFile && (
-        <View>
-          <Chart items={items} />
-        </View>
+          <SegmentedTabs
+            items={resultTabs}
+            value={tab}
+            onChange={setTab}
+            style={local.tabsWrap}
+          />
+
+          {tab === 'values' ? (
+            hasValues ? (
+              <Chart items={items} />
+            ) : (
+              <T size={fontSize.body} color="#6B7280">
+                {t('history.noRecord')}
+              </T>
+            )
+          ) : notableItems.length > 0 ? (
+            <Chart items={notableItems} />
+          ) : (
+            <EmptyState title={t('history.notableEmpty')} />
+          )}
+
+          <CenterModal
+            visible={analysisVisible}
+            title={t('history.analysisComment')}
+            fixedHeight
+            rightButtonText={t('common.close')}
+            onRightPress={() => setAnalysisVisible(false)}>
+            {hasAnalysis ? (
+              <ScrollView
+                style={{width: '100%', flex: 1}}
+                contentContainerStyle={{paddingBottom: 8 * h1px}}
+                showsVerticalScrollIndicator={false}>
+                <AnalysisContent content={analysis} />
+              </ScrollView>
+            ) : (
+              <EmptyState title={t('home.noAnalysis')} />
+            )}
+          </CenterModal>
+        </>
       )}
     </View>
   );
-};
+}
 
 export default ResultSection;

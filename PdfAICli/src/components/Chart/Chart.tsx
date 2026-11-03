@@ -1,5 +1,4 @@
-// src/components/Chart.tsx
-// Yaşlı dostu, şık tahlil sonucu gösterimi. Kartlar 10'ar sayfalanır (sayfa kasmasın).
+// Halk için sade tahlil kartları: tek durum rozeti, net değer, sayısalda aralık çubuğu.
 import React, {useMemo, useState, useEffect} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -16,15 +15,18 @@ const PAGE_SIZE = 10;
 
 type Props = {items: LabItem[]; width?: number};
 
-const YELLOW = '#EAB308'; // düşük – sarı
-const GREEN = '#22C55E'; // normal – yeşil
-const RED = '#DC2626'; // yüksek – kırmızı
-const BAR_DEFAULT = '#E5E7EB'; // referans aralığı yok → bar varsayılan (gri)
-const HEART_PURPLE = '#9333EA'; // kalp ikonu her zaman mor
+const YELLOW = '#CA8A04';
+const GREEN = '#15803D';
+const RED = '#B91C1C';
+const TRACK = '#E5E7EB';
+const ZONE = '#BBF7D0';
 
-const BG_YELLOW = '#FEFCE8';
+const BG_YELLOW = '#FFFBEB';
 const BG_GREEN = '#F0FDF4';
 const BG_RED = '#FEF2F2';
+const BORDER_YELLOW = '#FDE68A';
+const BORDER_GREEN = '#BBF7D0';
+const BORDER_RED = '#FECACA';
 
 const fmtNum = (n: number) =>
   Number.isFinite(n)
@@ -61,7 +63,6 @@ const hasRef = (it: LabItem) => {
   return true;
 };
 
-/** Kartta gösterilecek test adı: (ACIL) kaldır; uzun büyük isimleri Potasyum/Amilaz yap, HGB/WBC kısaltmaları aynen. */
 const displayTestName = (
   test: string | null | undefined,
   label: string | null | undefined,
@@ -88,7 +89,7 @@ const displayTestName = (
   return s;
 };
 
-const BAR_HORIZONTAL_PADDING = 0;
+type Tone = 'ok' | 'low' | 'high' | 'alert';
 
 const Chart: React.FC<Props> = ({items = [], width = 320}) => {
   const t = useT();
@@ -96,71 +97,88 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
   const [barContainerWidth, setBarContainerWidth] = useState(0);
   const widthPx =
     barContainerWidth > 0
-      ? Math.max(0, barContainerWidth - BAR_HORIZONTAL_PADDING * 2)
-      : width * w1px * 0.85; // fallback until onLayout
+      ? Math.max(0, barContainerWidth)
+      : width * w1px * 0.85;
 
   const s = useMemo(
     () =>
       StyleSheet.create({
         card: {
-          backgroundColor: '#fff',
-          borderRadius: 12 * w1px,
-          padding: 8 * w1px,
-          marginBottom: 10 * h1px,
+          borderRadius: 14 * w1px,
+          paddingVertical: 10 * h1px,
+          paddingHorizontal: 12 * w1px,
+          marginBottom: 8 * h1px,
           borderWidth: 1,
-          borderColor: '#F3F4F6',
-          shadowColor: '#000',
-          shadowOpacity: 0.04,
-          shadowRadius: 6,
-          elevation: 2,
+          overflow: 'hidden',
+          flexDirection: 'row',
+          alignItems: 'stretch',
+        },
+        accent: {
+          width: 4 * w1px,
+          borderRadius: 999,
+          marginRight: 10 * w1px,
+          alignSelf: 'stretch',
+        },
+        body: {
+          flex: 1,
+          minWidth: 0,
+        },
+        topRow: {
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 8 * w1px,
+          marginBottom: 4 * h1px,
         },
         testName: {
-          marginBottom: 4 * h1px,
-          paddingRight: 4 * w1px,
+          flex: 1,
+          minWidth: 0,
         },
-        valueRow: {
-          flexDirection: 'row',
-          alignItems: 'baseline',
-          marginBottom: 3 * h1px,
-          gap: 5 * w1px,
+        statusPill: {
+          paddingVertical: 4 * h1px,
+          paddingHorizontal: 10 * w1px,
+          borderRadius: 999,
+          flexShrink: 0,
+        },
+        resultLabel: {
+          marginBottom: 2 * h1px,
+        },
+        valueText: {
+          marginBottom: 4 * h1px,
         },
         rangeRow: {
           flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: 3 * h1px,
           flexWrap: 'wrap',
+          alignItems: 'center',
+          gap: 4 * w1px,
+          marginBottom: 8 * h1px,
+        },
+        hint: {
+          marginTop: 2 * h1px,
         },
         barWrapper: {
           width: '100%',
-          alignItems: 'center',
-          marginTop: 4 * h1px,
-          marginBottom: 5 * h1px,
-          paddingHorizontal: BAR_HORIZONTAL_PADDING * w1px,
-          position: 'relative',
+          marginTop: 2 * h1px,
+          marginBottom: 2 * h1px,
         },
         bar: {
-          height: 10 * h1px,
-          borderRadius: 5 * w1px,
-          backgroundColor: '#F3F4F6',
-          position: 'relative',
+          height: 8 * h1px,
+          borderRadius: 999,
+          backgroundColor: TRACK,
           overflow: 'hidden',
           flexDirection: 'row',
         },
         seg: {height: '100%'},
         markerWrap: {
           position: 'absolute',
-          top: -8 * h1px,
+          top: -10 * h1px,
+          width: 22 * w1px,
           alignItems: 'center',
           justifyContent: 'center',
         },
-        statusPillWrapper: {
-          width: '100%',
-          alignItems: 'center',
-        },
-        statusPill: {
-          paddingVertical: 3 * h1px,
-          paddingHorizontal: 8 * w1px,
-          borderRadius: 999,
+        markerCaption: {
+          marginTop: 10 * h1px,
+          alignSelf: 'flex-start',
         },
       }),
     [w1px, h1px],
@@ -177,24 +195,22 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
     });
   }, [items]);
 
-  // Bölüm sırası PDF/API’den gelen sıraya göre (ilk geçiş sırası); sabit başlık listesi yok.
   const groupsBySection = useMemo(() => {
     const map = new Map<string | null, typeof filtered>();
     const sectionOrder: (string | null)[] = [];
     for (const item of filtered) {
-      const s = (item as LabItem & {section?: string | null}).section ?? null;
-      if (!map.has(s)) {
-        map.set(s, []);
-        sectionOrder.push(s);
+      const sec = (item as LabItem & {section?: string | null}).section ?? null;
+      if (!map.has(sec)) {
+        map.set(sec, []);
+        sectionOrder.push(sec);
       }
-      map.get(s)!.push(item);
+      map.get(sec)!.push(item);
     }
     return sectionOrder
       .filter(section => (map.get(section)?.length ?? 0) > 0)
       .map(section => ({section, items: map.get(section)!}));
   }, [filtered]);
 
-  // Sayfalama: tüm kartları düz listeye al, 10'ar göster.
   const flatCards = useMemo(() => {
     const out: {section: string | null; item: LabItem}[] = [];
     for (const {section, items: groupItems} of groupsBySection) {
@@ -217,11 +233,9 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
     setVisibleCount(PAGE_SIZE);
   }, [totalCards]);
 
-  if (!filtered.length) {
-    return <EmptyState title={t('history.noData')} style={{height: '70%'}} />;
-  }
+  const heartSize = iconSize.medium * Math.min(w1px, h1px);
 
-  const RangeRow: React.FC<{item: LabItem}> = ({item}) => {
+  const renderCard = (item: LabItem) => {
     const v = Number(item.value);
     const _hasRef = hasRef(item);
     const rawLow = _hasRef ? Number(item.refLow) : v;
@@ -235,184 +249,189 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
       scaleMin -= 1;
       scaleMax += 1;
     }
+    const pad = (scaleMax - scaleMin) * 0.08 || 0.5;
+    scaleMin -= pad;
+    scaleMax += pad;
 
     const toPct = (x: number) =>
       Math.max(0, Math.min(1, (x - scaleMin) / (scaleMax - scaleMin)));
     const toPx = (x: number) => widthPx * toPct(x);
 
-    const leftW = _hasRef ? toPx(refLow) : widthPx;
-        const midW = _hasRef ? Math.max(0, toPx(refHigh) - toPx(refLow)) : 0;
-        const markerLeft = toPx(v);
+    const leftW = _hasRef ? toPx(refLow) : 0;
+    const midW = _hasRef ? Math.max(0, toPx(refHigh) - toPx(refLow)) : 0;
+    const rightW = _hasRef ? Math.max(0, widthPx - leftW - midW) : widthPx;
+    const markerLeft = toPx(v);
 
-    // Aralık altı = sarı (L), aralık üstü = kırmızı (H), aralıkta = yeşil (N)
-    const flag = v < refLow ? 'L' : v > refHigh ? 'H' : 'N';
     const hasResultLabel =
       item.resultLabel && String(item.resultLabel).trim().length > 0;
     const negatifLike = /^(Negatif|Negative)$/i.test(
       String(item.resultLabel || ''),
     );
-    const pozitifLike = /^(Pozitif|Positive|Reaktif)$/i.test(
+    const pozitifLike = /^(Pozitif|Positive|Reaktif|Reactive)$/i.test(
       String(item.resultLabel || ''),
     );
-    const flagText = hasResultLabel
-      ? String(item.resultLabel).trim()
-      : flag === 'L'
-      ? t('history.statusLow')
-      : flag === 'H'
-      ? t('history.statusHigh')
-      : t('history.statusNormal');
-    const flagColor = hasResultLabel
-      ? negatifLike
-        ? GREEN
-        : pozitifLike
-        ? RED
-        : flag === 'H'
-        ? RED
-        : flag === 'L'
-        ? YELLOW
-        : GREEN
-      : flag === 'H'
-      ? RED
-      : flag === 'L'
-      ? YELLOW
-      : GREEN;
-    const bgColor = hasResultLabel
-      ? negatifLike
-        ? BG_GREEN
-        : pozitifLike
-        ? BG_RED
-        : flag === 'H'
-        ? BG_RED
-        : flag === 'L'
-        ? BG_YELLOW
-        : BG_GREEN
-      : flag === 'H'
-      ? BG_RED
-      : flag === 'L'
-      ? BG_YELLOW
-      : BG_GREEN;
+    const flag = !_hasRef
+      ? 'N'
+      : v < refLow
+      ? 'L'
+      : v > refHigh
+      ? 'H'
+      : 'N';
+
+    const isCategorical = !_hasRef && !!hasResultLabel;
+
+    let tone: Tone = 'ok';
+    let flagText = t('history.statusNormal');
+    let hint = t('history.hintNormal');
+
+    if (isCategorical) {
+      flagText = String(item.resultLabel).trim();
+      if (negatifLike) {
+        tone = 'ok';
+        hint = t('history.hintNegative');
+      } else if (pozitifLike) {
+        tone = 'alert';
+        hint = t('history.hintPositive');
+      } else {
+        tone = 'ok';
+        hint = '';
+      }
+    } else if (flag === 'L') {
+      tone = 'low';
+      flagText = t('history.statusLow');
+      hint = t('history.hintLow');
+    } else if (flag === 'H') {
+      tone = 'high';
+      flagText = t('history.statusHigh');
+      hint = t('history.hintHigh');
+    }
+
+    const toneColor =
+      tone === 'ok' ? GREEN : tone === 'low' ? YELLOW : RED;
+    const toneBg =
+      tone === 'ok' ? BG_GREEN : tone === 'low' ? BG_YELLOW : BG_RED;
+    const toneBorder =
+      tone === 'ok'
+        ? BORDER_GREEN
+        : tone === 'low'
+        ? BORDER_YELLOW
+        : BORDER_RED;
 
     const rawUnit = item.unit != null ? String(item.unit).trim() : '';
     const unitStr =
       rawUnit && rawUnit !== 'null' && rawUnit.toLowerCase() !== 'undefined'
         ? ` ${rawUnit}`
         : '';
-    // Kategorik sonuç (referans yok + Negatif/Pozitif vb.): sayı yerine sonuç etiketini göster (örn. HPV "Negatif")
-    const isCategorical = !_hasRef && hasResultLabel;
+
+    const valueDisplay =
+      item.valueDisplay != null && String(item.valueDisplay).trim() !== ''
+        ? `${String(item.valueDisplay).trim()}${unitStr}`
+        : `${fmtNum(v)}${unitStr}`;
 
     return (
-      <View style={s.card}>
-        {/* Test adı – Potasyum, Klor, Amilaz gibi okunaklı isim */}
-        <T
-          size={fontSize.bodyMedium}
-          weight="600"
-          color="#111827"
-          numberOfLines={2}
-          style={s.testName}>
-          {displayTestName(item.test, item.label)}
-        </T>
-
-        {/* Kullanıcının değeri – kategorikse (HPV Negatif vb.) etiket; değilse sayı veya valueDisplay */}
-        <View style={s.valueRow}>
-          <T size={fontSize.subtitle} weight="700" color={flagColor}>
-            {isCategorical
-              ? flagText
-              : item.valueDisplay != null &&
-                String(item.valueDisplay).trim() !== ''
-              ? `${String(item.valueDisplay).trim()}${unitStr}`
-              : `${fmtNum(v)}${unitStr}`}
-          </T>
-          <T size={fontSize.bodySmall} color="#6B7280">
-            ({t('history.yourResult')})
-          </T>
-        </View>
-
-        {/* Normal aralık – sadece belirtilmişse göster */}
-        {_hasRef && (
-          <View style={s.rangeRow}>
-            <T size={fontSize.bodySmall} color="#6B7280">
-              {t('history.normalRange')}:
-            </T>
+      <View
+        style={[
+          s.card,
+          {backgroundColor: toneBg, borderColor: toneBorder},
+        ]}>
+        <View style={[s.accent, {backgroundColor: toneColor}]} />
+        <View style={s.body}>
+          <View style={s.topRow}>
             <T
-              size={fontSize.bodySmall}
-              weight="600"
-              color="#374151"
-              style={{marginLeft: 4}}>
-              {`${fmtNum(refLow)} – ${fmtNum(refHigh)}${unitStr}`}
+              size={fontSize.bodyMedium}
+              weight="700"
+              color="#111827"
+              numberOfLines={2}
+              style={s.testName}>
+              {displayTestName(item.test, item.label)}
             </T>
+            <View style={[s.statusPill, {backgroundColor: '#fff'}]}>
+              <T size={fontSize.label} weight="700" color={toneColor}>
+                {flagText}
+              </T>
+            </View>
           </View>
-        )}
 
-        {/* Görsel ölçek çubuğu */}
-        <View
-          style={s.barWrapper}
-          onLayout={e => setBarContainerWidth(e.nativeEvent.layout.width)}>
-          <View style={[s.bar, {width: widthPx}]}>
-            {_hasRef ? (
-              <View
-                style={[s.seg, {width: widthPx, backgroundColor: flagColor}]}
-              />
-            ) : (
-              <View
-                style={[
-                  s.seg,
-                  {
-                    width: widthPx,
-                    backgroundColor: hasResultLabel ? flagColor : BAR_DEFAULT,
-                  },
-                ]}
-              />
-            )}
-          </View>
           {!isCategorical && (
-            <View
-              style={[
-                s.markerWrap,
-                {
-                  left:
-                    (barContainerWidth - widthPx) / 2 +
-                    Math.max(
-                      0,
-                      Math.min(
-                        widthPx - iconSize.medium * w1px,
-                        markerLeft -
-                          (iconSize.medium / 2) * Math.min(w1px, h1px),
-                      ),
-                    ),
-                },
-              ]}>
-              <Ionicons
-                name="heart"
-                size={iconSize.medium * Math.min(w1px, h1px)}
-                color={HEART_PURPLE}
-              />
+            <>
+              <T
+                size={fontSize.bodySmall}
+                color="#6B7280"
+                style={s.resultLabel}>
+                {t('history.yourResult')}
+              </T>
+              <T
+                size={fontSize.subtitle}
+                weight="700"
+                color="#111827"
+                style={s.valueText}>
+                {valueDisplay}
+              </T>
+            </>
+          )}
+
+          {_hasRef && (
+            <View style={s.rangeRow}>
+              <T size={fontSize.bodySmall} color="#6B7280">
+                {t('history.normalRange')}:
+              </T>
+              <T size={fontSize.bodySmall} weight="600" color="#374151">
+                {`${fmtNum(refLow)} – ${fmtNum(refHigh)}${unitStr}`}
+              </T>
             </View>
           )}
-        </View>
 
-        {/* Değer + Normal/Negatif/Pozitif notumuz (Durum: Normal / Negatif / Pozitif / Düşük / Yüksek) */}
-        <View
-          style={[
-            s.statusPillWrapper,
-            {
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-            },
-          ]}>
-          <T size={fontSize.bodySmall} color="#6B7280">
-            {t('history.statusLabel')}:
-          </T>
-          <View style={[s.statusPill, {backgroundColor: bgColor}]}>
-            <T size={fontSize.label} weight="700" color={flagColor}>
-              {flagText}
+          {_hasRef && !isCategorical && (
+            <View
+              style={s.barWrapper}
+              onLayout={e =>
+                setBarContainerWidth(e.nativeEvent.layout.width)
+              }>
+              <View style={[s.bar, {width: widthPx}]}>
+                <View style={[s.seg, {width: leftW, backgroundColor: TRACK}]} />
+                <View style={[s.seg, {width: midW, backgroundColor: ZONE}]} />
+                <View
+                  style={[s.seg, {width: rightW, backgroundColor: TRACK}]}
+                />
+              </View>
+              <View
+                style={[
+                  s.markerWrap,
+                  {
+                    left: Math.max(
+                      0,
+                      Math.min(widthPx - heartSize, markerLeft - heartSize / 2),
+                    ),
+                  },
+                ]}>
+                <Ionicons
+                  name="heart"
+                  size={heartSize}
+                  color={colors.backgroundPurple}
+                />
+              </View>
+              <T
+                size={fontSize.bodySmall}
+                color="#6B7280"
+                style={s.markerCaption}>
+                {t('history.youMarker')}
+              </T>
+            </View>
+          )}
+
+          {!!hint && (
+            <T size={fontSize.bodySmall} color="#4B5563" style={s.hint}>
+              {hint}
             </T>
-          </View>
+          )}
         </View>
       </View>
     );
   };
+
+  if (!filtered.length) {
+    return <EmptyState title={t('history.noData')} style={{height: '70%'}} />;
+  }
 
   return (
     <View style={{paddingVertical: 4 * h1px}}>
@@ -435,7 +454,7 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
             {showSectionHeader &&
               (section == null || section === '') &&
               idx > 0 && <View style={{marginTop: 14 * h1px}} />}
-            <RangeRow item={item} />
+            {renderCard(item)}
           </View>
         );
       })}

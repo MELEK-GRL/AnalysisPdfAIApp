@@ -7,12 +7,14 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     RefreshControl,
-    ScrollView,
     TextInput,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
-import { getLabHistory, getLabHistoryItem, deleteLabHistoryItem, deleteAllLabHistory, LabHistoryItem, LabHistoryDetail } from '../../server/api/Lab';
+import { getLabHistory, deleteLabHistoryItem, deleteAllLabHistory, LabHistoryItem } from '../../server/api/Lab';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { HistoryStackParamList } from '../../navigation/historyNavigation';
 import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useSessionStore } from '../../store/useSessionStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
@@ -27,33 +29,25 @@ import colors from '../../theme/colors';
 import { useTypography } from '../../theme/useTypography';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
-import CenterModal from '../../components/Modals/CenterModal';
 import PopupModal from '../../components/Modals/PopupModal';
-import Chart from '../../components/Chart/Chart';
 import EmptyState from '../../components/EmptyState/EmptyState';
-import AnalysisContent from '../../components/AnalysisContent/AnalysisContent';
-import LoadingIndicator from '../../components/LoadingIndicator/LoadingIndicator';
 
 const History: React.FC = () => {
     useScreenTime('History');
+    const navigation =
+        useNavigation<NativeStackNavigationProp<HistoryStackParamList>>();
     const [items, setItems] = useState<LabHistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [displayName, setDisplayName] = useState('');
-    const [detailModal, setDetailModal] = useState(false);
-    const [selectedDetail, setSelectedDetail] = useState<LabHistoryDetail | null>(null);
-    const [detailLoading, setDetailLoading] = useState(false);
-    const [detailTitle, setDetailTitle] = useState('');
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [errorSource, setErrorSource] = useState<'fetch' | 'detail'>('fetch');
-    const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
     const [deleteAllConfirmVisible, setDeleteAllConfirmVisible] = useState(false);
     const [deleteSelectedConfirmVisible, setDeleteSelectedConfirmVisible] = useState(false);
     const [selectionMode, setSelectionMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [searchQuery, setSearchQuery] = useState('');
-    const [detailTab, setDetailTab] = useState<'values' | 'analysis'>('values');
     const t = useT();
     const locale = useLocaleStore((s) => s.locale);
     const { w1px, h1px, fs1px } = useResponsive();
@@ -107,28 +101,11 @@ const History: React.FC = () => {
         fetchHistory();
     }, [fetchHistory]);
 
-    const handleItemPress = useCallback(async (id: string) => {
+    const handleItemPress = useCallback((id: string) => {
         const listItem = items.find((it) => it.id === id);
-        setDetailTitle(listItem?.pdfName?.trim() || t('history.detailTitle'));
-        setDetailLoading(true);
-        setDetailModal(true);
-        setSelectedDetail(null);
-        setDetailTab('values');
-        try {
-            const detail = await getLabHistoryItem(id);
-            setSelectedDetail(detail);
-            if (detail?.pdfName?.trim()) {
-                setDetailTitle(detail.pdfName.trim());
-            }
-        } catch (e) {
-            setDetailModal(false);
-            setErrorMessage(t('history.detailError'));
-            setErrorSource('detail');
-            setErrorVisible(true);
-        } finally {
-            setDetailLoading(false);
-        }
-    }, [t, items]);
+        const title = listItem?.pdfName?.trim() || t('history.detailTitle');
+        navigation.navigate('HistoryDetail', { id, title });
+    }, [t, items, navigation]);
 
     const formatDate = (s: string) => {
         const d = new Date(s);
@@ -173,17 +150,13 @@ const History: React.FC = () => {
                 await deleteLabHistoryItem(id);
             }
             setItems((prev) => prev.filter((i) => !selectedIds.has(i.id)));
-            if (selectedDetail && selectedIds.has(selectedDetail.id)) {
-                setDetailModal(false);
-                setSelectedDetail(null);
-            }
             exitSelectionMode();
         } catch (err) {
             setErrorMessage(t('history.fetchErrorServer'));
             setErrorSource('fetch');
             setErrorVisible(true);
         }
-    }, [selectedIds, selectedDetail, t]);
+    }, [selectedIds, t, exitSelectionMode]);
 
     const styles = useMemo(
         () =>
@@ -198,59 +171,50 @@ const History: React.FC = () => {
                 },
                 card: {
                     flexDirection: 'row',
-                    alignItems: 'center',
+                    alignItems: 'stretch',
                     backgroundColor: colors.white,
-                    borderRadius: 12 * w1px,
+                    borderRadius: 14 * w1px,
                     paddingVertical: 12 * h1px,
                     paddingHorizontal: 12 * w1px,
                     marginBottom: 10 * h1px,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.04,
-                    shadowRadius: 4,
-                    elevation: 2,
                     borderWidth: 1,
                     borderColor: '#E5E7EB',
+                    overflow: 'hidden',
+                },
+                cardAccent: {
+                    width: 4 * w1px,
+                    borderRadius: 999,
+                    backgroundColor: colors.backgroundPurple,
+                    marginRight: 10 * w1px,
+                    alignSelf: 'stretch',
                 },
                 cardContent: {
                     flex: 1,
                     minWidth: 0,
+                    justifyContent: 'center',
                 },
                 cardTitle: {
                     flexDirection: 'row',
                     justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 8 * w1px,
+                    marginBottom: 6 * h1px,
+                },
+                cardMetaRow: {
+                    flexDirection: 'row',
                     alignItems: 'center',
-                    marginBottom: 4 * h1px,
+                    flexWrap: 'wrap',
+                    gap: 8 * w1px,
+                },
+                cardPill: {
+                    backgroundColor: colors.backgroundPurpleSoft,
+                    borderRadius: 999,
+                    paddingVertical: 3 * h1px,
+                    paddingHorizontal: 10 * w1px,
                 },
                 cardChevron: {
                     marginLeft: 8 * w1px,
-                },
-                detailDateRow: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: 12 * h1px,
-                    gap: 12 * w1px,
-                },
-                detailModalView: {
-                    flex: 1,
-                    width: '100%',
-                    minHeight: 0,
-                    paddingHorizontal: 12 * w1px,
-                },
-                detailLoadingWrap: {
-                    flex: 1,
-                    width: '100%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                },
-                pill: {
-                    alignSelf: 'flex-start',
-                    backgroundColor: '#F3F4F6',
-                    borderRadius: 999,
-                    paddingVertical: 4 * h1px,
-                    paddingHorizontal: 10 * w1px,
-                    marginBottom: 8 * h1px,
+                    alignSelf: 'center',
                 },
                 retentionHintWrap: {
                     flexDirection: 'row',
@@ -332,37 +296,13 @@ const History: React.FC = () => {
                 checkboxWrap: {
                     marginRight: 12 * w1px,
                 },
-                detailTabRow: {
-                    flexDirection: 'row',
-                    marginBottom: 16 * h1px,
-                    backgroundColor: '#F3F4F6',
-                    borderRadius: 10 * w1px,
-                    padding: 4 * w1px,
-                },
-                detailTab: {
-                    flex: 1,
-                    paddingVertical: 10 * h1px,
-                    borderRadius: 8 * w1px,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                },
-                detailTabActive: {
-                    backgroundColor: colors.white,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.06,
-                    shadowRadius: 3,
-                    elevation: 2,
-                },
-                detailTabInactive: {
-                    backgroundColor: 'transparent',
-                },
             }),
         [w1px, h1px, fs1px, scale],
     );
 
     const renderItem = ({ item }: { item: LabHistoryItem }) => {
         const isSelected = selectedIds.has(item.id);
+        const isLab = item.itemCount > 0;
         return (
             <TouchableOpacity
                 style={styles.card}
@@ -382,21 +322,27 @@ const History: React.FC = () => {
                             color={isSelected ? '#22C55E' : '#9CA3AF'}
                         />
                     </View>
-                ) : null}
+                ) : (
+                    <View style={styles.cardAccent} />
+                )}
                 <View style={styles.cardContent}>
                     <View style={styles.cardTitle}>
-                        <T size={fontSize.subtitle} weight="600" color="#111827" numberOfLines={1} style={{ flex: 1 }}>
+                        <T size={fontSize.bodyMedium} weight="500" color="#111827" numberOfLines={2} style={{ flex: 1 }}>
                             {item.pdfName || t('history.labReport')}
                         </T>
-                        <T size={fontSize.bodySmall} color="#9CA3AF" style={{ marginLeft: 8 }}>
+                        <View style={styles.cardPill}>
+                            <T size={fontSize.label} weight="700" color={isLab ? colors.backgroundPurple : '#6B7280'}>
+                                {isLab
+                                    ? `${item.itemCount} ${t('history.paramCount')}`
+                                    : t('history.notLabReport')}
+                            </T>
+                        </View>
+                    </View>
+                    <View style={styles.cardMetaRow}>
+                        <T size={fontSize.bodySmall} color="#6B7280">
                             {formatDate(item.createdAt)}
                         </T>
                     </View>
-                    <T size={fontSize.body} color="#6B7280">
-                        {item.itemCount > 0
-                            ? `${item.itemCount} ${t('history.paramCount')}`
-                            : t('history.notLabReport')}
-                    </T>
                 </View>
                 {!selectionMode ? (
                     <Ionicons
@@ -538,108 +484,6 @@ const History: React.FC = () => {
                 </View>
             </PageLayout>
 
-            <CenterModal
-                visible={detailModal}
-                fixedHeight
-                title={detailTitle || t('history.detailTitle')}
-                leftButtonText={t('common.delete')}
-                rightButtonText={t('common.close')}
-                leftButtonBackgroundColor="#DC2626"
-                onLeftPress={() => {
-                    if (!detailLoading && selectedDetail) {
-                        setDeleteConfirmVisible(true);
-                    }
-                }}
-                onRightPress={() => setDetailModal(false)}>
-                <View style={styles.detailModalView}>
-                    {detailLoading || !selectedDetail ? (
-                        <View style={styles.detailLoadingWrap}>
-                            <LoadingIndicator size="sm" />
-                        </View>
-                    ) : (
-                        <ScrollView
-                            style={{ flex: 1 }}
-                            nestedScrollEnabled
-                            showsVerticalScrollIndicator={false}
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={{ paddingBottom: 24 }}>
-                            <View style={styles.detailDateRow}>
-                                {selectedDetail.patientName?.trim() ? (
-                                    <T size={fontSize.body} weight="600" color="#374151" numberOfLines={1} style={{ flex: 1 }}>
-                                        {selectedDetail.patientName.trim()}
-                                    </T>
-                                ) : (
-                                    <View style={{ flex: 1 }} />
-                                )}
-                                <T size={fontSize.body} weight="700" color="#374151">
-                                    {formatDate(selectedDetail.createdAt)}
-                                </T>
-                            </View>
-                            <View style={styles.detailTabRow}>
-                                <TouchableOpacity
-                                    style={[styles.detailTab, detailTab === 'values' ? styles.detailTabActive : styles.detailTabInactive]}
-                                    onPress={() => setDetailTab('values')}
-                                    activeOpacity={0.7}>
-                                    <T
-                                        size={fontSize.body}
-                                        weight={detailTab === 'values' ? '700' : '500'}
-                                        color={detailTab === 'values' ? colors.backgroundPurpleDark : '#6B7280'}>
-                                        {t('history.labValues')}
-                                    </T>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[styles.detailTab, detailTab === 'analysis' ? styles.detailTabActive : styles.detailTabInactive]}
-                                    onPress={() => setDetailTab('analysis')}
-                                    activeOpacity={0.7}>
-                                    <T
-                                        size={fontSize.body}
-                                        weight={detailTab === 'analysis' ? '700' : '500'}
-                                        color={detailTab === 'analysis' ? colors.backgroundPurpleDark : '#6B7280'}>
-                                        {t('history.analysisComment')}
-                                    </T>
-                                </TouchableOpacity>
-                            </View>
-                            {detailTab === 'values' ? (
-                                selectedDetail.items.length > 0 ? (
-                                    <Chart items={selectedDetail.items} />
-                                ) : (
-                                    <T size={fontSize.body} color="#6B7280">{t('history.noRecord')}</T>
-                                )
-                            ) : selectedDetail.analysis ? (
-                                <AnalysisContent content={selectedDetail.analysis} />
-                            ) : (
-                                <T size={fontSize.body} color="#6B7280">{t('history.noRecord')}</T>
-                            )}
-                        </ScrollView>
-                    )}
-                </View>
-            </CenterModal>
-
-            <PopupModal
-                visible={deleteConfirmVisible}
-                title={t('common.warning')}
-                message={t('history.deleteConfirmMessage')}
-                type="warning"
-                leftButtonText={t('common.cancel')}
-                rightButtonText={t('common.delete')}
-                onLeftPress={() => setDeleteConfirmVisible(false)}
-                onRightPress={async () => {
-                    setDeleteConfirmVisible(false);
-                    if (selectedDetail) {
-                        try {
-                            await deleteLabHistoryItem(selectedDetail.id);
-                            setItems((prev) => prev.filter((i) => i.id !== selectedDetail.id));
-                            setDetailModal(false);
-                            setSelectedDetail(null);
-                        } catch (err) {
-                            setErrorMessage(t('history.fetchErrorServer'));
-                            setErrorSource('fetch');
-                            setErrorVisible(true);
-                        }
-                    }
-                }}
-            />
-
             <PopupModal
                 visible={deleteAllConfirmVisible}
                 title={t('common.warning')}
@@ -653,8 +497,6 @@ const History: React.FC = () => {
                     try {
                         await deleteAllLabHistory();
                         setItems([]);
-                        setDetailModal(false);
-                        setSelectedDetail(null);
                     } catch (err) {
                         setErrorMessage(t('history.fetchErrorServer'));
                         setErrorSource('fetch');

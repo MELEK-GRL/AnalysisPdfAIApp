@@ -456,7 +456,6 @@ const Home: React.FC = () => {
                                 <ResultSection
                                     items={items}
                                     analysis={analysis}
-                                    pickedFile={pickedFile}
                                     onNoPdfWarning={() => setNoPdfWarningVisible(true)}
                                     trackButtonClick={trackButtonClick}
                                     t={t}

@@ -3,7 +3,7 @@ import { View, Platform, StyleSheet, Dimensions, TouchableOpacity } from 'react-
 import LottieView from 'lottie-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useT, useLocaleStore } from '../store/useLocaleStore';
+import { useT } from '../store/useLocaleStore';
 import { useAnalysisLoadingStore } from '../store/useAnalysisLoadingStore';
 import { NavigationContainer } from '@react-navigation/native';
 import {
@@ -11,7 +11,6 @@ import {
     resetToLogin,
     type RootStackParamList,
 } from './rootNavigation';
-import LoadingModal from '../components/Modals/LoadingModal';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -206,7 +205,6 @@ const AppNavigator = () => {
     const [hasConsentOnce, setHasConsentOnce] = useState(false);
     const [hasToken, setHasToken] = useState(false);
     const storeToken = useAuthStore((s) => s.token);
-    const analysisLoading = useAnalysisLoadingStore((s) => s.loading);
     const prevTokenRef = useRef<string | null | undefined>(undefined);
 
     // Token varken silinirse (çıkış) Login'e düş — ilk hydrate null'ında tetikleme
@@ -287,33 +285,23 @@ const AppNavigator = () => {
     };
 
     return (
-        <>
-            <NavigationContainer ref={navigationRef} linking={linking}>
-                <Stack.Navigator
-                    initialRouteName={initialRouteName}
-                    screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="LanguageSplash" component={LanguageSplash} />
-                    <Stack.Screen name="InfoSplash" component={InfoSplash} />
-                    <Stack.Screen name="SplashTwo" component={SplashTwo} />
-                    <Stack.Screen name="Login" component={Login} />
-                    <Stack.Screen name="Register" component={Register} />
-                    <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-                    <Stack.Screen name="ResetPassword" component={ResetPassword} />
-                    <Stack.Screen name="MainTabs" component={MainTabs} />
-                    <Stack.Screen name="Settings" component={Settings} />
-                    <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-                    <Stack.Screen name="Logout" component={Logout} />
-                </Stack.Navigator>
-            </NavigationContainer>
-            <LoadingModal
-                visible={analysisLoading}
-                message={
-                    analysisLoading
-                        ? useLocaleStore.getState().t('home.analysisLoadingHint')
-                        : undefined
-                }
-            />
-        </>
+        <NavigationContainer ref={navigationRef} linking={linking}>
+            <Stack.Navigator
+                initialRouteName={initialRouteName}
+                screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="LanguageSplash" component={LanguageSplash} />
+                <Stack.Screen name="InfoSplash" component={InfoSplash} />
+                <Stack.Screen name="SplashTwo" component={SplashTwo} />
+                <Stack.Screen name="Login" component={Login} />
+                <Stack.Screen name="Register" component={Register} />
+                <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+                <Stack.Screen name="ResetPassword" component={ResetPassword} />
+                <Stack.Screen name="MainTabs" component={MainTabs} />
+                <Stack.Screen name="Settings" component={Settings} />
+                <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+                <Stack.Screen name="Logout" component={Logout} />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 };
 

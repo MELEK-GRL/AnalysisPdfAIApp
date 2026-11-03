@@ -275,6 +275,10 @@ const Home: React.FC = () => {
         setAnalysis('');
         setPhase('loading');
         useAnalysisLoadingStore.getState().setLoading(true);
+        // Overlay boyansın; aksi halde loading çoğu zaman sonuç popup’ından hemen önce flaşlar
+        await new Promise<void>(resolve => {
+            requestAnimationFrame(() => setTimeout(resolve, 32));
+        });
         try {
             const form = new FormData();
             const rawName = pickedFile.name ?? 'document.pdf';
@@ -294,6 +298,11 @@ const Home: React.FC = () => {
 
             const data = await uploadPdf(form);
             void useQuotaStore.getState().refresh();
+            // Loading UI’yi tamamen kapat, sonra sonuç popup’ı (flaş yok)
+            useAnalysisLoadingStore.getState().setLoading(false);
+            await new Promise<void>(resolve => {
+                requestAnimationFrame(() => setTimeout(resolve, 40));
+            });
             if (data.type === 'lab') {
                 setItems(data.items || []);
                 setRawItems(data.rawItems ?? data.items ?? []);
@@ -309,6 +318,10 @@ const Home: React.FC = () => {
                 setNotLabVisible(true);
             }
         } catch (err: any) {
+            useAnalysisLoadingStore.getState().setLoading(false);
+            await new Promise<void>(resolve => {
+                requestAnimationFrame(() => setTimeout(resolve, 40));
+            });
             if (err?.isRateLimit) {
                 void useQuotaStore.getState().refresh();
                 const offerAds = err?.adsEnabled === true;

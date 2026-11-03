@@ -136,7 +136,7 @@
     "nameInUse": "Bu kullanıcı adı zaten kullanılıyor. Lütfen farklı bir ad deneyin."
   },
   "home": {
-    "dragOrSelect": "Sürükle veya Seç",
+    "dragOrSelect": "Sürükle veya Tıkla Seç",
     "uploadPdf": "Tahlil Raporunu Yükle",
     "newPdfUpload": "Yeni PDF Yükle",
     "send": "Gönder",

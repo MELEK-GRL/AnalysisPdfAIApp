@@ -136,7 +136,7 @@
     "nameInUse": "This username is already taken. Please try a different name."
   },
   "home": {
-    "dragOrSelect": "Drag or Select",
+    "dragOrSelect": "Drag or Click to Select",
     "uploadPdf": "Upload Lab Report",
     "newPdfUpload": "Upload New PDF",
     "send": "Send",

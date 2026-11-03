@@ -237,6 +237,23 @@ const History: React.FC = () => {
                     paddingHorizontal: 10 * w1px,
                     marginBottom: 8 * h1px,
                 },
+                retentionHintWrap: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: colors.backgroundPurpleSoft,
+                    borderRadius: 12 * w1px,
+                    paddingVertical: 10 * h1px,
+                    paddingHorizontal: 12 * w1px,
+                    marginBottom: 12 * h1px,
+                    borderWidth: 1,
+                    borderColor: 'rgba(116, 83, 224, 0.12)',
+                },
+                retentionHintIcon: {
+                    marginRight: 8 * w1px,
+                },
+                retentionHintText: {
+                    flex: 1,
+                },
                 sectionGap: { height: 12 * h1px },
                 searchWrap: {
                     flexDirection: 'row',
@@ -383,6 +400,20 @@ const History: React.FC = () => {
             <Header title={displayName} />
             <PageLayout>
                 <PageHeader title={t('tabs.history')} />
+                <View style={styles.retentionHintWrap}>
+                    <Ionicons
+                        name="information-circle"
+                        size={18}
+                        color={colors.backgroundPurple}
+                        style={styles.retentionHintIcon}
+                    />
+                    <T
+                        size={fontSize.bodySmall}
+                        color={colors.backgroundPurpleDark}
+                        style={styles.retentionHintText}>
+                        {t('history.retentionHint')}
+                    </T>
+                </View>
                 {!loading && items.length > 0 ? (
                     <>
                         <View style={styles.searchWrap}>

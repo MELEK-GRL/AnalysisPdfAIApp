@@ -166,8 +166,9 @@
     "rawValuesTitle": "Tahlil değerleri (PDF'deki gibi)"
   },
   "history": {
+    "retentionHint": "En fazla son 30 analiz kaydı saklanır.",
     "emptyTitle": "Veri bulunamadı",
-    "emptySub": "PDF yükleyip analiz ettikçe geçmiş burada görünecek",
+    "emptySub": "PDF yükleyip analiz ettikçe geçmiş burada görünecek. En fazla son 30 kayıt tutulur.",
     "detailTitle": "Detay",
     "labValues": "Tahlil Değerleri",
     "analysis": "ANALİZ",

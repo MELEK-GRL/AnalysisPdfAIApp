@@ -166,8 +166,9 @@
     "rawValuesTitle": "Lab values (as in PDF)"
   },
   "history": {
+    "retentionHint": "Only your latest 30 analysis records are kept.",
     "emptyTitle": "Data not found",
-    "emptySub": "Your history will appear here as you upload and analyze PDFs",
+    "emptySub": "Your history will appear here as you upload and analyze PDFs. Only the latest 30 records are kept.",
     "detailTitle": "Detail",
     "labValues": "Lab Values",
     "analysis": "ANALYSIS",

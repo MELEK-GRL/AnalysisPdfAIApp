@@ -37,7 +37,8 @@ const PageLayout: React.FC<Props> = ({
     );
 
     return (
-        <SafeAreaView style={[styles.safe, style]}>
+        // Header zaten üstte; top safe-area tekrar eklenmesin (başlık üst boşluğu şişmesin).
+        <SafeAreaView style={[styles.safe, style]} edges={['bottom', 'left', 'right']}>
             <View style={styles.container}>{children}</View>
         </SafeAreaView>
     );

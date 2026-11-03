@@ -5,13 +5,14 @@ import T from '../Text/T';
 import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
 
-/** Sayfa başlığı – tüm sayfalarda üst/alt boşluklar eşit, içerik bu bileşenin altından başlar. */
+/** Sayfa başlığı – tüm sayfalarda aynı dikey ritim; içerik bu bileşenin altından başlar. */
 type Props = {
     title: string;
 };
 
-/** Üst ve alt boşluk eşit (tüm sayfalarda aynı). */
-const PAGE_HEADER_VERTICAL = 18;
+/** Üst/alt eşit ve sıkı standart (Header altında ekstra top inset yok). */
+const PAGE_HEADER_TOP = 20;
+const PAGE_HEADER_BOTTOM = 12;
 
 const PageHeader: React.FC<Props> = ({ title }) => {
     const { w1px, h1px } = useResponsive();
@@ -20,8 +21,8 @@ const PageHeader: React.FC<Props> = ({ title }) => {
         () =>
             StyleSheet.create({
                 wrap: {
-                    paddingTop: PAGE_HEADER_VERTICAL * h1px,
-                    paddingBottom: PAGE_HEADER_VERTICAL * h1px,
+                    paddingTop: PAGE_HEADER_TOP * h1px,
+                    paddingBottom: PAGE_HEADER_BOTTOM * h1px,
                     paddingHorizontal: 0,
                 },
                 title: {

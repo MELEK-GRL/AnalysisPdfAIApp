@@ -56,16 +56,98 @@ function isJunkLabLabel(test) {
     if (/^Analiz$/i.test(t) || /^HPF$/i.test(t)) return true;
     if (/\.(gov|tr|com|net|org)\b/i.test(t) || /^https?:\/\//i.test(t) || /^www\./i.test(t)) return true;
     if (/^Değeri$/i.test(t)) return true;
-    if (/^BIRIMREFERANS$/i.test(t)) return true;
+    if (/^BIRIMREFERANS$/i.test(t) || /^BIRIM/i.test(t)) return true;
     if (/CKD-EPI formülüne göre|formülüne göre hesaplanmıştır/i.test(t)) return true;
     if (/T\.C\.|SAĞLIK BAKANLIĞI|Genel Müdürlük|Adı\/Soyadı|Cinsiyet\s*:|Doğum tarihi|Sağlık Bilgi Sistemleri/i.test(t)) return true;
     if (/ÖZEL\s+[A-ZİĞÜŞÖÇ]+\s+HASTANESİ|MEDİCALPARK|TarihTahlilSonuç|Tarih\s*Tahlil\s*Sonuç/i.test(t)) return true;
     if (t.length > 80 && /bakanlık|müdürlük|sistemleri|adı\s*\/\s*soyadı|cinsiyet|hastanesi/i.test(t)) return true;
-    if (/^Kadın$/i.test(t) || /^Erkek$/i.test(t)) return true;
+    if (/ÖRNEKTİR|GERÇEK TAHLİL RAPORU|Örnek türü|Örnek amaçlı|Rapor\s*no|Örnek Hasta|Örnek Laboratuvar/i.test(t)) return true;
+    if (/Parametre\s*Sonuç|ParametreSonuç|SonuçBirim|Referans\s*aralığı/i.test(t)) return true;
+    if (/^lar\s+Parametre/i.test(t)) return true;
+    if (/^Kadın$/i.test(t) || /^Erkek$/i.test(t) || /^L?Kadın$/i.test(t)) return true;
+    if (/^(g\/dL|mg\/dL|IU\/L|pg|fL|%)Kadın/i.test(t)) return true;
     if (/^\/?uL$/i.test(t) || /^lU\/mL\s+Premenopozal/i.test(t)) return true;
     if (/^Postmenopozal$/i.test(t) || /^Hamilelikte$/i.test(t) || /^Hafta$/i.test(t)) return true;
     if (/^HEMOGRAM\s+BAS$/i.test(t)) return true;
+    // Üst bilgi / tablo başlığı birleşmiş aşırı uzun etiket
+    if (t.length > 55) return true;
     return false;
+}
+
+/**
+ * Regex/LLM birleşiminde UI'ya basılmaması gereken düşük kaliteli satırlar.
+ * Parametre adları hastaya göre değişir; burada yalnızca yapısal çöp elenir.
+ */
+function isLowQualityLabItem(it) {
+    if (!it || typeof it.test !== 'string') return true;
+    const t = it.test.trim();
+    if (!t || isJunkLabLabel(t)) return true;
+    if (Number(it.value) === -1 && !it.resultLabel && !it.valueDisplay) return true;
+    // HPV tip numarası tek başına sayısal sonuç sanılmış (Durum: Normal / 16.0)
+    if (
+        /^HR\s*HPV\s*Tip$/i.test(t) &&
+        Number.isFinite(Number(it.value)) &&
+        !it.resultLabel &&
+        !it.valueDisplay
+    ) {
+        return true;
+    }
+    // Ref satırı parçası (Kadın: 3.8 – 5.2) sahte test olmuş
+    if (/Kadın\s*:|Erkek\s*:/i.test(t) && t.length < 40) return true;
+    if (/^(g\/dL|mg\/dL|IU\/L|pg|fL|10[³⁶^/\d]*).{0,8}(Kadın|Erkek)/i.test(t)) return true;
+    return false;
+}
+
+function isLowQualitySection(section) {
+    if (section == null || typeof section !== 'string') return false;
+    const t = section.trim();
+    if (!t) return false;
+    if (isJunkSection(t) || isSectionHeaderBlocklist(t)) return true;
+    if (t.length > 60) return true;
+    if (/SEMT POLİKLİN|ORGANİZE SANAYİ|EĞİTİM VE ARAŞTIRMA|Sağlık Tesisi|POLİKLİNİĞİ|Örnek Laboratuvar|Rapor tarihi/i.test(t)) return true;
+    // Ham tablo satırı bölüm diye yapışmış
+    if (/\d+[,.]?\d*.{0,12}(mg\/dL|10[³6^]|μL|µL|g\/dL|fL)/i.test(t)) return true;
+    return false;
+}
+
+/** Gruplu HPV (33/58) varken tekil "Tip 33" tekrarını düş. */
+function dedupeHpvGroupedItems(items) {
+    const groupTips = new Set();
+    for (const it of items) {
+        const m = String(it.test || '').match(/HR\s*HPV\s*Tip\s*\(([^)]+)\)/i);
+        if (!m) continue;
+        for (const part of String(m[1]).split(/[\/,]/)) {
+            const n = part.trim();
+            if (/^\d+$/.test(n)) groupTips.add(n);
+        }
+    }
+    if (groupTips.size === 0) return items;
+    return items.filter((it) => {
+        const m = String(it.test || '').match(/^HR\s*HPV\s*Tip\s+(\d+)\s*$/i);
+        if (m && groupTips.has(m[1])) return false;
+        return true;
+    });
+}
+
+/** Merge sonrası son temizlik: çöp kart + hatalı section. */
+function finalizeLabItems(items) {
+    if (!Array.isArray(items)) return [];
+    const cleaned = dedupeHpvGroupedItems(
+        items
+            .filter((it) => !isLowQualityLabItem(it))
+            .map((it) => {
+                if (!it.section || !isLowQualitySection(it.section)) return it;
+                return { ...it, section: null };
+            }),
+    );
+    // Aynı canonical test için birden fazla kaldıysa ilk temiz olanı tut
+    const seen = new Set();
+    return cleaned.filter((it) => {
+        const key = canonicalTestKey(it.test);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
 }
 
 /** Bölüm sadece PDF/LLM'den gelir; test adına göre sabit bölüm atanmaz (her gelen PDF farklı parametre/başlık getirebilir). */
@@ -128,6 +210,7 @@ function coerceAndValidate(payload) {
             };
         })
         .filter((it) => it.test && (Number.isFinite(it.value) || it.resultLabel || it.valueDisplay) && !isJunkLabLabel(it.test))
+        .filter((it) => !isLowQualityLabItem(it))
         .filter((it) => {
             // Idrar PRO (Protein) değil; Protrombin Aktivitesi ile karışan satırı eler (value % ve ref 70-130)
             if (/^PRO$/i.test(String(it.test).trim()) && Number(it.value) > 1 && it.unit === '%' && it.refLow >= 70 && it.refHigh <= 130) return false;
@@ -135,17 +218,9 @@ function coerceAndValidate(payload) {
         });
 
     // Aynı test adına sahip tekrarları kaldır (ilk geçen değeri tut)
-    const canonicalKey = (test) =>
-        String(test)
-            .trim()
-            .replace(/\s+/g, ' ')
-            .replace(/\s*\([^)]*\)\s*/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim()
-            .toUpperCase();
     const seen = new Set();
     out.items = out.items.filter((it) => {
-        const key = canonicalKey(it.test);
+        const key = canonicalTestKey(it.test);
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
@@ -154,6 +229,23 @@ function coerceAndValidate(payload) {
     out.items = out.items.map((it) => {
         const v = it.value;
         if (!Number.isFinite(v)) return it;
+        // PLT 268 + 10³ birleşince 26810 oluyor → 268
+        if (/PLT|Trombosit/i.test(String(it.test)) && v >= 10000 && v <= 999999) {
+            const asInt = Math.trunc(v);
+            const s = String(asInt);
+            if (/10$/.test(s)) {
+                const stripped = Number(s.replace(/10$/, ''));
+                if (stripped >= 20 && stripped <= 900) {
+                    return {
+                        ...it,
+                        value: stripped,
+                        unit: it.unit || '10³/μL',
+                        refLow: it.refLow ?? 150,
+                        refHigh: it.refHigh ?? 400,
+                    };
+                }
+            }
+        }
         // BASO%: PDF'de "0.3 % (0 - 1.0)" bazen model tarafından value=0, ref 0.3-1 olarak parse ediliyor; düzelt
         if (/^BASO?%$/i.test(String(it.test).trim()) && v === 0 && it.refLow === 0.3 && it.refHigh === 1) {
             return { ...it, value: 0.3, refLow: 0, refHigh: 1 };
@@ -238,11 +330,11 @@ function coerceAndValidate(payload) {
         return (test === 'Görünüm' && it.resultLabel !== 'Berrak') || (test === 'BLD' && it.resultLabel !== 'Negatif') || (test === 'PRO' && it.resultLabel !== 'Negatif');
     });
     const idrarSectionName = idrarItems.length > 0 ? idrarItems[0].section : null;
-    const keysSet = new Set(out.items.map((it) => canonicalKey(it.test)));
+    const keysSet = new Set(out.items.map((it) => canonicalTestKey(it.test)));
     if (hasRealIdrar && idrarSectionName) {
         if (!keysSet.has('BLD')) out.items.push({ test: 'BLD', label: null, value: 0, unit: null, refLow: null, refHigh: null, resultLabel: 'Negatif', valueDisplay: null, section: idrarSectionName });
         if (!keysSet.has('PRO')) out.items.push({ test: 'PRO', label: null, value: 0, unit: null, refLow: null, refHigh: null, resultLabel: 'Negatif', valueDisplay: null, section: idrarSectionName });
-        if (!keysSet.has(canonicalKey('Görünüm'))) out.items.push({ test: 'Görünüm', label: null, value: 0, unit: null, refLow: null, refHigh: null, resultLabel: 'Berrak', valueDisplay: null, section: idrarSectionName });
+        if (!keysSet.has(canonicalTestKey('Görünüm'))) out.items.push({ test: 'Görünüm', label: null, value: 0, unit: null, refLow: null, refHigh: null, resultLabel: 'Berrak', valueDisplay: null, section: idrarSectionName });
     }
 
     return out;
@@ -256,7 +348,16 @@ const KNOWN_IDRAR_TESTS = [
 ];
 
 function canonicalTestKey(test) {
-    return String(test).trim().replace(/\s+/g, ' ').replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase();
+    const raw = String(test).trim().replace(/\s+/g, ' ');
+    // HPV gruplu tiplerde parantez kimliğin parçası: (33/58) ≠ (56/59/66)
+    if (/HR\s*HPV\s*Tip/i.test(raw)) {
+        return raw.toUpperCase();
+    }
+    return raw
+        .replace(/\s*\([^)]*\)\s*/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toUpperCase();
 }
 
 /** Metinde bulunan ancak items içinde olmayan idrar/hemogram/biokimya parametrelerini satır satır tarayıp ekler. */
@@ -421,39 +522,214 @@ function assignSectionsFromPdfText(text, items) {
     });
 }
 
+/**
+ * e-Nabız vb. bitişik satırlar: "HR HPV Tip 16NegatifBIRIMREFERANS"
+ * Sayısal regex bunları kaçırır; kategorik tarama satırlarını ayrıca çıkarır.
+ */
+function extractCategoricalScreeningItems(text) {
+    if (!text || typeof text !== 'string') return [];
+    const norm = String(text).replace(/\u00A0/g, ' ');
+    const items = [];
+    const seen = new Set();
+    const pushCat = (test, resultLabel) => {
+        const clean = String(test || '')
+            .replace(/\s+/g, ' ')
+            .replace(/HUMAN\s*PAPILLOMA\s*VIRUS\s*HPV\s*\)?/i, 'HR HPV')
+            .trim();
+        if (!clean || !resultLabel) return;
+        const it = {
+            test: clean,
+            label: null,
+            value: 0,
+            unit: null,
+            refLow: null,
+            refHigh: null,
+            resultLabel,
+            valueDisplay: null,
+            section: null,
+        };
+        if (isLowQualityLabItem(it)) return;
+        const key = canonicalTestKey(it.test);
+        if (seen.has(key)) return;
+        seen.add(key);
+        items.push(it);
+    };
+
+    const tipRx =
+        /HR\s*HPV\s*Tip\s*(\([^)]+\)|\d+)\s*(Negatif|Pozitif|Reaktif|Negative|Positive)/gi;
+    let m;
+    while ((m = tipRx.exec(norm))) {
+        const tip = String(m[1] || '').trim();
+        const label = m[2];
+        const test = /^\d+$/.test(tip) ? `HR HPV Tip ${tip}` : `HR HPV Tip ${tip}`;
+        pushCat(test, label);
+    }
+
+    if (
+        /HUMAN\s*PAPILLOMA\s*VIRUS[\s\S]{0,40}?HR\s*Negatif|HPV\s*\)\s*HR\s*Negatif|HPV\)HRNegatif/i.test(
+            norm,
+        )
+    ) {
+        pushCat('HR HPV', 'Negatif');
+    } else if (
+        /HUMAN\s*PAPILLOMA\s*VIRUS[\s\S]{0,40}?HR\s*Pozitif|HPV\s*\)\s*HR\s*Pozitif|HPV\)HRPozitif/i.test(
+            norm,
+        )
+    ) {
+        pushCat('HR HPV', 'Pozitif');
+    }
+
+    // Hemogram bitişik:
+    //   7.21 + 10³ → PDF "7.210³" (değer 1 ile birim 10’un 1’i birleşir) → (?:10|0)[³]
+    //   4.55 + 10⁶ → "4.5510⁶"; PLT 268 + 10³ → "26810³"
+    const gluedHemogram = [
+        {
+            rx: /WBC\s*\(\s*L[oö]kosit\s*\)\s*(\d+[.,]\d{2})(?:10|0)[³3]\s*\/?\s*[µμ]?L\s*(?:Kad[iı]n:\s*)?(\d+[.,]\d+|\d+)\s*[-–~]\s*(\d+[.,]\d+|\d+)/i,
+            test: 'WBC (Lökosit)',
+            unit: '10³/μL',
+            defLow: 4,
+            defHigh: 10,
+        },
+        {
+            rx: /RBC\s*\(\s*Eritrosit\s*\)\s*(\d+[.,]\d{2})(?:10|0)[⁶6]\s*\/?\s*[µμ]?L\s*(?:Kad[iı]n:\s*)?(\d+[.,]\d+|\d+)\s*[-–~]\s*(\d+[.,]\d+|\d+)/i,
+            test: 'RBC (Eritrosit)',
+            unit: '10⁶/μL',
+            defLow: 3.8,
+            defHigh: 5.2,
+        },
+        {
+            rx: /PLT\s*\(\s*Trombosit\s*\)\s*(\d{2,3})10[³3]\s*\/?\s*[µμ]?L\s*(\d+)\s*[-–~]\s*(\d+)/i,
+            test: 'PLT (Trombosit)',
+            unit: '10³/μL',
+            defLow: 150,
+            defHigh: 400,
+        },
+    ];
+    for (const spec of gluedHemogram) {
+        const gm = norm.match(spec.rx);
+        if (!gm) continue;
+        const value = Number(String(gm[1]).replace(',', '.'));
+        const refLow = Number(String(gm[2]).replace(',', '.'));
+        const refHigh = Number(String(gm[3]).replace(',', '.'));
+        if (!Number.isFinite(value)) continue;
+        const it = {
+            test: spec.test,
+            label: null,
+            value,
+            unit: spec.unit,
+            refLow: Number.isFinite(refLow) ? refLow : spec.defLow,
+            refHigh: Number.isFinite(refHigh) ? refHigh : spec.defHigh,
+            resultLabel: null,
+            valueDisplay: null,
+            section: null,
+        };
+        if (isLowQualityLabItem(it)) continue;
+        const key = canonicalTestKey(it.test);
+        // Bitişik satır doğru değeri her zaman yazar (regex 7.2 / 4.551 üzerine)
+        seen.add(key);
+        const idx = items.findIndex((x) => canonicalTestKey(x.test) === key);
+        if (idx >= 0) items[idx] = it;
+        else items.push(it);
+    }
+
+    return items;
+}
+
 function getFullTextBaseItems(text) {
     if (!text || typeof text !== 'string') return [];
     const regexItems = (regexExtract(text).items || []).slice(0, 150);
     const permItems = (permissiveLabExtract(text).items || []).slice(0, 150);
+    const catItems = extractCategoricalScreeningItems(text);
     const byKey = new Map();
     for (const it of regexItems) {
-        if (it?.test && !isJunkLabLabel(it.test)) byKey.set(canonicalTestKey(it.test), it);
+        if (it?.test && !isJunkLabLabel(it.test) && !isLowQualityLabItem(it)) {
+            byKey.set(canonicalTestKey(it.test), it);
+        }
     }
     for (const it of permItems) {
-        if (it?.test && !isJunkLabLabel(it.test)) byKey.set(canonicalTestKey(it.test), it);
+        if (it?.test && !isJunkLabLabel(it.test) && !isLowQualityLabItem(it)) {
+            byKey.set(canonicalTestKey(it.test), it);
+        }
+    }
+    for (const it of catItems) {
+        byKey.set(canonicalTestKey(it.test), it);
     }
     const combined = Array.from(byKey.values());
     const filled = fillMissingFromText(text, combined);
     const coerced = coerceAndValidate({ isLab: true, confidence: 0.5, reason: 'Full-text extraction', items: filled });
-    return coerced.items || [];
+    return finalizeLabItems(coerced.items || []);
 }
 
-/** Taban (tam metin) + LLM çıktısını birleştirir: aynı test LLM’de varsa LLM değeri kullanılır, yoksa tabandaki kalır. İdrar Eritrosit/Lökosit için LLM bazen 0 döndürür; tabanda 2/3 HPF varsa onu koruruz. */
+/** Bitişik hemogram değerlerini PDF metninden zorla düzelt/ekle (7.210³→7.21, 4.5510⁶→4.55, 26810³→268). */
+function fixGluedHemogramFromText(text, items) {
+    if (!text || typeof text !== 'string' || !Array.isArray(items)) return items;
+    const glued = extractCategoricalScreeningItems(text).filter((it) =>
+        /^(WBC|RBC|PLT)\b/i.test(String(it.test || '')),
+    );
+    if (glued.length === 0) return items;
+    const byKey = new Map((items || []).map((it) => [canonicalTestKey(it.test), it]));
+    for (const fix of glued) {
+        if (!Number.isFinite(fix.value)) continue;
+        const key = canonicalTestKey(fix.test);
+        const existing = byKey.get(key);
+        byKey.set(key, existing
+            ? {
+                ...existing,
+                value: fix.value,
+                unit: fix.unit || existing.unit,
+                refLow: fix.refLow ?? existing.refLow,
+                refHigh: fix.refHigh ?? existing.refHigh,
+            }
+            : fix);
+    }
+    return Array.from(byKey.values());
+}
+
+/** Bölüm ata + idrar HPF düzelt + çöp kartları at (analiz/UI öncesi). */
+function postProcessItems(fullText, items) {
+    let out = assignSectionsFromPdfText(fullText, items);
+    out = fixIdrarHpfFromText(fullText, out);
+    out = fixGluedHemogramFromText(fullText, out);
+    return finalizeLabItems(out);
+}
+
+/**
+ * Taban (regex) + LLM birleştirme.
+ * Önce LLM (temiz) yazılır; regex yalnızca eksik ve kaliteli satırları tamamlar.
+ * Böylece disclaimer/tarih/ref parçası gibi regex çöpü UI’ya sızmaz.
+ * İdrar Eritrosit/Lökosit: LLM 0, tabanda HPF>0 ise taban korunur.
+ */
 function mergeWithLLM(baseItems, llmItems) {
     const map = new Map();
-    for (const it of baseItems) map.set(canonicalTestKey(it.test), it);
     const idrarKeepBase = new Set(['ERITROSIT', 'LOKOSIT']);
+
     for (const it of llmItems || []) {
+        if (!it?.test || isLowQualityLabItem(it)) continue;
+        map.set(canonicalTestKey(it.test), it);
+    }
+
+    for (const it of baseItems || []) {
+        if (!it?.test || isLowQualityLabItem(it)) continue;
         const key = canonicalTestKey(it.test);
-        const base = map.get(key);
-        const sec = it.section || inferSectionForTest(it.test);
-        if (isIdrarSection(sec) && base && idrarKeepBase.has(keyForCompare(key))) {
-            const baseVal = base.value;
-            const llmVal = it.value;
-            if (Number.isFinite(baseVal) && baseVal > 0 && Number.isFinite(llmVal) && llmVal === 0 && base.unit === 'HPF')
-                continue;
+        const existing = map.get(key);
+        if (!existing) {
+            map.set(key, it);
+            continue;
         }
-        map.set(key, it);
+        const sec = existing.section || it.section || inferSectionForTest(it.test);
+        if (isIdrarSection(sec) && idrarKeepBase.has(keyForCompare(key))) {
+            const baseVal = it.value;
+            const llmVal = existing.value;
+            if (
+                Number.isFinite(baseVal) &&
+                baseVal > 0 &&
+                Number.isFinite(llmVal) &&
+                llmVal === 0 &&
+                it.unit === 'HPF'
+            ) {
+                map.set(key, it);
+            }
+        }
     }
     return Array.from(map.values());
 }
@@ -754,59 +1030,200 @@ function itemsToBulletedText(items) {
             if (Number.isFinite(it.refLow) && Number.isFinite(it.refHigh)) {
                 parts.push(`ref: ${it.refLow}–${it.refHigh}${it.unit ? ' ' + it.unit : ''}`);
             }
+            const flag = getItemRefFlag(it);
+            if (flag === 'H') parts.push('durum: REFERANS ÜSTÜ (yüksek)');
+            else if (flag === 'L') parts.push('durum: REFERANS ALTI (düşük)');
+            else if (flag === 'POS') parts.push('durum: POZİTİF/REAKTİF (öne çıkan)');
+            else if (flag === 'N') parts.push('durum: referans içinde');
             return `- ${parts.join(' | ')}`;
         })
         .join('\n');
 }
 
+/** H=yüksek, L=düşük, N=normal, POS=kategorik pozitif, null=değerlendirilemez */
+function getItemRefFlag(it) {
+    if (!it) return null;
+    const label = String(it.resultLabel || '').trim();
+    if (/^(Pozitif|Positive|Reaktif|Reactive)$/i.test(label)) return 'POS';
+    const v = Number(it.value);
+    const lo = Number(it.refLow);
+    const hi = Number(it.refHigh);
+    if (!Number.isFinite(v) || !Number.isFinite(lo) || !Number.isFinite(hi)) return null;
+    if (lo > hi) return null;
+    if (v < lo) return 'L';
+    if (v > hi) return 'H';
+    return 'N';
+}
+
+function collectNotableFindings(items, locale = 'tr') {
+    const isEn = locale === 'en';
+    const list = [];
+    for (const it of items || []) {
+        if (isLowQualityLabItem(it)) continue;
+        const flag = getItemRefFlag(it);
+        if (flag !== 'H' && flag !== 'L' && flag !== 'POS') continue;
+        const unit = it.unit ? ` ${it.unit}` : '';
+        const ref =
+            Number.isFinite(Number(it.refLow)) && Number.isFinite(Number(it.refHigh))
+                ? `${it.refLow}–${it.refHigh}${unit}`
+                : null;
+        const name = String(it.test).trim();
+        let line;
+        if (flag === 'POS') {
+            line = isEn
+                ? `${name}: ${labelOrValue(it)} (notable qualitative result)`
+                : `${name}: ${labelOrValue(it)} (öne çıkan nitel sonuç)`;
+        } else if (flag === 'H') {
+            line = isEn
+                ? `${name}: ${fmtAnalysisVal(it.value)}${unit} — above reference (expected: ${ref})`
+                : `${name}: ${fmtAnalysisVal(it.value)}${unit} — referans üstü (olması gereken: ${ref})`;
+        } else {
+            line = isEn
+                ? `${name}: ${fmtAnalysisVal(it.value)}${unit} — below reference (expected: ${ref})`
+                : `${name}: ${fmtAnalysisVal(it.value)}${unit} — referans altı (olması gereken: ${ref})`;
+        }
+        list.push({
+            test: name,
+            value: it.value,
+            unit: it.unit || null,
+            refLow: it.refLow,
+            refHigh: it.refHigh,
+            resultLabel: it.resultLabel || null,
+            flag,
+            line,
+        });
+    }
+    return list;
+}
+
+function fmtAnalysisVal(v) {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return String(v ?? '');
+    return Number.isInteger(n) ? String(n) : String(Math.round(n * 1000) / 1000);
+}
+
+function labelOrValue(it) {
+    const label = String(it.resultLabel || '').trim();
+    if (label) return label;
+    return fmtAnalysisVal(it.value);
+}
+
+/** LLM yoksa bile referans dışı / öne çıkan bulguları maddelerle yaz. */
+function buildLocalAnalysisFromItems(items, locale = 'tr') {
+    const clean = (items || []).filter((it) => !isLowQualityLabItem(it));
+    const notable = collectNotableFindings(clean, locale);
+    const isEn = locale === 'en';
+    const n = clean.length;
+
+    if (isEn) {
+        const summary = notable.length
+            ? `${n} lab parameter(s) reviewed. ${notable.length} value(s) stand out versus the given reference ranges or qualitative results.`
+            : `${n} lab parameter(s) reviewed. Based on the provided reference ranges, no out-of-range numeric values were identified.`;
+        const findings = notable.length
+            ? notable.map((f) => `- ${f.line}`).join('\n')
+            : '- No parameters outside the given reference ranges were found.';
+        return [
+            '### Summary',
+            summary,
+            '',
+            '### Notable findings',
+            findings,
+            '',
+            '### Recommendations',
+            '- Share this report with your doctor together with your symptoms and history.',
+            '- Balanced diet, hydration, sleep, and light-to-moderate activity support general health.',
+            '',
+            '---',
+            '**Disclaimer:** This content is not medical advice. Discuss your results with **your doctor** along with your symptoms and history.',
+        ].join('\n');
+    }
+
+    const summary = notable.length
+        ? `${n} parametre incelendi. Verilen referans aralıklarına göre ${notable.length} değer öne çıkıyor (referans dışı veya nitel pozitif/reaktif).`
+        : `${n} parametre incelendi. Verilen referans aralıklarına göre referans dışı sayısal değer bulunmadı.`;
+    const findings = notable.length
+        ? notable.map((f) => `- ${f.line}`).join('\n')
+        : '- Referans aralığı dışında kalan parametre bulunmadı.';
+    return [
+        '### Tahlil Özeti',
+        summary,
+        '',
+        '### Öne Çıkan Bulgular',
+        findings,
+        '',
+        '### Tavsiye',
+        '- Bu sonuçları semptomlarınız ve öykünüzle birlikte doktorunuzla paylaşın.',
+        '- Dengeli beslenme, yeterli su, düzenli uyku ve hafif/orta aktivite genel sağlığı destekler.',
+        '',
+        '---',
+        '**Uyarı:** Bu içerik tıbbi tavsiye değildir. Sonuçlarınızı semptomlarınız ve öykünüzle birlikte **doktorunuza** danışın.',
+    ].join('\n');
+}
+
 async function generateAnalysisText(items, locale = 'tr') {
-    if (!Array.isArray(items) || items.length === 0) {
+    const clean = (Array.isArray(items) ? items : []).filter((it) => !isLowQualityLabItem(it));
+    if (clean.length === 0) {
         return defaultAnalysisFallback(locale);
     }
 
-    const bullet = itemsToBulletedText(items);
+    const localAnalysis = buildLocalAnalysisFromItems(clean, locale);
+    const notable = collectNotableFindings(clean, locale);
+    const bullet = itemsToBulletedText(clean);
+    const notableBlock = notable.length
+        ? notable.map((f) => `- ${f.line}`).join('\n')
+        : (locale === 'en'
+            ? '- (none — all numeric values with refs are in range)'
+            : '- (yok — referansı olan sayısal değerlerin tümü aralık içinde)');
     const isEn = locale === 'en';
 
     const systemInstr = isEn
         ? `
-You are not a clinical assistant; **you do not give medical diagnoses**. Based only on the laboratory data provided, write an informative, plain **English** summary. **Comment only on the parameter names, values, and reference ranges given below.** Do not add or assume anything not in the data.
+You are not a clinical assistant; **you do not give medical diagnoses**. Based only on the laboratory data provided, write an informative, plain **English** summary.
 OUTPUT ONLY IN MARKDOWN. Produce these 4 sections in order:
-1) **Summary**: Brief overview of the given values.
-2) **Notable findings**: List items outside the reference range with parameter name and value from the data (if any).
-3) **Recommendations**: General lifestyle/follow-up suggestions (no medical treatment advice).
-4) **Disclaimer**: A clear disclaimer such as "This is not a medical evaluation; share your results with your doctor."
+1) **Summary**: Say how many parameters were reviewed and whether any are outside reference (or qualitatively positive). Mention out-of-range names briefly.
+2) **Notable findings**: **REQUIRED.** List EVERY out-of-range / notable item from the precomputed list below with parameter name, value, and reference. Add one short plain-language note (e.g. "above the lab's reference range"). If the precomputed list is empty, write that none were outside range — do NOT say you cannot identify them.
+3) **Recommendations**: General lifestyle/follow-up (no treatment advice).
+4) **Disclaimer**: Not medical advice; discuss with a doctor.
 
 Constraints:
 - Do not give drug names, doses, or diagnoses.
-- If unclear, say "further clinical context may be needed."
-- Comment only from the given list; do not invent parameters or values.
-- Tone: calm, non-judgmental, plain.
+- Do not invent parameters. Prefer the precomputed notable list for section 2.
+- Never claim that out-of-range values cannot be identified when the data includes reference ranges.
+- Tone: calm, plain.
 `
         : `
-Sen bir klinik asistan değilsin; **tıbbi tanı koymazsın**. Sadece verilen laboratuvar verilerine dayanarak bilgilendirici ve sade Türkçe bir özet yaz. **Sadece aşağıda verilen parametrelerin adı, değeri ve referans aralığına göre yorum yap.** Veride olmayan bir şey ekleme veya varsayma.
+Sen bir klinik asistan değilsin; **tıbbi tanı koymazsın**. Sadece verilen laboratuvar verilerine dayanarak bilgilendirici ve sade Türkçe yaz.
 ÇIKTIYI SADECE MARKDOWN OLARAK VER. Aşağıdaki 4 bölümü bu sırada üret:
-1) **Tahlil Özeti**: Verilen değerlerin genel çerçevesi (kısa).
-2) **Öne Çıkan Bulgular**: Referans dışına çıkan maddeleri, verideki parametre adı ve değeriyle madde işaretli listele (varsa).
-3) **Tavsiye**: Yaşam tarzı/izlem önerileri (genel, tıbbi tedavi önermeden).
-4) **Uyarı**: “Bu bir tıbbi değerlendirme değildir, sonuçları doktorunuzla paylaşın.” gibi net bir uyarı.
+1) **Tahlil Özeti**: Kaç parametre incelendiğini ve referans dışı / öne çıkan değer olup olmadığını kısaca söyle; varsa parametre adlarını an.
+2) **Öne Çıkan Bulgular**: **ZORUNLU.** Aşağıdaki önceden hesaplanmış listedeki HER referans dışı / öne çıkan maddeyi parametre adı, değer ve referans aralığıyla madde madde yaz. Her maddeye kısa, sade bir açıklama ekle (örn. “laboratuvarın verdiği aralığın üzerinde”). Liste boşsa “Referans aralığı dışında kalan parametre bulunmadı” yaz — “belirleyemeyebilir” deme.
+3) **Tavsiye**: Genel yaşam tarzı / doktora danışma (tedavi önerme).
+4) **Uyarı**: Tıbbi tavsiye değildir; doktorunuza danışın.
 
 Kısıtlar:
-- **İlaç ismi, doz, tanı** verme.
-- Belirsiz durumda “ek klinik bağlam gerekir” de.
-- Yorumu yalnızca verilen liste üzerinden yap; listede olmayan parametre veya değer yazma.
-- Ton: sakin, yargısız, sade.
+- İlaç ismi, doz, tanı verme.
+- Listede olmayan parametre uydurma. Bölüm 2 için öncelik önceden hesaplanmış listededir.
+- Referans aralığı varken “referans dışı değerleri belirleyemeyebilir” deme.
+- Ton: sakin, sade.
 `;
 
     const userInput = isEn
         ? `
-Below are the user's lab parameters (item by item). Write a short assessment under the 4 sections above.
-Data:
+Precomputed notable findings (use these in section 2):
+${notableBlock}
+
+All lab rows:
 ${bullet}
+
+Write the 4 sections now.
 `
         : `
-Aşağıda kullanıcının laboratuvar maddeleri var (madde madde). Buna göre yukarıdaki 4 başlıkta kısa bir değerlendirme yaz.
-Veriler:
+Önceden hesaplanmış öne çıkan bulgular (bölüm 2’de bunları kullan):
+${notableBlock}
+
+Tüm laboratuvar satırları:
 ${bullet}
+
+Şimdi 4 bölümü yaz.
 `;
 
     try {
@@ -815,18 +1232,24 @@ ${bullet}
                 model: MODEL,
                 instructions: systemInstr,
                 input: userInput,
-
             }),
             TIMEOUT_ANALYSIS,
             'openai.responses.create (analysis)'
         );
 
         const text = extractOutputText(resp)?.trim();
-        if (!text) return defaultAnalysisFallback(locale);
+        if (!text) return localAnalysis;
+        // LLM “belirleyemeyebilir” kaçırırsa yerel bulgu metnini kullan
+        const low = text.toLowerCase();
+        const evasive =
+            /belirleyemeyebilir|may not reliably identify|sınırlı veya standart biçimde değil|data is limited or not in a standard/i.test(
+                low,
+            );
+        if (evasive && clean.length >= 3) return localAnalysis;
         return hardenWithDisclaimer(text, locale);
     } catch (e) {
         console.warn('OPENAI ANALYSIS ERR:', e?.message || e);
-        return defaultAnalysisFallback(locale);
+        return localAnalysis;
     }
 }
 
@@ -900,7 +1323,11 @@ Your task:
 5. When the result is below or above detection limit (e.g. "<0,5", "<0.5", ">500"), set value to the numeric threshold and set valueDisplay to the exact string as in the PDF (e.g. "<0.5", ">500"). Otherwise leave valueDisplay null.
 6. Each parameter must use only its own reference range from the same row in the PDF; do not use another parameter's range (e.g. MPV has its own ref, do not use PDW's range for MPV).
 7. When the PDF has section headers (e.g. "İDRAR TETKİKİ", "HEMOGRAM", "BİYOKİMYA (ACİL)", "Tam Kan Sayımı"), set section for each item to the section header under which that test appears. Use the exact header text as in the PDF. If no clear section, use null.
-8. Ignore headers, footers, page numbers, and URLs (e.g. enabiz.gov.tr).`;
+8. Ignore headers, footers, page numbers, and URLs (e.g. enabiz.gov.tr).
+9. Ignore disclaimer/watermark text (e.g. ÖRNEKTİR, GERÇEK TAHLİL RAPORU DEĞİLDİR), patient/meta rows (Rapor tarihi, Örnek türü, Rapor no), and table column headers (Parametre/Sonuç/Birim/Referans). Never create items from those.
+10. Do not create items from gender/reference fragments (e.g. "Kadın:", "g/dLKadın"). Reference bounds belong in refLow/refHigh of the real test only.
+11. For qualitative results (Negatif/Pozitif/Non-reaktif), set resultLabel and include every result row from the PDF (e.g. each HPV type line). Do not invent a numeric value from the type number alone (e.g. do not emit test "HR HPV Tip" with value 16 and no resultLabel).
+12. Keep section only for real panel headers (HEMOGRAM, İDRAR, BİYOKİMYA, etc.). Never use hospital/clinic/facility names as section.`;
 
 async function classifyAndExtract(text, locale = 'tr') {
     const baseInstr = LAB_EXTRACTION_INSTRUCTIONS;
@@ -939,23 +1366,21 @@ async function classifyAndExtract(text, locale = 'tr') {
 
         if (r1.isLab && r1.confidence >= 0.6) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, r1.items));
-            let items = assignSectionsFromPdfText(fullText, rawItems);
-            items = fixIdrarHpfFromText(fullText, items);
+            const items = postProcessItems(fullText, rawItems);
             const analysis = await generateAnalysisText(items, locale);
-            return { ...r1, items, rawItems, analysis };
+            return { ...r1, items, rawItems: items, analysis };
         }
 
         /* Only override when LLM said it IS lab but was unsure; never force lab when LLM said not lab (e.g. CV). */
         if (r1.isLab && r1.confidence < 0.6 && regexLikely) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, local0.items));
-            let mergedItems = assignSectionsFromPdfText(fullText, rawItems);
-            mergedItems = fixIdrarHpfFromText(fullText, mergedItems);
+            const mergedItems = postProcessItems(fullText, rawItems);
             const merged = {
                 isLab: true,
                 confidence: Math.max(0.35, r1.confidence || 0.35),
                 reason: 'Regex heuristic override (LLM unsure)',
                 items: mergedItems,
-                rawItems,
+                rawItems: mergedItems,
             };
             const analysis = await generateAnalysisText(merged.items, locale);
             return { ...merged, analysis };
@@ -963,10 +1388,9 @@ async function classifyAndExtract(text, locale = 'tr') {
 
         if (r1.isLab) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, r1.items));
-            let items = assignSectionsFromPdfText(fullText, rawItems);
-            items = fixIdrarHpfFromText(fullText, items);
+            const items = postProcessItems(fullText, rawItems);
             const analysis = await generateAnalysisText(items, locale);
-            return { ...r1, items, rawItems, analysis };
+            return { ...r1, items, rawItems: items, analysis };
         }
 
         return r1;
@@ -983,22 +1407,20 @@ async function classifyAndExtract(text, locale = 'tr') {
 
         if (r2.isLab && r2.confidence >= 0.6) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, r2.items));
-            let items = assignSectionsFromPdfText(fullText, rawItems);
-            items = fixIdrarHpfFromText(fullText, items);
+            const items = postProcessItems(fullText, rawItems);
             const analysis = await generateAnalysisText(items, locale);
-            return { ...r2, items, rawItems, analysis };
+            return { ...r2, items, rawItems: items, analysis };
         }
 
         if (r2.isLab && r2.confidence < 0.6 && regexLikely) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, local0.items));
-            let mergedItems = assignSectionsFromPdfText(fullText, rawItems);
-            mergedItems = fixIdrarHpfFromText(fullText, mergedItems);
+            const mergedItems = postProcessItems(fullText, rawItems);
             const merged = {
                 isLab: true,
                 confidence: Math.max(0.35, r2.confidence || 0.35),
                 reason: 'Regex heuristic override (LLM unsure)',
                 items: mergedItems,
-                rawItems,
+                rawItems: mergedItems,
             };
             const analysis = await generateAnalysisText(merged.items, locale);
             return { ...merged, analysis };
@@ -1006,10 +1428,9 @@ async function classifyAndExtract(text, locale = 'tr') {
 
         if (r2.isLab) {
             const rawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, r2.items));
-            let items = assignSectionsFromPdfText(fullText, rawItems);
-            items = fixIdrarHpfFromText(fullText, items);
+            const items = postProcessItems(fullText, rawItems);
             const analysis = await generateAnalysisText(items, locale);
-            return { ...r2, items, rawItems, analysis };
+            return { ...r2, items, rawItems: items, analysis };
         }
 
         return r2;
@@ -1050,18 +1471,24 @@ async function classifyAndExtract(text, locale = 'tr') {
         items: fallbackItems,
     });
     const fallbackRawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, coercedFallback.items));
-    let fallbackItemsMerged = assignSectionsFromPdfText(fullText, fallbackRawItems);
-    fallbackItemsMerged = fixIdrarHpfFromText(fullText, fallbackItemsMerged);
+    const fallbackItemsMerged = postProcessItems(fullText, fallbackRawItems);
     const fallback = {
-        isLab: isLabFinal,
+        isLab: isLabFinal && fallbackItemsMerged.length > 0,
         confidence: coercedFallback.confidence,
         reason: coercedFallback.reason,
         items: fallbackItemsMerged,
-        rawItems: fallbackRawItems,
+        rawItems: fallbackItemsMerged,
     };
 
     const analysis = fallback.isLab ? await generateAnalysisText(fallback.items, locale) : defaultAnalysisFallback(locale);
     return { ...fallback, analysis };
 }
 
-module.exports = { classifyAndExtract };
+module.exports = {
+    classifyAndExtract,
+    generateAnalysisText,
+    /** test / upload sonrası savunma hattı */
+    finalizeLabItems,
+    isJunkLabLabel,
+    isLowQualityLabItem,
+};

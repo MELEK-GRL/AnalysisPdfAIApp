@@ -3,7 +3,7 @@
  * Controller (route) rate limit ve multer ile dosyayı alır; bu servis iş mantığını yürütür.
  */
 const { extractTextFromPdf } = require('./pdf');
-const { classifyAndExtract } = require('./openai');
+const { classifyAndExtract, finalizeLabItems } = require('./openai');
 const Lab = require('../models/LatestLabResult');
 const LabHistory = require('../models/LabHistory');
 const { MAX_LAB_HISTORY_PER_USER } = require('../constants');
@@ -59,6 +59,14 @@ async function runAnalysis(tmpPath, locale = 'tr') {
 
     try {
         const result = await classifyAndExtract(text || '', locale);
+        // Savunma: UI'ya yalnızca temiz parametreler gitsin (regex çöpü / hatalı section yok)
+        const cleanItems = finalizeLabItems(result?.items || []);
+        result.items = cleanItems;
+        result.rawItems = cleanItems;
+        if (cleanItems.length === 0) {
+            result.isLab = false;
+            result.confidence = Math.min(Number(result.confidence) || 0, 0.2);
+        }
         const patientName = extractPatientName(text);
         if (patientName) result.patientName = patientName;
         return result;

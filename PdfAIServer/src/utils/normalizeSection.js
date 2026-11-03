@@ -27,6 +27,7 @@ function isSectionHeaderBlocklist(title) {
         /^POZİTİF$/i, /^Negatif$/i, /^Reaktif$/i,
         /Sağlık Bilgi Sistemleri/i, /Genel Müdürlüğü/i, /BAKANLIĞI/i, /^T\.C\./i,
         /enabiz|Sayfa\s*\d|Adı\/Soyadı|Cinsiyet|Doğum\s*Tarihi|Sağlık Tesisi|Hastanesi/i,
+        /SEMT POLİKLİN|ORGANİZE SANAYİ|EĞİTİM VE ARAŞTIRMA|POLİKLİNİĞİ/i,
         /* Tablo sütunu / birleşik satır (idrar vb.): BIRIM REFERANS, Görünüm/Renk+değer birleşik */
         /BIRIM\s*REFERANS|BIRIMREFERANS/i,
         /^GÖRÜNÜM[A-Za-zığüşöçİ]/i,

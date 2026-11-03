@@ -32,6 +32,7 @@ import PopupModal from '../../components/Modals/PopupModal';
 import Chart from '../../components/Chart/Chart';
 import EmptyState from '../../components/EmptyState/EmptyState';
 import AnalysisContent from '../../components/AnalysisContent/AnalysisContent';
+import LoadingIndicator from '../../components/LoadingIndicator/LoadingIndicator';
 
 const History: React.FC = () => {
     useScreenTime('History');
@@ -42,6 +43,7 @@ const History: React.FC = () => {
     const [detailModal, setDetailModal] = useState(false);
     const [selectedDetail, setSelectedDetail] = useState<LabHistoryDetail | null>(null);
     const [detailLoading, setDetailLoading] = useState(false);
+    const [detailTitle, setDetailTitle] = useState('');
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [errorSource, setErrorSource] = useState<'fetch' | 'detail'>('fetch');
@@ -106,6 +108,8 @@ const History: React.FC = () => {
     }, [fetchHistory]);
 
     const handleItemPress = useCallback(async (id: string) => {
+        const listItem = items.find((it) => it.id === id);
+        setDetailTitle(listItem?.pdfName?.trim() || t('history.detailTitle'));
         setDetailLoading(true);
         setDetailModal(true);
         setSelectedDetail(null);
@@ -113,14 +117,18 @@ const History: React.FC = () => {
         try {
             const detail = await getLabHistoryItem(id);
             setSelectedDetail(detail);
+            if (detail?.pdfName?.trim()) {
+                setDetailTitle(detail.pdfName.trim());
+            }
         } catch (e) {
+            setDetailModal(false);
             setErrorMessage(t('history.detailError'));
             setErrorSource('detail');
             setErrorVisible(true);
         } finally {
             setDetailLoading(false);
         }
-    }, [t]);
+    }, [t, items]);
 
     const formatDate = (s: string) => {
         const d = new Date(s);
@@ -225,9 +233,16 @@ const History: React.FC = () => {
                     gap: 12 * w1px,
                 },
                 detailModalView: {
-                    height: h1px * 500,
+                    flex: 1,
                     width: '100%',
+                    minHeight: 0,
                     paddingHorizontal: 12 * w1px,
+                },
+                detailLoadingWrap: {
+                    flex: 1,
+                    width: '100%',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 },
                 pill: {
                     alignSelf: 'flex-start',
@@ -525,22 +540,29 @@ const History: React.FC = () => {
 
             <CenterModal
                 visible={detailModal}
-                title={selectedDetail?.pdfName || t('history.detailTitle')}
+                fixedHeight
+                title={detailTitle || t('history.detailTitle')}
                 leftButtonText={t('common.delete')}
                 rightButtonText={t('common.close')}
                 leftButtonBackgroundColor="#DC2626"
-                onLeftPress={() => setDeleteConfirmVisible(true)}
+                onLeftPress={() => {
+                    if (!detailLoading && selectedDetail) {
+                        setDeleteConfirmVisible(true);
+                    }
+                }}
                 onRightPress={() => setDetailModal(false)}>
-                <ScrollView
-                    style={styles.detailModalView}
-                    nestedScrollEnabled
-                    showsVerticalScrollIndicator={false}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 24 }}>
-                    {detailLoading ? (
-                        <ActivityIndicator style={{ marginTop: 40 }} />
-                    ) : selectedDetail ? (
-                        <>
+                <View style={styles.detailModalView}>
+                    {detailLoading || !selectedDetail ? (
+                        <View style={styles.detailLoadingWrap}>
+                            <LoadingIndicator size="sm" />
+                        </View>
+                    ) : (
+                        <ScrollView
+                            style={{ flex: 1 }}
+                            nestedScrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={{ paddingBottom: 24 }}>
                             <View style={styles.detailDateRow}>
                                 {selectedDetail.patientName?.trim() ? (
                                     <T size={fontSize.body} weight="600" color="#374151" numberOfLines={1} style={{ flex: 1 }}>
@@ -588,9 +610,9 @@ const History: React.FC = () => {
                             ) : (
                                 <T size={fontSize.body} color="#6B7280">{t('history.noRecord')}</T>
                             )}
-                        </>
-                    ) : null}
-                </ScrollView>
+                        </ScrollView>
+                    )}
+                </View>
             </CenterModal>
 
             <PopupModal

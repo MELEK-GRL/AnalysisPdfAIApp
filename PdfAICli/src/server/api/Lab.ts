@@ -89,52 +89,113 @@ function throwRateLimit(data?: {
     throw e;
 }
 
-export async function uploadPdf(form: FormData): Promise<UploadResponse> {
-    const handleError = (err: any): never => {
-        if (err?.response?.status === 429) {
-            throwRateLimit(err?.response?.data);
-        }
-        const msg = err?.response?.data?.message || err?.message || 'PDF yüklenemedi.';
-        throw new Error(msg);
-    };
+type XhrResult = { status: number; body: string };
 
-    try {
-        const res = await api.post<UploadResponse>('/upload', form, {
-            timeout: UPLOAD_TIMEOUT_MS,
-            responseType: 'json',
-            maxBodyLength: Infinity,
-            maxContentLength: Infinity,
-        });
-        return res.data;
-    } catch (e: any) {
-        if (e?.response) handleError(e);
-        const token = await getToken();
-        const r = await fetch(`${API_BASE_URL}/api/upload`, {
-            method: 'POST',
-            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-            body: form,
-        });
-        if (!r.ok) {
-            const text = await r.text();
-            let msg = text;
-            try {
-                const j = JSON.parse(text);
-                if (j?.message) msg = j.message;
-            } catch (_) {}
-            if (r.status === 429) {
-                let adsEnabled = false;
-                let rewardedUnitId: string | null = null;
-                try {
-                    const j = JSON.parse(text);
-                    adsEnabled = j?.adsEnabled === true;
-                    rewardedUnitId = j?.rewardedUnitId || null;
-                } catch (_) {}
-                throwRateLimit({ message: msg, adsEnabled, rewardedUnitId });
-            }
-            throw new Error(msg);
-        }
-        return (await r.json()) as UploadResponse;
+/**
+ * RN Android'de fetch+FormData Authorization header'ını düşürebiliyor.
+ * XMLHttpRequest ile header güvenilir şekilde gider.
+ */
+function postFormDataWithAuth(
+    url: string,
+    form: FormData,
+    token: string,
+    timeoutMs: number,
+): Promise<XhrResult> {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', url);
+        // Authorization bazı RN Android multipart isteklerinde düşer;
+        // X-Access-Token + query access_token yedek kanallar.
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.setRequestHeader('X-Access-Token', token);
+        // Content-Type set etme — boundary XHR/RN tarafından eklenir
+        xhr.timeout = timeoutMs;
+        xhr.onload = () => {
+            resolve({ status: xhr.status, body: xhr.responseText || '' });
+        };
+        xhr.onerror = () => {
+            reject(new Error('Ağ hatası. İnternet bağlantınızı kontrol edin.'));
+        };
+        xhr.ontimeout = () => {
+            reject(
+                new Error(
+                    'Yükleme zaman aşımına uğradı. Lütfen tekrar deneyin.',
+                ),
+            );
+        };
+        xhr.send(form);
+    });
+}
+
+/**
+ * PDF yükleme — önce token doğrula, sonra XHR ile multipart gönder.
+ */
+export async function uploadPdf(form: FormData): Promise<UploadResponse> {
+    const token = await getToken();
+    if (!token) {
+        throw new Error('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
     }
+
+    // Aynı token ile basit auth kontrolü (upload öncesi)
+    try {
+        await api.get('/auth/me', {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+    } catch (e: any) {
+        const status = e?.response?.status;
+        if (status === 401) {
+            throw new Error(
+                'Oturum geçersiz veya süresi dolmuş. Lütfen çıkış yapıp tekrar giriş yapın.',
+            );
+        }
+        // me başarısız olsa bile upload'ı denemeye devam etme; token yoksa zaten 401
+        if (!e?.response) {
+            throw new Error(
+                'Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.',
+            );
+        }
+    }
+
+    const uploadUrl =
+        `${API_BASE_URL}/api/upload` +
+        `?access_token=${encodeURIComponent(token)}`;
+
+    const { status, body } = await postFormDataWithAuth(
+        uploadUrl,
+        form,
+        token,
+        UPLOAD_TIMEOUT_MS,
+    );
+
+    let data: any = null;
+    try {
+        data = body ? JSON.parse(body) : null;
+    } catch (_) {
+        data = null;
+    }
+
+    if (status < 200 || status >= 300) {
+        const msg =
+            data?.message || body || `PDF yüklenemedi (HTTP ${status}).`;
+        if (status === 429) {
+            throwRateLimit({
+                message: msg,
+                adsEnabled: data?.adsEnabled === true,
+                rewardedUnitId: data?.rewardedUnitId ?? null,
+            });
+        }
+        if (status === 401) {
+            throw new Error(
+                'Yükleme yetkilendirmesi başarısız (401). Lütfen çıkış yapıp tekrar giriş yapın.',
+            );
+        }
+        throw new Error(msg);
+    }
+
+    if (!data) {
+        throw new Error('Sunucudan geçersiz yanıt alındı.');
+    }
+    return data as UploadResponse;
 }
 
 export type AdsRewardResponse = {

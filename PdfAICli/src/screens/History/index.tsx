@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import {
     View,
@@ -126,6 +126,50 @@ const History: React.FC = () => {
         }, [fetchHistory]),
     );
 
+    const listSelectMode = selectionMode || compareMode;
+    /** Karşılaştırma için en az 2 tahlil gerekir */
+    const canCompare = items.length >= 2;
+
+    const exitSelectionMode = useCallback(() => {
+        setSelectionMode(false);
+        setCompareMode(false);
+        setSelectedIds(new Set());
+        setCompareOrder([]);
+        setCompareAdPromptVisible(false);
+        setCompareViewPromptVisible(false);
+    }, []);
+
+    const selectModeRef = useRef({ selectionMode, compareMode });
+    selectModeRef.current = { selectionMode, compareMode };
+    const exitSelectionModeRef = useRef(exitSelectionMode);
+    exitSelectionModeRef.current = exitSelectionMode;
+    const fetchHistoryRef = useRef(fetchHistory);
+    fetchHistoryRef.current = fetchHistory;
+
+    useEffect(() => {
+        if (compareMode && !canCompare) {
+            setCompareMode(false);
+            setCompareOrder([]);
+        }
+    }, [compareMode, canCompare]);
+
+    /** Alt menüde Geçmiş'e tekrar basınca karşılaştırma / seçim iptal + liste yenile */
+    useEffect(() => {
+        const parent = navigation.getParent();
+        if (!parent) {
+            return undefined;
+        }
+        return parent.addListener('tabPress', () => {
+            const { selectionMode: sel, compareMode: cmp } =
+                selectModeRef.current;
+            if (sel || cmp) {
+                exitSelectionModeRef.current();
+            }
+            setRefreshing(true);
+            void fetchHistoryRef.current();
+        });
+    }, [navigation]);
+
     const onRefresh = useCallback(() => {
         setRefreshing(true);
         fetchHistory();
@@ -163,17 +207,6 @@ const History: React.FC = () => {
         );
     }, [items, searchQuery]);
 
-    const listSelectMode = selectionMode || compareMode;
-    /** Karşılaştırma için en az 2 tahlil gerekir */
-    const canCompare = items.length >= 2;
-
-    useEffect(() => {
-        if (compareMode && !canCompare) {
-            setCompareMode(false);
-            setCompareOrder([]);
-        }
-    }, [compareMode, canCompare]);
-
     const toggleSelection = useCallback(
         (id: string) => {
             if (compareMode) {
@@ -193,15 +226,6 @@ const History: React.FC = () => {
         },
         [compareMode],
     );
-
-    const exitSelectionMode = useCallback(() => {
-        setSelectionMode(false);
-        setCompareMode(false);
-        setSelectedIds(new Set());
-        setCompareOrder([]);
-        setCompareAdPromptVisible(false);
-        setCompareViewPromptVisible(false);
-    }, []);
 
     const enterCompareMode = useCallback(() => {
         setSelectionMode(false);

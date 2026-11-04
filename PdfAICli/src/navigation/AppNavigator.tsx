@@ -191,15 +191,11 @@ const MainTabs = () => {
             <Tab.Screen
                 name="Profil"
                 component={ProfileStack}
-                options={{ title: t('tabs.profile') }}
-                listeners={({ navigation }) => ({
-                    /** Başka sekmeye geçince stack sıfırlansın; dönünce ProfileHome açılsın */
-                    blur: () => {
-                        navigation.navigate('Profil', {
-                            screen: 'ProfileHome',
-                        });
-                    },
-                })}
+                options={{
+                    title: t('tabs.profile'),
+                    /** Sekmeden çıkınca stack unmount; dönüşte ProfileHome */
+                    unmountOnBlur: true,
+                }}
             />
         </Tab.Navigator>
     );

@@ -9,6 +9,7 @@ import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { useResponsive } from '../../utils/deviceStore/device';
 import { resetToLogin } from '../../navigation/rootNavigation';
 import T from '../../components/Text/T';
+import BackButton from '../../components/Buttons/BackButton';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
 import PopupModal from '../../components/Modals/PopupModal';
@@ -40,30 +41,6 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
                     flex: 1,
                     padding: 20 * w1px,
                     paddingTop: 52 * h1px,
-                },
-                headerRow: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 24 * h1px,
-                },
-                backBtnWrap: {
-                    width: 38 * w1px,
-                    height: 38 * w1px,
-                    borderRadius: 19 * w1px,
-                    backgroundColor: colors.backgroundPurpleSoft,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 12 * w1px,
-                    borderWidth: 1,
-                    borderColor: 'rgba(116, 83, 224, 0.2)',
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.06,
-                    shadowRadius: 3,
-                    elevation: 2,
-                },
-                headerCenter: {
-                    flex: 1,
                 },
                 pageTitle: {
                     marginBottom: 20 * h1px,
@@ -156,17 +133,10 @@ const Settings: React.FC<SettingsProps> = ({ showBackButton = true }) => {
         <GradientLayout>
             <View style={styles.container}>
                 {showBackButton ? (
-                    <View style={styles.headerRow}>
-                        <TouchableOpacity
-                            style={styles.backBtnWrap}
-                            onPress={() => nav.goBack()}
-                            activeOpacity={0.8}>
-                            <Ionicons name="arrow-back" size={iconSize.medium} color={colors.backgroundPurple} />
-                        </TouchableOpacity>
-                        <T size={fontSize.subtitleLarge} weight="600" color="#1F2937" style={styles.headerCenter}>
-                            {t('common.back')}
-                        </T>
-                    </View>
+                    <BackButton
+                        onPress={() => nav.goBack()}
+                        style={{ marginBottom: 24 * h1px }}
+                    />
                 ) : null}
 
                 <T size={fontSize.title} weight="700" color="#374151" style={styles.pageTitle}>

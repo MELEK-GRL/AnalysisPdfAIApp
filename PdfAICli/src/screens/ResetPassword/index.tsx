@@ -4,7 +4,6 @@ import {
     KeyboardAvoidingView,
     Platform,
     StyleSheet,
-    TouchableOpacity,
     ScrollView,
     Keyboard,
     TouchableWithoutFeedback,
@@ -14,6 +13,7 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { resetPasswordByToken, resetPasswordByCode } from '../../server/api/User';
 import Button from '../../components/Buttons/Button';
+import BackButton from '../../components/Buttons/BackButton';
 import T from '../../components/Text/T';
 import PopupModal from '../../components/Modals/PopupModal';
 import TextInputComponent from '../../components/Inputs/TextInputComponent';
@@ -87,11 +87,6 @@ const ResetPassword: React.FC = () => {
                     shadowRadius: 12 * w1px,
                     shadowOffset: { width: 0, height: 6 },
                     elevation: 2,
-                },
-                backRow: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 16 * h1px,
                 },
             }),
         [w1px, h1px, keyboardInset, keyboardOpen],
@@ -175,14 +170,7 @@ const ResetPassword: React.FC = () => {
         return (
             <GradientLayout>
                 <View style={[s.container, s.scrollContent]}>
-                    <TouchableOpacity
-                        style={s.backRow}
-                        onPress={() => nav.replace('Login')}
-                        activeOpacity={0.7}>
-                        <T size={fontSize.body} color={colors.backgroundPurple} weight="600">
-                            {t('common.back')}
-                        </T>
-                    </TouchableOpacity>
+                    <BackButton onPress={() => nav.replace('Login')} />
                     <View style={s.card}>
                         <T
                             size={fontSize.display}
@@ -222,17 +210,7 @@ const ResetPassword: React.FC = () => {
                     showsVerticalScrollIndicator={false}>
                     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                         <View>
-                            <TouchableOpacity
-                                style={s.backRow}
-                                onPress={() => nav.replace('Login')}
-                                activeOpacity={0.7}>
-                                <T
-                                    size={fontSize.body}
-                                    color={colors.backgroundPurple}
-                                    weight="600">
-                                    {t('common.back')}
-                                </T>
-                            </TouchableOpacity>
+                            <BackButton onPress={() => nav.replace('Login')} />
                             <View style={s.card}>
                                 <T
                                     size={fontSize.display}

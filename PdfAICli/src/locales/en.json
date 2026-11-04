@@ -172,7 +172,7 @@
     "adCreditGranted": "Congrats! You earned +1 analysis credit.",
     "adFailed": "Ad could not be completed. Please try again.",
     "adLoading": "Loading ad…",
-    "analysisLoadingHint": "Analyzing your report, please wait 1–2 minutes…",
+    "analysisLoadingHint": "Analyzing… please wait up to 1 minute.",
     "uploadError": "Could not upload PDF.",
     "pleaseUploadResult": "Please upload a lab result PDF.",
     "rawValuesTitle": "Lab values (as in PDF)"

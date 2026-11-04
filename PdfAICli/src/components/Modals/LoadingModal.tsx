@@ -52,30 +52,43 @@ const LoadingModal: React.FC<Props> = ({
                     paddingHorizontal: 24 * w1px,
                     maxWidth: 340 * w1px,
                 },
-                messageCard: {
-                    backgroundColor: colors.white,
-                    borderRadius: 18 * w1px,
-                    paddingVertical: 16 * h1px,
-                    paddingHorizontal: 22 * w1px,
-                    marginBottom: 0,
-                    borderWidth: 1,
-                    borderColor: colors.backgroundPurple + '28',
-                    shadowColor: colors.backgroundPurple,
-                    shadowOffset: { width: 0, height: 8 },
-                    shadowOpacity: 0.18,
-                    shadowRadius: 20,
-                    elevation: 8,
+                balloon: {
+                    alignItems: 'center',
                     zIndex: 1,
+                },
+                messageWrap: {
+                    backgroundColor: 'rgba(248, 246, 255, 0.86)',
+                    borderRadius: 28 * w1px,
+                    paddingVertical: 14 * h1px,
+                    paddingHorizontal: 22 * w1px,
+                    borderWidth: 1,
+                    borderColor: 'rgba(116, 83, 224, 0.14)',
+                    shadowColor: '#3A3496',
+                    shadowOffset: { width: 0, height: 6 },
+                    shadowOpacity: 0.16,
+                    shadowRadius: 14,
+                    elevation: 6,
+                },
+                balloonTail: {
+                    width: 0,
+                    height: 0,
+                    marginTop: -1,
+                    borderLeftWidth: 9 * w1px,
+                    borderRightWidth: 9 * w1px,
+                    borderTopWidth: 10 * h1px,
+                    borderLeftColor: 'transparent',
+                    borderRightColor: 'transparent',
+                    borderTopColor: 'rgba(248, 246, 255, 0.86)',
                 },
                 message: {
                     textAlign: 'center',
-                    letterSpacing: 0.15,
+                    letterSpacing: 0.2,
                     lineHeight: 24 * h1px,
                 },
                 lottie: {
-                    width: 200 * w1px,
-                    height: 200 * h1px,
-                    marginTop: -28 * h1px,
+                    width: 160 * w1px,
+                    height: 160 * h1px,
+                    marginTop: -36 * h1px,
                     backgroundColor: 'transparent',
                 },
             }),
@@ -85,15 +98,18 @@ const LoadingModal: React.FC<Props> = ({
     const content = (
         <View style={styles.box} pointerEvents="none">
             {message ? (
-                <View style={styles.messageCard}>
-                    <T
-                        size={fontSize.subtitle}
-                        weight="600"
-                        color={colors.backgroundPurpleDark}
-                        align="center"
-                        style={styles.message}>
-                        {message}
-                    </T>
+                <View style={styles.balloon}>
+                    <View style={styles.messageWrap}>
+                        <T
+                            size={fontSize.subtitle}
+                            weight="600"
+                            color={colors.backgroundPurpleDark}
+                            align="center"
+                            style={styles.message}>
+                            {message}
+                        </T>
+                    </View>
+                    <View style={styles.balloonTail} />
                 </View>
             ) : null}
             <LottieView

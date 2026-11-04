@@ -1,12 +1,12 @@
 /**
  * E-posta gönderimi (şifre sıfırlama + destek).
- * SMTP yoksa development'ta log; production'da sent:false.
+ * Railway'de Gmail SMTP (465/587) sık connection timeout verir →
+ * varsa Resend / Brevo HTTPS API tercih edilir, sonra SMTP denenir.
  */
 
 function getSmtpAuth() {
     const host = (process.env.SMTP_HOST || '').trim();
     const user = (process.env.SMTP_USER || '').trim();
-    // Gmail uygulama şifresi UI'da boşluklu gelebilir
     const pass = String(process.env.SMTP_PASS || '').replace(/\s+/g, '');
     return { host, user, pass };
 }
@@ -25,11 +25,103 @@ function createTransporter(overrides = {}) {
         port,
         secure,
         auth: { user, pass },
-        connectionTimeout: 12000,
-        greetingTimeout: 12000,
-        socketTimeout: 20000,
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
         tls: { minVersion: 'TLSv1.2' },
     });
+}
+
+async function sendWithResend({ to, subject, text, replyTo }) {
+    const key = (process.env.RESEND_API_KEY || '').trim();
+    if (!key) return null;
+
+    const from =
+        (process.env.MAIL_FROM || '').trim() ||
+        'LabAnalysis <onboarding@resend.dev>';
+
+    try {
+        const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${key}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                from,
+                to: [to],
+                subject,
+                text,
+                ...(replyTo ? { reply_to: replyTo } : {}),
+            }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            console.error('[Mail] Resend error:', res.status, data);
+            return {
+                sent: false,
+                provider: 'resend',
+                error: data?.message || `Resend HTTP ${res.status}`,
+            };
+        }
+        return { sent: true, provider: 'resend', id: data?.id };
+    } catch (err) {
+        console.error('[Mail] Resend exception:', err?.message || err);
+        return {
+            sent: false,
+            provider: 'resend',
+            error: err?.message || 'Resend failed',
+        };
+    }
+}
+
+async function sendWithBrevo({ to, subject, text, replyTo }) {
+    const key = (
+        process.env.BREVO_API_KEY ||
+        process.env.SENDINBLUE_API_KEY ||
+        ''
+    ).trim();
+    if (!key) return null;
+
+    const fromEmail =
+        (process.env.MAIL_FROM || process.env.SMTP_USER || '').trim() ||
+        'noreply@labanalysis.app';
+    const fromName = 'LabAnalysis';
+
+    try {
+        const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'api-key': key,
+                'Content-Type': 'application/json',
+                accept: 'application/json',
+            },
+            body: JSON.stringify({
+                sender: { name: fromName, email: fromEmail },
+                to: [{ email: to }],
+                subject,
+                textContent: text,
+                ...(replyTo ? { replyTo: { email: replyTo } } : {}),
+            }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            console.error('[Mail] Brevo error:', res.status, data);
+            return {
+                sent: false,
+                provider: 'brevo',
+                error: data?.message || `Brevo HTTP ${res.status}`,
+            };
+        }
+        return { sent: true, provider: 'brevo', id: data?.messageId };
+    } catch (err) {
+        console.error('[Mail] Brevo exception:', err?.message || err);
+        return {
+            sent: false,
+            provider: 'brevo',
+            error: err?.message || 'Brevo failed',
+        };
+    }
 }
 
 async function sendWithSmtp({ to, subject, text, replyTo }) {
@@ -44,11 +136,10 @@ async function sendWithSmtp({ to, subject, text, replyTo }) {
             port: Number(process.env.SMTP_PORT) || 587,
             secure: process.env.SMTP_SECURE === 'true',
         },
-        // Railway / bazı ağlarda 587 takılırsa SSL 465 dene
         { port: 465, secure: true },
+        { port: 587, secure: false },
     ];
 
-    // Aynı port iki kez denenmesin
     const seen = new Set();
     const unique = attempts.filter((a) => {
         const key = `${a.port}:${a.secure}`;
@@ -85,9 +176,26 @@ async function sendWithSmtp({ to, subject, text, replyTo }) {
     };
 }
 
-/**
- * Şifre sıfırlama e-postası gönderir (link ile).
- */
+/** HTTPS API (Resend/Brevo) → SMTP sırası */
+async function sendMail(opts) {
+    const viaResend = await sendWithResend(opts);
+    if (viaResend?.sent) return viaResend;
+
+    const viaBrevo = await sendWithBrevo(opts);
+    if (viaBrevo?.sent) return viaBrevo;
+
+    const smtp = await sendWithSmtp(opts);
+    if (smtp.sent) return smtp;
+
+    // HTTP denendi ama başarısız + SMTP de başarısız
+    const httpErr = viaResend?.error || viaBrevo?.error;
+    return {
+        sent: false,
+        smtpConfigured: Boolean(getSmtpAuth().pass) || Boolean(httpErr),
+        error: smtp.error || httpErr || 'No mail provider succeeded',
+    };
+}
+
 async function sendPasswordResetEmail(email, token) {
     const base = process.env.RESET_LINK_BASE || 'pdfai://reset-password';
     const resetLink = base.includes('?')
@@ -96,23 +204,16 @@ async function sendPasswordResetEmail(email, token) {
     const subject = 'Şifre sıfırlama linki';
     const text = `Şifrenizi sıfırlamak için aşağıdaki linke tıklayın:\n\n${resetLink}\n\nBu link 1 saat geçerlidir.\n\nBu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.`;
 
-    return sendWithSmtp({ to: email, subject, text });
+    return sendMail({ to: email, subject, text });
 }
 
-/**
- * Şifre sıfırlama kodu (6 haneli) e-postası gönderir.
- */
 async function sendPasswordResetCodeEmail(email, code) {
     const subject = 'Şifre sıfırlama kodunuz';
     const text = `Şifre sıfırlama kodunuz: ${code}\n\nBu kod 3 dakika geçerlidir. 3 dakika içinde uygulama içinde bu kodu girip şifrenizi yenilemeniz gerekir; aksi halde kod geçersiz olur.\n\nBu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.`;
 
-    return sendWithSmtp({ to: email, subject, text });
+    return sendMail({ to: email, subject, text });
 }
 
-/**
- * Uygulama içi yardım/destek mesajı.
- * Alıcı: SUPPORT_INBOX (varsayılan labanalysis.noreply@gmail.com).
- */
 async function sendSupportEmail({ fromName, fromEmail, userId, message }) {
     const inbox = (
         process.env.SUPPORT_INBOX || 'labanalysis.noreply@gmail.com'
@@ -130,7 +231,13 @@ async function sendSupportEmail({ fromName, fromEmail, userId, message }) {
     ].join('\n');
 
     const { host, user, pass } = getSmtpAuth();
-    if (!host || !user || !pass) {
+    const hasHttp =
+        Boolean((process.env.RESEND_API_KEY || '').trim()) ||
+        Boolean(
+            (process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY || '').trim(),
+        );
+
+    if (!host && !user && !pass && !hasHttp) {
         if (process.env.NODE_ENV !== 'production') {
             console.log('[Mail] Support (SMTP yok, log):', {
                 inbox,
@@ -142,7 +249,7 @@ async function sendSupportEmail({ fromName, fromEmail, userId, message }) {
         return { sent: false, smtpConfigured: false };
     }
 
-    return sendWithSmtp({
+    return sendMail({
         to: inbox,
         subject,
         text,

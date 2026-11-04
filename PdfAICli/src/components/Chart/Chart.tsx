@@ -196,10 +196,32 @@ const Chart: React.FC<Props> = ({items = [], width = 320}) => {
   }, [items]);
 
   const groupsBySection = useMemo(() => {
+    /** Kurum/poliklinik adları bölüm başlığı değil — ortada başlık gibi görünmesin */
+    const cleanSection = (raw: string | null | undefined): string | null => {
+      if (raw == null) return null;
+      const t = String(raw).trim();
+      if (!t) return null;
+      const fold = t
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\u0130/g, 'I')
+        .replace(/\u0131/g, 'i')
+        .toLowerCase();
+      if (
+        /semt\s*poliklin|poliklinigi|organize\s*sanayi|egitim\s*ve\s*arastirma|saglik\s*tesisi|hastanesi|bakanligi/.test(
+          fold,
+        )
+      ) {
+        return null;
+      }
+      return t;
+    };
     const map = new Map<string | null, typeof filtered>();
     const sectionOrder: (string | null)[] = [];
     for (const item of filtered) {
-      const sec = (item as LabItem & {section?: string | null}).section ?? null;
+      const sec = cleanSection(
+        (item as LabItem & {section?: string | null}).section,
+      );
       if (!map.has(sec)) {
         map.set(sec, []);
         sectionOrder.push(sec);

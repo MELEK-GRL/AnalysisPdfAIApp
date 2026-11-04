@@ -4,6 +4,7 @@ const {
     ADS_ENABLED,
     ADS_WATCHES_PER_CREDIT,
     ADMOB_REWARDED_UNIT_ID,
+    isOpenAIEnabled,
 } = require('../constants');
 const { getQuotaForUser, recordAdWatch } = require('../services/adsQuota');
 
@@ -15,6 +16,8 @@ router.get('/status', requireAuth, async (req, res) => {
         return res.json({
             ok: true,
             adsEnabled: ADS_ENABLED,
+            openaiEnabled: isOpenAIEnabled(),
+            openaiEnabledRaw: process.env.OPENAI_ENABLED ?? null,
             watchesPerCredit: ADS_WATCHES_PER_CREDIT,
             rewardedUnitId: ADS_ENABLED ? ADMOB_REWARDED_UNIT_ID : null,
             ...quota,

@@ -17,10 +17,21 @@ function isJunkSection(title) {
     return false;
 }
 
+/** Türkçe İ/ı güvenli karşılaştırma için ASCII fold */
+function foldTr(s) {
+    return String(s)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\u0130/g, 'I') // İ
+        .replace(/\u0131/g, 'i') // ı
+        .toLowerCase();
+}
+
 /** Tablo sütun adı / kurum adı / metadata – bunlar PDF’deki gerçek bölüm başlığı değil, bölüm olarak kullanılmamalı. */
 function isSectionHeaderBlocklist(title) {
     if (!title || typeof title !== 'string') return false;
     const t = title.trim();
+    const f = foldTr(t);
     const blocklist = [
         /^Değeri$/i, /^Sonuç$/i, /^Referans$/i, /^Birimi$/i, /^Tarih$/i, /^Analiz$/i,
         /^TarihTahlilSonuç$/i, /^Sonuç\s+Birim/i, /^Referans\s+Değeri/i,
@@ -36,7 +47,16 @@ function isSectionHeaderBlocklist(title) {
         /* Test adı + değer birleşik (örn. LIPAZ(ACİL)45.7BIRIM, BETA-HCG (ACIL)<0.200) */
         /\d+[,.]?\d*\s*BIRIM\s*\d|<\s*0[,.]\d+.*IU\/mL/i,
     ];
-    return blocklist.some((rx) => rx.test(t));
+    if (blocklist.some((rx) => rx.test(t))) return true;
+    // Kurum / poliklinik / hastane (İ/I farkına takılmadan)
+    if (
+        /semt\s*poliklin|poliklinigi|organize\s*sanayi|egitim\s*ve\s*arastirma|saglik\s*tesisi|hastanesi|bakanligi/.test(
+            f,
+        )
+    ) {
+        return true;
+    }
+    return false;
 }
 
 /**

@@ -32,8 +32,25 @@ const ADS_WATCHES_PER_CREDIT = Math.max(1, Number(process.env.ADS_WATCHES_PER_CR
  * OpenAI LLM çağrıları. Aç/kapa sadece sunucu (OPENAI_ENABLED).
  * Varsayılan: açık. Token bitince OPENAI_ENABLED=false → regex + lokal yorum (API isteği yok).
  * Client rebuild gerekmez; env değişince process restart yeter.
+ * Not: Her çağrıda process.env okunur (Railway restart / boşluk / tırnak için).
  */
-const OPENAI_ENABLED = String(process.env.OPENAI_ENABLED ?? 'true').toLowerCase() !== 'false';
+function parseEnvFlag(raw, defaultValue) {
+    if (raw == null || String(raw).trim() === '') return defaultValue;
+    const v = String(raw)
+        .trim()
+        .toLowerCase()
+        .replace(/^['"]|['"]$/g, '');
+    if (['false', '0', 'off', 'no'].includes(v)) return false;
+    if (['true', '1', 'on', 'yes'].includes(v)) return true;
+    return defaultValue;
+}
+
+function isOpenAIEnabled() {
+    return parseEnvFlag(process.env.OPENAI_ENABLED, true);
+}
+
+/** Snapshot (modül yükleme anı) — canlı kontrol için isOpenAIEnabled() kullan. */
+const OPENAI_ENABLED = isOpenAIEnabled();
 /** Boşsa Google test rewarded unit (canlıda gerçek unit koy). */
 const ADMOB_REWARDED_UNIT_ID =
     (process.env.ADMOB_REWARDED_UNIT_ID || '').trim() ||
@@ -75,6 +92,8 @@ module.exports = {
     ADS_WATCHES_PER_CREDIT,
     ADMOB_REWARDED_UNIT_ID,
     OPENAI_ENABLED,
+    isOpenAIEnabled,
+    parseEnvFlag,
     TMP_DIR,
     DEFAULT_PORT,
     DEFAULT_DB_NAME,

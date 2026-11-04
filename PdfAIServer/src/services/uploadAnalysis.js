@@ -4,6 +4,7 @@
  */
 const { extractTextFromPdf } = require('./pdf');
 const { classifyAndExtract, finalizeLabItems } = require('./openai');
+const { isOpenAIEnabled } = require('../constants');
 const Lab = require('../models/LatestLabResult');
 const LabHistory = require('../models/LabHistory');
 const { MAX_LAB_HISTORY_PER_USER } = require('../constants');
@@ -150,6 +151,7 @@ async function analyzeAndSave(tmpPath, userId, pdfName, locale = 'tr') {
         type: result?.isLab ? 'lab' : 'non-lab',
         confidence: result?.confidence ?? null,
         reason: result?.reason ?? null,
+        openaiEnabled: isOpenAIEnabled(),
         items: result?.items || [],
         /** 1. Aşama: PDF'den çıkarılan ham parametreler (bölüm atama / idrar-HPF düzeltmeleri uygulanmamış); UI'da aynen göstermek için. */
         rawItems: result?.rawItems ?? [],

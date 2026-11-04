@@ -1,10 +1,10 @@
 
 const OpenAI = require('openai');
-const { OPENAI_ENABLED } = require('../constants');
+const { isOpenAIEnabled } = require('../constants');
 
 let _openaiClient;
 function getOpenAIClient() {
-    if (!OPENAI_ENABLED) {
+    if (!isOpenAIEnabled()) {
         throw new Error('OPENAI_ENABLED is false');
     }
     const key = process.env.OPENAI_API_KEY;
@@ -108,7 +108,20 @@ function isLowQualitySection(section) {
     if (!t) return false;
     if (isJunkSection(t) || isSectionHeaderBlocklist(t)) return true;
     if (t.length > 60) return true;
-    if (/SEMT POLİKLİN|ORGANİZE SANAYİ|EĞİTİM VE ARAŞTIRMA|Sağlık Tesisi|POLİKLİNİĞİ|Örnek Laboratuvar|Rapor tarihi/i.test(t)) return true;
+    // fold: İ/I farkı (SANAYİ BÖLGESİ SEMT POLİKLİNİĞİ vb.)
+    const fold = t
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\u0130/g, 'I')
+        .replace(/\u0131/g, 'i')
+        .toLowerCase();
+    if (
+        /semt\s*poliklin|poliklinigi|organize\s*sanayi|egitim\s*ve\s*arastirma|saglik\s*tesisi|hastanesi|ornek\s*laboratuvar|rapor\s*tarihi/.test(
+            fold,
+        )
+    ) {
+        return true;
+    }
     // Ham tablo satırı bölüm diye yapışmış
     if (/\d+[,.]?\d*.{0,12}(mg\/dL|10[³6^]|μL|µL|g\/dL|fL)/i.test(t)) return true;
     return false;
@@ -1002,7 +1015,7 @@ const LAB_EXTRACTION_FORMAT = {
 
 
 async function callOpenAI({ instructions, input, timeoutMs = TIMEOUT_PRIMARY, model = MODEL }) {
-    if (!OPENAI_ENABLED) {
+    if (!isOpenAIEnabled()) {
         throw new Error('OPENAI_ENABLED is false');
     }
     const resp = await withTimeout(
@@ -1174,7 +1187,7 @@ async function generateAnalysisText(items, locale = 'tr') {
     }
 
     const localAnalysis = buildLocalAnalysisFromItems(clean, locale);
-    if (!OPENAI_ENABLED) {
+    if (!isOpenAIEnabled()) {
         return localAnalysis;
     }
     const notable = collectNotableFindings(clean, locale);
@@ -1406,8 +1419,11 @@ async function classifyAndExtract(text, locale = 'tr') {
         return { ...fallback, analysis };
     }
 
-    if (!OPENAI_ENABLED) {
-        if (DEV) console.warn('OPENAI_ENABLED=false — local regex only');
+    if (!isOpenAIEnabled()) {
+        console.warn(
+            'OPENAI_ENABLED=false — local regex only (raw=%s)',
+            JSON.stringify(process.env.OPENAI_ENABLED),
+        );
         return finishWithLocalOnly(
             'Local regex extraction (OPENAI_ENABLED=false)',
             'OPENAI_ENABLED=false – not treated as lab',
@@ -1510,6 +1526,5 @@ module.exports = {
     finalizeLabItems,
     isJunkLabLabel,
     isLowQualityLabItem,
-    /** env flag (constants) — test / ops */
-    OPENAI_ENABLED,
+    isOpenAIEnabled,
 };

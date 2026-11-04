@@ -16,8 +16,8 @@
   },
   "header": {
     "welcome": "Hoş geldin",
-    "quotaLeft": "{{count}} analiz",
-    "quotaEmpty": "0 analiz",
+    "quotaLeft": "{{count}} Analiz",
+    "quotaEmpty": "0 Analiz",
     "quotaUnlimited": "Sınırsız",
     "quotaInfoLeft": "Bugün {{count}} tahlil analizi yapabilirsiniz.",
     "quotaInfoEmpty": "Bugünkü analizleriniz bitti. Reklam izleyerek +1 analiz kazanabilirsiniz.",

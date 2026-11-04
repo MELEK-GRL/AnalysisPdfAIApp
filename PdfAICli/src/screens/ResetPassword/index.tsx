@@ -1,5 +1,15 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { View, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import {
+    View,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    TouchableOpacity,
+    ScrollView,
+    Keyboard,
+    TouchableWithoutFeedback,
+    Dimensions,
+} from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 
 import { resetPasswordByToken, resetPasswordByCode } from '../../server/api/User';
@@ -12,6 +22,7 @@ import colors from '../../theme/colors';
 import { fontSize } from '../../constants/typography';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { useT } from '../../store/useLocaleStore';
+import { useKeyboardBottomInset } from '../../hooks/useKeyboardBottomInset';
 
 type ResetPasswordRoute = { ResetPassword: { token?: string; email?: string; devCode?: string } };
 
@@ -23,6 +34,9 @@ const ResetPassword: React.FC = () => {
     const devCodeFromRoute = route.params?.devCode ?? '';
     const t = useT();
     const { w1px, h1px } = useResponsive();
+    const keyboardInset = useKeyboardBottomInset(0.5);
+    const keyboardOpen = keyboardInset > 0;
+    const scrollRef = useRef<ScrollView>(null);
     const [code, setCode] = useState(devCodeFromRoute);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,6 +48,14 @@ const ResetPassword: React.FC = () => {
         type?: 'error' | 'warning' | 'success';
     }>({ visible: false, title: '', message: '' });
     const [showExpiryHint, setShowExpiryHint] = useState(false);
+
+    const ensureFieldVisible = useCallback(() => {
+        const screenH = Dimensions.get('window').height;
+        const y = Math.round(screenH * 0.18);
+        setTimeout(() => {
+            scrollRef.current?.scrollTo({ y, animated: true });
+        }, 120);
+    }, []);
 
     useEffect(() => {
         if (emailFromRoute) {
@@ -47,8 +69,12 @@ const ResetPassword: React.FC = () => {
             StyleSheet.create({
                 container: {
                     flex: 1,
+                },
+                scrollContent: {
+                    flexGrow: 1,
+                    justifyContent: keyboardOpen ? 'flex-start' : 'center',
                     padding: 16 * w1px,
-                    justifyContent: 'center',
+                    paddingBottom: 24 * h1px + keyboardInset,
                 },
                 card: {
                     backgroundColor: '#fff',
@@ -68,7 +94,7 @@ const ResetPassword: React.FC = () => {
                     marginBottom: 16 * h1px,
                 },
             }),
-        [w1px, h1px],
+        [w1px, h1px, keyboardInset, keyboardOpen],
     );
 
     const handleSubmit = async () => {
@@ -148,7 +174,7 @@ const ResetPassword: React.FC = () => {
     if (!tokenFromRoute && !emailFromRoute) {
         return (
             <GradientLayout>
-                <View style={s.container}>
+                <View style={[s.container, s.scrollContent]}>
                     <TouchableOpacity
                         style={s.backRow}
                         onPress={() => nav.replace('Login')}
@@ -186,93 +212,147 @@ const ResetPassword: React.FC = () => {
         <GradientLayout>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                style={s.container}>
-                <TouchableOpacity
-                    style={s.backRow}
-                    onPress={() => nav.replace('Login')}
-                    activeOpacity={0.7}>
-                    <T size={fontSize.body} color={colors.backgroundPurple} weight="600">
-                        {t('common.back')}
-                    </T>
-                </TouchableOpacity>
-                <View style={s.card}>
-                    <T
-                        size={fontSize.display}
-                        weight="900"
-                        color={colors.backgroundPurple}
-                        style={{ marginBottom: 24 * h1px, textAlign: 'center' }}>
-                        {t('resetPassword.title')}
-                    </T>
-                    <T
-                        size={fontSize.body}
-                        color={colors.textDark}
-                        style={{ marginBottom: 16 * h1px, textAlign: 'center' }}>
-                        {emailFromRoute ? t('resetPassword.subtitle') : t('resetPassword.subtitleLink')}
-                    </T>
-                    {emailFromRoute ? (
-                        <>
-                            <TextInputComponent
-                                label={t('forgotPassword.emailLabel')}
-                                placeholder={t('register.emailPlaceholder')}
-                                value={emailFromRoute}
-                                editable={false}
-                                containerStyle={{ marginBottom: 12 * h1px }}
-                            />
-                            <TextInputComponent
-                                label={t('resetPassword.codeLabel')}
-                                placeholder={t('resetPassword.codePlaceholder')}
-                                value={code}
-                                onChangeText={v => setCode(v.replace(/\D/g, '').slice(0, 6))}
-                                keyboardType="number-pad"
-                                maxLength={6}
-                                containerStyle={{ marginBottom: devCodeFromRoute ? 4 * h1px : 12 * h1px }}
-                            />
-                            {devCodeFromRoute ? (
+                style={s.container}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}>
+                <ScrollView
+                    ref={scrollRef}
+                    contentContainerStyle={s.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode="on-drag"
+                    showsVerticalScrollIndicator={false}>
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View>
+                            <TouchableOpacity
+                                style={s.backRow}
+                                onPress={() => nav.replace('Login')}
+                                activeOpacity={0.7}>
                                 <T
-                                    size={fontSize.caption}
-                                    color={colors.textLight}
-                                    style={{ marginBottom: 12 * h1px }}>
-                                    {t('resetPassword.devCodeHint')}
+                                    size={fontSize.body}
+                                    color={colors.backgroundPurple}
+                                    weight="600">
+                                    {t('common.back')}
                                 </T>
-                            ) : null}
-                        </>
-                    ) : null}
-                    <TextInputComponent
-                        label={t('resetPassword.newPasswordLabel')}
-                        placeholder={t('register.passwordHintPlaceholder')}
-                        value={newPassword}
-                        onChangeText={v => setNewPassword(v.replace(/\s/g, ''))}
-                        secureTextEntry
-                        passwordToggle
-                        containerStyle={{ marginBottom: 12 * h1px }}
-                    />
-                    <TextInputComponent
-                        label={t('register.confirmPlaceholder')}
-                        placeholder={t('register.confirmPlaceholder')}
-                        value={confirmPassword}
-                        onChangeText={v =>
-                            setConfirmPassword(v.replace(/\s/g, ''))
-                        }
-                        secureTextEntry
-                        passwordToggle
-                        returnKeyType="done"
-                        onSubmitEditing={handleSubmit}
-                        containerStyle={{ marginBottom: 12 * h1px }}
-                    />
-                    <Button
-                        buttonText={t('resetPassword.submitButton')}
-                        onPress={handleSubmit}
-                        activityIndicatorLoading={loading}
-                        disabled={
-                            loading ||
-                            !newPassword ||
-                            newPassword !== confirmPassword ||
-                            (emailFromRoute ? code.trim().length !== 6 : false)
-                        }
-                        style={{ marginTop: 4 * h1px }}
-                        width={h1px * 260}
-                    />
-                </View>
+                            </TouchableOpacity>
+                            <View style={s.card}>
+                                <T
+                                    size={fontSize.display}
+                                    weight="900"
+                                    color={colors.backgroundPurple}
+                                    style={{
+                                        marginBottom: 24 * h1px,
+                                        textAlign: 'center',
+                                    }}>
+                                    {t('resetPassword.title')}
+                                </T>
+                                <T
+                                    size={fontSize.body}
+                                    color={colors.textDark}
+                                    style={{
+                                        marginBottom: 16 * h1px,
+                                        textAlign: 'center',
+                                    }}>
+                                    {emailFromRoute
+                                        ? t('resetPassword.subtitle')
+                                        : t('resetPassword.subtitleLink')}
+                                </T>
+                                {emailFromRoute ? (
+                                    <>
+                                        <TextInputComponent
+                                            label={t('forgotPassword.emailLabel')}
+                                            placeholder={t(
+                                                'register.emailPlaceholder',
+                                            )}
+                                            value={emailFromRoute}
+                                            editable={false}
+                                            containerStyle={{
+                                                marginBottom: 12 * h1px,
+                                            }}
+                                        />
+                                        <TextInputComponent
+                                            label={t('resetPassword.codeLabel')}
+                                            placeholder={t(
+                                                'resetPassword.codePlaceholder',
+                                            )}
+                                            value={code}
+                                            onChangeText={v =>
+                                                setCode(
+                                                    v.replace(/\D/g, '').slice(0, 6),
+                                                )
+                                            }
+                                            keyboardType="number-pad"
+                                            maxLength={6}
+                                            onFocus={ensureFieldVisible}
+                                            containerStyle={{
+                                                marginBottom: devCodeFromRoute
+                                                    ? 4 * h1px
+                                                    : 12 * h1px,
+                                            }}
+                                        />
+                                        {devCodeFromRoute ? (
+                                            <T
+                                                size={fontSize.caption}
+                                                color={colors.textLight}
+                                                style={{
+                                                    marginBottom: 12 * h1px,
+                                                }}>
+                                                {t('resetPassword.devCodeHint')}
+                                            </T>
+                                        ) : null}
+                                    </>
+                                ) : null}
+                                <TextInputComponent
+                                    label={t('resetPassword.newPasswordLabel')}
+                                    placeholder={t(
+                                        'register.passwordHintPlaceholder',
+                                    )}
+                                    value={newPassword}
+                                    onChangeText={v =>
+                                        setNewPassword(v.replace(/\s/g, ''))
+                                    }
+                                    secureTextEntry
+                                    passwordToggle
+                                    onFocus={ensureFieldVisible}
+                                    containerStyle={{
+                                        marginBottom: 12 * h1px,
+                                    }}
+                                />
+                                <TextInputComponent
+                                    label={t('register.confirmPlaceholder')}
+                                    placeholder={t(
+                                        'register.confirmPlaceholder',
+                                    )}
+                                    value={confirmPassword}
+                                    onChangeText={v =>
+                                        setConfirmPassword(v.replace(/\s/g, ''))
+                                    }
+                                    secureTextEntry
+                                    passwordToggle
+                                    returnKeyType="done"
+                                    onFocus={ensureFieldVisible}
+                                    onSubmitEditing={handleSubmit}
+                                    containerStyle={{
+                                        marginBottom: 12 * h1px,
+                                    }}
+                                />
+                                <Button
+                                    buttonText={t('resetPassword.submitButton')}
+                                    onPress={handleSubmit}
+                                    activityIndicatorLoading={loading}
+                                    disabled={
+                                        loading ||
+                                        !newPassword ||
+                                        newPassword !== confirmPassword ||
+                                        (emailFromRoute
+                                            ? code.trim().length !== 6
+                                            : false)
+                                    }
+                                    style={{ marginTop: 4 * h1px }}
+                                    width={h1px * 260}
+                                />
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
+                </ScrollView>
             </KeyboardAvoidingView>
 
             <PopupModal

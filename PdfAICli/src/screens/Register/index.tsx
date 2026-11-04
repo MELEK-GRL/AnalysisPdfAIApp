@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import {
     View,
     StyleSheet,
@@ -36,13 +36,25 @@ import { LAST_CONSENT_ID } from '../../constants/storageKeys';
 import { isNetworkError } from '../../utils/errorUtils';
 import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
 import OPEN_CONSENT_ITEMS from '../../utils/contractArticles/OpenConsentArticles.json';
+import { useKeyboardBottomInset } from '../../hooks/useKeyboardBottomInset';
 
 const Register: React.FC = () => {
     const nav = useNavigation<any>();
     useScreenTime('Register');
     const t = useT();
     const { w1px, h1px, fs1px } = useResponsive();
+    const keyboardInset = useKeyboardBottomInset(0.5);
+    const scrollRef = useRef<ScrollView>(null);
     const setUserAndToken = useAuthStore(s => s.setUserAndToken);
+
+    const ensureFieldVisible = useCallback(() => {
+        const screenH = Dimensions.get('window').height;
+        // Cihaz boyuna göre ılımlı kaydır — scrollToEnd değil
+        const y = Math.round(screenH * 0.18);
+        setTimeout(() => {
+            scrollRef.current?.scrollTo({ y, animated: true });
+        }, 120);
+    }, []);
 
     const [form, setForm] = useState({
         name: '',
@@ -63,6 +75,8 @@ const Register: React.FC = () => {
         type?: 'success' | 'error' | 'warning';
     }>({ visible: false, title: '', message: '' });
 
+    const keyboardOpen = keyboardInset > 0;
+
     const s = useMemo(
         () =>
             StyleSheet.create({
@@ -70,8 +84,9 @@ const Register: React.FC = () => {
                 scrollContent: {
                     flexGrow: 1,
                     padding: 16 * w1px,
-                    paddingBottom: 24 * h1px,
-                    justifyContent: 'center',
+                    paddingTop: keyboardOpen ? 8 * h1px : 16 * h1px,
+                    paddingBottom: 24 * h1px + keyboardInset,
+                    justifyContent: keyboardOpen ? 'flex-start' : 'center',
                 },
                 card: {
                     backgroundColor: '#fff',
@@ -114,7 +129,7 @@ const Register: React.FC = () => {
                     backgroundColor: colors.backgroundPurpleSoft,
                 },
             }),
-        [w1px, h1px, fs1px],
+        [w1px, h1px, fs1px, keyboardInset, keyboardOpen],
     );
 
     const renderTermChild = useCallback(
@@ -342,12 +357,15 @@ const Register: React.FC = () => {
             <SafeAreaView style={{ flex: 1 }}>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                    style={s.container}>
+                    style={s.container}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}>
                     <ScrollView
+                        ref={scrollRef}
                         style={s.container}
                         contentContainerStyle={s.scrollContent}
                         showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled">
+                        keyboardShouldPersistTaps="handled"
+                        keyboardDismissMode="on-drag">
                         <View style={s.card}>
                             <T
                             size={fontSize.display}
@@ -398,6 +416,7 @@ const Register: React.FC = () => {
                             secureTextEntry
                             passwordToggle
                             returnKeyType="next"
+                            onFocus={ensureFieldVisible}
                             containerStyle={{ marginBottom: 10 * h1px }}
                         />
 
@@ -411,6 +430,7 @@ const Register: React.FC = () => {
                             secureTextEntry
                             passwordToggle
                             returnKeyType="done"
+                            onFocus={ensureFieldVisible}
                             containerStyle={{ marginBottom: 4 * h1px }}
                         />
 

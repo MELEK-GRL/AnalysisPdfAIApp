@@ -1,7 +1,11 @@
 /**
  * E-posta gönderimi (şifre sıfırlama + destek).
- * Railway'de Gmail SMTP (465/587) sık connection timeout verir →
- * varsa Resend / Brevo HTTPS API tercih edilir, sonra SMTP denenir.
+ *
+ * Railway → Gmail SMTP (465/587) Connection timeout veriyor.
+ * Ücretsiz çözüm: Google Apps Script Web App (HTTPS) + Gmail MailApp.
+ * Env: GOOGLE_SCRIPT_MAIL_URL  (+ opsiyonel GOOGLE_SCRIPT_MAIL_SECRET)
+ *
+ * Lokal: SMTP_* ile doğrudan Gmail çalışır.
  */
 
 function getSmtpAuth() {
@@ -32,94 +36,58 @@ function createTransporter(overrides = {}) {
     });
 }
 
-async function sendWithResend({ to, subject, text, replyTo }) {
-    const key = (process.env.RESEND_API_KEY || '').trim();
-    if (!key) return null;
+/** Tamamen ücretsiz: Google Apps Script → Gmail */
+async function sendWithGoogleScript({ to, subject, text, replyTo }) {
+    const url = (process.env.GOOGLE_SCRIPT_MAIL_URL || '').trim();
+    if (!url) return null;
 
-    const from =
-        (process.env.MAIL_FROM || '').trim() ||
-        'LabAnalysis <onboarding@resend.dev>';
-
-    try {
-        const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${key}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                from,
-                to: [to],
-                subject,
-                text,
-                ...(replyTo ? { reply_to: replyTo } : {}),
-            }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-            console.error('[Mail] Resend error:', res.status, data);
-            return {
-                sent: false,
-                provider: 'resend',
-                error: data?.message || `Resend HTTP ${res.status}`,
-            };
-        }
-        return { sent: true, provider: 'resend', id: data?.id };
-    } catch (err) {
-        console.error('[Mail] Resend exception:', err?.message || err);
-        return {
-            sent: false,
-            provider: 'resend',
-            error: err?.message || 'Resend failed',
-        };
-    }
-}
-
-async function sendWithBrevo({ to, subject, text, replyTo }) {
-    const key = (
-        process.env.BREVO_API_KEY ||
-        process.env.SENDINBLUE_API_KEY ||
-        ''
-    ).trim();
-    if (!key) return null;
-
-    const fromEmail =
-        (process.env.MAIL_FROM || process.env.SMTP_USER || '').trim() ||
-        'noreply@labanalysis.app';
-    const fromName = 'LabAnalysis';
+    const secret = (process.env.GOOGLE_SCRIPT_MAIL_SECRET || '').trim();
+    const payload = {
+        to,
+        subject,
+        text,
+        ...(replyTo ? { replyTo } : {}),
+        ...(secret ? { secret } : {}),
+    };
 
     try {
-        const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 25000);
+        const res = await fetch(url, {
             method: 'POST',
-            headers: {
-                'api-key': key,
-                'Content-Type': 'application/json',
-                accept: 'application/json',
-            },
-            body: JSON.stringify({
-                sender: { name: fromName, email: fromEmail },
-                to: [{ email: to }],
-                subject,
-                textContent: text,
-                ...(replyTo ? { replyTo: { email: replyTo } } : {}),
-            }),
+            redirect: 'follow',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
         });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-            console.error('[Mail] Brevo error:', res.status, data);
+        clearTimeout(timer);
+
+        const raw = await res.text();
+        let data = {};
+        try {
+            data = JSON.parse(raw);
+        } catch {
+            data = { raw };
+        }
+
+        if (!res.ok || data.ok === false) {
+            console.error('[Mail] Google Script error:', res.status, data);
             return {
                 sent: false,
-                provider: 'brevo',
-                error: data?.message || `Brevo HTTP ${res.status}`,
+                provider: 'google-script',
+                error:
+                    data?.error ||
+                    data?.raw ||
+                    `Google Script HTTP ${res.status}`,
             };
         }
-        return { sent: true, provider: 'brevo', id: data?.messageId };
+        return { sent: true, provider: 'google-script' };
     } catch (err) {
-        console.error('[Mail] Brevo exception:', err?.message || err);
+        console.error('[Mail] Google Script exception:', err?.message || err);
         return {
             sent: false,
-            provider: 'brevo',
-            error: err?.message || 'Brevo failed',
+            provider: 'google-script',
+            error: err?.message || 'Google Script failed',
         };
     }
 }
@@ -176,23 +144,23 @@ async function sendWithSmtp({ to, subject, text, replyTo }) {
     };
 }
 
-/** HTTPS API (Resend/Brevo) → SMTP sırası */
+/** Önce Google Script (ücretsiz HTTPS), sonra SMTP */
 async function sendMail(opts) {
-    const viaResend = await sendWithResend(opts);
-    if (viaResend?.sent) return viaResend;
-
-    const viaBrevo = await sendWithBrevo(opts);
-    if (viaBrevo?.sent) return viaBrevo;
+    const viaScript = await sendWithGoogleScript(opts);
+    if (viaScript?.sent) return viaScript;
 
     const smtp = await sendWithSmtp(opts);
     if (smtp.sent) return smtp;
 
-    // HTTP denendi ama başarısız + SMTP de başarısız
-    const httpErr = viaResend?.error || viaBrevo?.error;
     return {
         sent: false,
-        smtpConfigured: Boolean(getSmtpAuth().pass) || Boolean(httpErr),
-        error: smtp.error || httpErr || 'No mail provider succeeded',
+        smtpConfigured:
+            Boolean(getSmtpAuth().pass) ||
+            Boolean((process.env.GOOGLE_SCRIPT_MAIL_URL || '').trim()),
+        error:
+            viaScript?.error ||
+            smtp.error ||
+            'No mail provider succeeded',
     };
 }
 
@@ -231,22 +199,24 @@ async function sendSupportEmail({ fromName, fromEmail, userId, message }) {
     ].join('\n');
 
     const { host, user, pass } = getSmtpAuth();
-    const hasHttp =
-        Boolean((process.env.RESEND_API_KEY || '').trim()) ||
-        Boolean(
-            (process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY || '').trim(),
-        );
+    const hasScript = Boolean(
+        (process.env.GOOGLE_SCRIPT_MAIL_URL || '').trim(),
+    );
 
-    if (!host && !user && !pass && !hasHttp) {
+    if (!hasScript && !host && !user && !pass) {
         if (process.env.NODE_ENV !== 'production') {
-            console.log('[Mail] Support (SMTP yok, log):', {
+            console.log('[Mail] Support (provider yok, log):', {
                 inbox,
                 subject,
                 text,
             });
             return { sent: true, smtpConfigured: false, logged: true };
         }
-        return { sent: false, smtpConfigured: false };
+        return {
+            sent: false,
+            smtpConfigured: false,
+            error: 'GOOGLE_SCRIPT_MAIL_URL or SMTP not configured',
+        };
     }
 
     return sendMail({

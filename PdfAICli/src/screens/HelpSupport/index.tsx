@@ -43,7 +43,7 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
     const user = useAuthStore(s => s.user);
     const displayName = user?.name ?? '';
     const { w1px, h1px } = useResponsive();
-    const { scale } = useTypography();
+    const { scale, fontFamily } = useTypography();
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -145,10 +145,13 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
                     minHeight: 150 * h1px,
                     maxHeight: 220 * h1px,
                     textAlignVertical: 'top',
+                    // TextInputComponent ile aynı tipografi (uygulama geneli body)
                     fontSize: fontSize.body * scale,
-                    lineHeight: fontSize.body * scale * 1.45,
+                    lineHeight: fontSize.body * scale * 1.35,
+                    fontFamily,
                     color: colors.textDark,
                     padding: 0,
+                    includeFontPadding: false,
                 },
                 sendWrap: {
                     width: '100%',
@@ -157,7 +160,7 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
                     marginBottom: 24 * h1px,
                 },
             }),
-        [w1px, h1px, scale],
+        [w1px, h1px, scale, fontFamily],
     );
 
     const showResult = useCallback(
@@ -322,8 +325,8 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
                                                 color={colors.backgroundPurple}
                                             />
                                             <T
-                                                size={fontSize.bodySmall}
-                                                weight="600"
+                                                size={fontSize.subtitle}
+                                                weight="400"
                                                 color={colors.textGraySoft}>
                                                 {t(
                                                     'settings.helpSupportMessageLabel',
@@ -344,7 +347,9 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
                                         placeholder={t(
                                             'settings.helpSupportPlaceholder',
                                         )}
-                                        placeholderTextColor="#9CA3AF"
+                                        placeholderTextColor={
+                                            colors.buttonGray
+                                        }
                                         multiline
                                         maxLength={MAX_MESSAGE}
                                         editable={!sending}

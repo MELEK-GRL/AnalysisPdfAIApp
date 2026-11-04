@@ -51,23 +51,51 @@ async function sendWithGoogleScript({ to, subject, text, replyTo }) {
     };
 
     try {
+        // Apps Script Web App akışı:
+        // 1) POST /exec (redirect:manual) → 302 Location (echo URL)
+        // 2) GET Location → JSON cevap  ({"ok":true})
+        // redirect:follow POST'u GET'e çevirip 405 verir; Location'a ikinci POST da 405.
+        // Content-Type text/plain: JSON Content-Type bazen Script tarafında sorun çıkarır.
+        const body = JSON.stringify(payload);
+        const headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 25000);
-        const res = await fetch(url, {
-            method: 'POST',
-            redirect: 'follow',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-            signal: controller.signal,
-        });
-        clearTimeout(timer);
+        let res;
+        try {
+            res = await fetch(url, {
+                method: 'POST',
+                redirect: 'manual',
+                headers,
+                body,
+                signal: controller.signal,
+            });
+
+            if (res.status >= 300 && res.status < 400) {
+                const loc = res.headers.get('location');
+                if (!loc) {
+                    return {
+                        sent: false,
+                        provider: 'google-script',
+                        error: `Google Script redirect without Location (${res.status})`,
+                    };
+                }
+                res = await fetch(loc, {
+                    method: 'GET',
+                    redirect: 'follow',
+                    signal: controller.signal,
+                });
+            }
+        } finally {
+            clearTimeout(timer);
+        }
 
         const raw = await res.text();
         let data = {};
         try {
             data = JSON.parse(raw);
         } catch {
-            data = { raw };
+            data = { raw: String(raw).slice(0, 300) };
         }
 
         if (!res.ok || data.ok === false) {

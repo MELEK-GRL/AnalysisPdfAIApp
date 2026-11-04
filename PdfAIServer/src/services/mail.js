@@ -5,8 +5,12 @@
  * Ücretsiz çözüm: Google Apps Script Web App (HTTPS) + Gmail MailApp.
  * Env: GOOGLE_SCRIPT_MAIL_URL  (+ opsiyonel GOOGLE_SCRIPT_MAIL_SECRET)
  *
- * Lokal: SMTP_* ile doğrudan Gmail çalışır.
+ * Lokal: SMTP_* ile doğrudan Gmail çalışır (Script yoksa).
  */
+
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
 
 function getSmtpAuth() {
     const host = (process.env.SMTP_HOST || '').trim();
@@ -36,9 +40,76 @@ function createTransporter(overrides = {}) {
     });
 }
 
+function normalizeScriptUrl(raw) {
+    return String(raw || '')
+        .trim()
+        .replace(/^['"]|['"]$/g, '');
+}
+
+/**
+ * Node fetch (undici) Apps Script 302'sinde Location'a yeniden POST atıp 405 üretebiliyor.
+ * https.request redirect takip etmez → POST /exec, sonra GET Location.
+ */
+function httpOnce(targetUrl, { method = 'GET', headers = {}, body, timeoutMs = 20000 } = {}) {
+    return new Promise((resolve, reject) => {
+        let parsed;
+        try {
+            parsed = new URL(targetUrl);
+        } catch (err) {
+            reject(new Error(`Invalid URL: ${targetUrl}`));
+            return;
+        }
+
+        const lib = parsed.protocol === 'http:' ? http : https;
+        const payload = body == null ? null : Buffer.from(String(body), 'utf8');
+        const reqHeaders = { ...headers };
+        if (payload && !reqHeaders['Content-Length']) {
+            reqHeaders['Content-Length'] = String(payload.length);
+        }
+
+        const req = lib.request(
+            {
+                protocol: parsed.protocol,
+                hostname: parsed.hostname,
+                port: parsed.port || (parsed.protocol === 'http:' ? 80 : 443),
+                path: `${parsed.pathname}${parsed.search}`,
+                method,
+                headers: reqHeaders,
+                timeout: timeoutMs,
+            },
+            (res) => {
+                const chunks = [];
+                res.on('data', (c) => chunks.push(c));
+                res.on('end', () => {
+                    resolve({
+                        status: res.statusCode || 0,
+                        headers: res.headers,
+                        body: Buffer.concat(chunks).toString('utf8'),
+                    });
+                });
+            },
+        );
+
+        req.on('timeout', () => {
+            req.destroy(new Error(`Request timeout after ${timeoutMs}ms`));
+        });
+        req.on('error', reject);
+        if (payload) req.write(payload);
+        req.end();
+    });
+}
+
+function parseJsonSafe(raw) {
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return { raw: String(raw || '').slice(0, 300) };
+    }
+}
+
 /** Tamamen ücretsiz: Google Apps Script → Gmail */
 async function sendWithGoogleScript({ to, subject, text, replyTo }) {
-    const url = (process.env.GOOGLE_SCRIPT_MAIL_URL || '').trim();
+    const url = normalizeScriptUrl(process.env.GOOGLE_SCRIPT_MAIL_URL);
     if (!url) return null;
 
     const secret = (process.env.GOOGLE_SCRIPT_MAIL_SECRET || '').trim();
@@ -51,54 +122,42 @@ async function sendWithGoogleScript({ to, subject, text, replyTo }) {
     };
 
     try {
-        // Apps Script Web App akışı:
-        // 1) POST /exec (redirect:manual) → 302 Location (echo URL)
-        // 2) GET Location → JSON cevap  ({"ok":true})
-        // redirect:follow POST'u GET'e çevirip 405 verir; Location'a ikinci POST da 405.
-        // Content-Type text/plain: JSON Content-Type bazen Script tarafında sorun çıkarır.
         const body = JSON.stringify(payload);
-        const headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+        const headers = {
+            'Content-Type': 'text/plain;charset=utf-8',
+            Accept: 'application/json,text/plain,*/*',
+        };
 
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 25000);
-        let res;
-        try {
-            res = await fetch(url, {
-                method: 'POST',
-                redirect: 'manual',
-                headers,
-                body,
-                signal: controller.signal,
-            });
+        let res = await httpOnce(url, {
+            method: 'POST',
+            headers,
+            body,
+            timeoutMs: 25000,
+        });
 
-            if (res.status >= 300 && res.status < 400) {
-                const loc = res.headers.get('location');
-                if (!loc) {
-                    return {
-                        sent: false,
-                        provider: 'google-script',
-                        error: `Google Script redirect without Location (${res.status})`,
-                    };
-                }
-                res = await fetch(loc, {
-                    method: 'GET',
-                    redirect: 'follow',
-                    signal: controller.signal,
-                });
+        // Apps Script: 302 + Location (echo) → GET ile JSON
+        if (res.status >= 300 && res.status < 400) {
+            const loc = res.headers.location || res.headers.Location;
+            if (!loc) {
+                console.error('[Mail] Google Script redirect without Location', res.status);
+                return {
+                    sent: false,
+                    provider: 'google-script',
+                    error: `Google Script redirect without Location (${res.status})`,
+                };
             }
-        } finally {
-            clearTimeout(timer);
+            const absolute = new URL(loc, url).toString();
+            res = await httpOnce(absolute, {
+                method: 'GET',
+                timeoutMs: 25000,
+            });
         }
 
-        const raw = await res.text();
-        let data = {};
-        try {
-            data = JSON.parse(raw);
-        } catch {
-            data = { raw: String(raw).slice(0, 300) };
-        }
+        const data = parseJsonSafe(res.body);
+        const okFlag = data && data.ok === true;
+        const httpOk = res.status >= 200 && res.status < 300;
 
-        if (!res.ok || data.ok === false) {
+        if (!okFlag && (!httpOk || data.ok === false)) {
             console.error('[Mail] Google Script error:', res.status, data);
             return {
                 sent: false,
@@ -109,6 +168,8 @@ async function sendWithGoogleScript({ to, subject, text, replyTo }) {
                     `Google Script HTTP ${res.status}`,
             };
         }
+
+        console.log('[Mail] Google Script ok');
         return { sent: true, provider: 'google-script' };
     } catch (err) {
         console.error('[Mail] Google Script exception:', err?.message || err);
@@ -172,23 +233,30 @@ async function sendWithSmtp({ to, subject, text, replyTo }) {
     };
 }
 
-/** Önce Google Script (ücretsiz HTTPS), sonra SMTP */
+/**
+ * Script URL varsa sadece onu kullan (Railway SMTP timeout client'ı 30sn'de düşürüyordu).
+ * Script yoksa lokal SMTP.
+ */
 async function sendMail(opts) {
-    const viaScript = await sendWithGoogleScript(opts);
-    if (viaScript?.sent) return viaScript;
+    const hasScript = Boolean(normalizeScriptUrl(process.env.GOOGLE_SCRIPT_MAIL_URL));
+
+    if (hasScript) {
+        const viaScript = await sendWithGoogleScript(opts);
+        if (viaScript?.sent) return viaScript;
+        return {
+            sent: false,
+            smtpConfigured: true,
+            error: viaScript?.error || 'Google Script mail failed',
+        };
+    }
 
     const smtp = await sendWithSmtp(opts);
     if (smtp.sent) return smtp;
 
     return {
         sent: false,
-        smtpConfigured:
-            Boolean(getSmtpAuth().pass) ||
-            Boolean((process.env.GOOGLE_SCRIPT_MAIL_URL || '').trim()),
-        error:
-            viaScript?.error ||
-            smtp.error ||
-            'No mail provider succeeded',
+        smtpConfigured: Boolean(getSmtpAuth().pass),
+        error: smtp.error || 'No mail provider succeeded',
     };
 }
 
@@ -227,9 +295,7 @@ async function sendSupportEmail({ fromName, fromEmail, userId, message }) {
     ].join('\n');
 
     const { host, user, pass } = getSmtpAuth();
-    const hasScript = Boolean(
-        (process.env.GOOGLE_SCRIPT_MAIL_URL || '').trim(),
-    );
+    const hasScript = Boolean(normalizeScriptUrl(process.env.GOOGLE_SCRIPT_MAIL_URL));
 
     if (!hasScript && !host && !user && !pass) {
         if (process.env.NODE_ENV !== 'production') {

@@ -213,8 +213,18 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
             });
             setMessage('');
             showResult(true, t('settings.helpSupportSuccess'), 'success');
-        } catch (_) {
-            showResult(false, t('settings.helpSupportError'), 'error');
+        } catch (err: any) {
+            const detail =
+                err?.response?.data?.detail ||
+                err?.response?.data?.message ||
+                err?.message;
+            showResult(
+                false,
+                typeof detail === 'string' && detail.trim()
+                    ? detail
+                    : t('settings.helpSupportError'),
+                'error',
+            );
         } finally {
             setSending(false);
         }

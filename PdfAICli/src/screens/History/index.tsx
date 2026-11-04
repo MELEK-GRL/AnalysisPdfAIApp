@@ -69,6 +69,12 @@ const History: React.FC = () => {
     const [compareLoading, setCompareLoading] = useState(false);
     const [compareResult, setCompareResult] = useState<LabComparisonResult | null>(null);
     const [compareModalVisible, setCompareModalVisible] = useState(false);
+    /** Karşılaştır → zorunlu reklam izle popup */
+    const [compareAdPromptVisible, setCompareAdPromptVisible] = useState(false);
+    /** Reklam sonrası → sonucu gör popup */
+    const [compareViewPromptVisible, setCompareViewPromptVisible] = useState(false);
+    const [compareRewardedUnitId, setCompareRewardedUnitId] =
+        useState(TEST_REWARDED_UNIT_ID);
     const [searchQuery, setSearchQuery] = useState('');
     const t = useT();
     const locale = useLocaleStore((s) => s.locale);
@@ -193,6 +199,8 @@ const History: React.FC = () => {
         setCompareMode(false);
         setSelectedIds(new Set());
         setCompareOrder([]);
+        setCompareAdPromptVisible(false);
+        setCompareViewPromptVisible(false);
     }, []);
 
     const enterCompareMode = useCallback(() => {
@@ -202,9 +210,33 @@ const History: React.FC = () => {
         setCompareMode(true);
     }, []);
 
-    const handleCompare = useCallback(async () => {
+    /** Karşılaştır butonu: önce zorunlu reklam popup */
+    const openCompareAdPrompt = useCallback(async () => {
         if (compareOrder.length !== 2 || compareLoading) return;
-        const [id1, id2] = compareOrder;
+        let adsOn = true;
+        let unitId = TEST_REWARDED_UNIT_ID;
+        try {
+            const status = await getAdsStatus();
+            adsOn = status.adsEnabled === true;
+            if (!__DEV__ && status.rewardedUnitId) {
+                unitId = String(status.rewardedUnitId);
+            }
+        } catch {
+            /* reklam dene */
+        }
+        setCompareRewardedUnitId(unitId);
+        if (adsOn) {
+            setCompareAdPromptVisible(true);
+        } else {
+            // Reklam kapalıysa doğrudan sonucu gör adımına geç
+            setCompareViewPromptVisible(true);
+        }
+    }, [compareOrder.length, compareLoading]);
+
+    /** Reklam İzle → LoadingModal + 1 rewarded */
+    const handleWatchCompareAd = useCallback(async () => {
+        if (compareLoading) return;
+        setCompareAdPromptVisible(false);
         setCompareLoading(true);
 
         const loadingStore = useAnalysisLoadingStore.getState();
@@ -213,36 +245,40 @@ const History: React.FC = () => {
         useSessionStore.getState().touch();
 
         try {
-            // Karşılaştırma öncesi 1 reklam zorunlu (ADS_ENABLED açıkken)
-            let adsOn = true;
-            let unitId = TEST_REWARDED_UNIT_ID;
-            try {
-                const status = await getAdsStatus();
-                adsOn = status.adsEnabled === true;
-                // Emülatör/dev: her zaman Google test rewarded unit (canlı unit fill vermez)
-                if (!__DEV__ && status.rewardedUnitId) {
-                    unitId = String(status.rewardedUnitId);
-                }
-            } catch {
-                /* status alınamazsa yine de reklam dene */
+            const adResult = await showRewardedAd(compareRewardedUnitId, {
+                report: true,
+            });
+            useAnalysisLoadingStore.getState().setAdUiLocked(true);
+            useAnalysisLoadingStore.getState().remountAdLock();
+            if (!adResult.watched) {
+                setErrorMessage(t('home.adFailed'));
+                setErrorSource('detail');
+                setErrorVisible(true);
+                return;
             }
+            setCompareViewPromptVisible(true);
+        } finally {
+            useSessionStore.getState().touch();
+            const store = useAnalysisLoadingStore.getState();
+            store.releaseHold();
+            store.setAdUiLocked(false);
+            setCompareLoading(false);
+        }
+    }, [compareLoading, compareRewardedUnitId, t]);
 
-            if (adsOn) {
-                if (__DEV__) {
-                    console.log('[compare] showing rewarded ad', unitId);
-                }
-                // LoadingModal yükleme sırasında açık; show öncesi rewardedAd kilidi indirir
-                const adResult = await showRewardedAd(unitId, { report: true });
-                useAnalysisLoadingStore.getState().setAdUiLocked(true);
-                useAnalysisLoadingStore.getState().remountAdLock();
-                if (!adResult.watched) {
-                    setErrorMessage(t('home.adFailed'));
-                    setErrorSource('detail');
-                    setErrorVisible(true);
-                    return;
-                }
-            }
+    /** Karşılaştırma sonucunu gör → API + CenterModal */
+    const handleViewCompareResult = useCallback(async () => {
+        if (compareOrder.length !== 2 || compareLoading) return;
+        const [id1, id2] = compareOrder;
+        setCompareViewPromptVisible(false);
+        setCompareLoading(true);
 
+        const loadingStore = useAnalysisLoadingStore.getState();
+        loadingStore.setAdUiLocked(true);
+        loadingStore.acquireHold();
+        useSessionStore.getState().touch();
+
+        try {
             const result = await compareLabs(id1, id2);
             setCompareResult(result);
             setCompareModalVisible(true);
@@ -255,10 +291,10 @@ const History: React.FC = () => {
             let msg = t('history.compareError');
             if (isNetworkError(e)) {
                 msg = t('history.fetchErrorNetwork');
-            } else if (status === 404) {
-                msg = t('history.compareErrorNotDeployed');
             } else if (serverMsg) {
                 msg = serverMsg;
+            } else if (status === 404) {
+                msg = t('history.compareErrorNotDeployed');
             }
             setErrorMessage(msg);
             setErrorSource('detail');
@@ -691,7 +727,7 @@ const History: React.FC = () => {
                                             return;
                                         }
                                         if (compareOrder.length === 2 && !compareLoading) {
-                                            void handleCompare();
+                                            void openCompareAdPrompt();
                                         }
                                     }}
                                     activeOpacity={0.8}
@@ -832,6 +868,30 @@ const History: React.FC = () => {
                 rightButtonText={errorSource === 'fetch' ? t('common.retry') : t('common.ok')}
                 onLeftPress={errorSource === 'fetch' ? () => setErrorVisible(false) : undefined}
                 onRightPress={errorSource === 'fetch' ? handleRetry : () => setErrorVisible(false)}
+            />
+
+            <PopupModal
+                visible={compareAdPromptVisible}
+                title={t('history.compareAdTitle')}
+                message={t('history.compareAdMessage')}
+                type="warning"
+                leftButtonText={t('common.cancel')}
+                rightButtonText={t('home.watchAd')}
+                onLeftPress={() => setCompareAdPromptVisible(false)}
+                onRightPress={() => {
+                    void handleWatchCompareAd();
+                }}
+            />
+
+            <PopupModal
+                visible={compareViewPromptVisible}
+                title={t('history.compareViewResultTitle')}
+                message={t('history.compareViewResultMessage')}
+                type="success"
+                rightButtonText={t('history.compareViewResultAction')}
+                onRightPress={() => {
+                    void handleViewCompareResult();
+                }}
             />
 
             <CenterModal

@@ -1,8 +1,15 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+    View,
+    StyleSheet,
+    TouchableOpacity,
+    ActivityIndicator,
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { resetToLogin } from '../../navigation/rootNavigation';
+import type { ProfileStackParamList } from '../../navigation/profileNavigation';
 import { useSessionStore } from '../../store/useSessionStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
@@ -21,16 +28,17 @@ import { deleteAccount } from '../../server/api/User';
 
 /**
  * Profil sayfası – bottom menüden "Profil" sekmesine tıklanınca açılır.
- * Diğer sayfalarla aynı yapı: GradientLayout, Header (kullanıcı adı), PageLayout.
  */
 const Profile: React.FC = () => {
     const t = useT();
-    const nav = useNavigation<any>();
-    const user = useAuthStore((s) => s.user);
-    const logout = useAuthStore((s) => s.logout);
+    const nav =
+        useNavigation<NativeStackNavigationProp<ProfileStackParamList>>();
+    const user = useAuthStore(s => s.user);
+    const logout = useAuthStore(s => s.logout);
     const displayName = user?.name ?? '';
     const { w1px, h1px } = useResponsive();
-    const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
+    const [deleteAccountModalVisible, setDeleteAccountModalVisible] =
+        useState(false);
     const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
 
     useScreenTime('Profile');
@@ -75,7 +83,7 @@ const Profile: React.FC = () => {
                 userInfo: { flex: 1 },
                 userLabel: { marginBottom: 2 * h1px },
                 userEmailLabel: { marginTop: 4 * h1px, marginBottom: 2 * h1px },
-                deleteRow: {
+                menuRow: {
                     flexDirection: 'row',
                     alignItems: 'center',
                     backgroundColor: '#fff',
@@ -87,7 +95,7 @@ const Profile: React.FC = () => {
                     borderColor: '#E5E7EB',
                     gap: 10 * w1px,
                 },
-                deleteIconWrap: {
+                menuIconWrap: {
                     width: 30 * w1px,
                     height: 30 * w1px,
                     borderRadius: 15 * w1px,
@@ -119,28 +127,46 @@ const Profile: React.FC = () => {
                 <Header title={displayName} />
                 <PageLayout>
                     <PageHeader title={t('tabs.profile')} />
-                    {(user?.name ?? user?.email) ? (
+                    {user?.name ?? user?.email ? (
                         <View style={styles.userCard}>
                             <View style={styles.userAvatarWrap}>
-                                <Ionicons name="person" size={26} color={colors.backgroundPurple} />
+                                <Ionicons
+                                    name="person"
+                                    size={26}
+                                    color={colors.backgroundPurple}
+                                />
                             </View>
                             <View style={styles.userInfo}>
                                 {user?.name ? (
                                     <>
-                                        <T size={fontSize.bodySmall} weight="600" color={colors.textGraySoft} style={styles.userLabel}>
+                                        <T
+                                            size={fontSize.bodySmall}
+                                            weight="600"
+                                            color={colors.textGraySoft}
+                                            style={styles.userLabel}>
                                             {t('settings.userName')}
                                         </T>
-                                        <T size={fontSize.subtitle} weight="600" color="#1F2937">
+                                        <T
+                                            size={fontSize.subtitle}
+                                            weight="600"
+                                            color="#1F2937">
                                             {user.name}
                                         </T>
                                     </>
                                 ) : null}
                                 {user?.email ? (
                                     <>
-                                        <T size={fontSize.bodySmall} weight="600" color={colors.textGraySoft} style={styles.userEmailLabel}>
+                                        <T
+                                            size={fontSize.bodySmall}
+                                            weight="600"
+                                            color={colors.textGraySoft}
+                                            style={styles.userEmailLabel}>
                                             {t('settings.email')}
                                         </T>
-                                        <T size={fontSize.subtitle} weight="600" color="#1F2937">
+                                        <T
+                                            size={fontSize.subtitle}
+                                            weight="600"
+                                            color="#1F2937">
                                             {user.email}
                                         </T>
                                     </>
@@ -148,34 +174,73 @@ const Profile: React.FC = () => {
                             </View>
                         </View>
                     ) : null}
+
                     <TouchableOpacity
-                        style={styles.deleteRow}
+                        style={styles.menuRow}
+                        onPress={() => nav.navigate('HelpSupport')}
+                        activeOpacity={0.8}>
+                        <View style={styles.menuIconWrap}>
+                            <Ionicons
+                                name="help-circle-outline"
+                                size={iconSize.medium}
+                                color={colors.backgroundPurple}
+                            />
+                        </View>
+                        <T
+                            size={fontSize.subtitle}
+                            weight="500"
+                            color={colors.textDark}
+                            style={{ flex: 1 }}>
+                            {t('settings.helpSupport')}
+                        </T>
+                        <Ionicons
+                            name="chevron-forward"
+                            size={iconSize.small}
+                            color="#9CA3AF"
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.menuRow}
                         onPress={() => setDeleteAccountModalVisible(true)}
                         activeOpacity={0.8}
                         disabled={deleteAccountLoading}>
-                        <View style={styles.deleteIconWrap}>
-                            <Ionicons name="trash-outline" size={iconSize.medium} color="#B91C1C" />
+                        <View style={styles.menuIconWrap}>
+                            <Ionicons
+                                name="trash-outline"
+                                size={iconSize.medium}
+                                color="#B91C1C"
+                            />
                         </View>
                         {deleteAccountLoading ? (
-                            <ActivityIndicator size="small" color="#B91C1C" style={{ flex: 1 }} />
+                            <ActivityIndicator
+                                size="small"
+                                color="#B91C1C"
+                                style={{ flex: 1 }}
+                            />
                         ) : (
-                            <T size={fontSize.subtitle} weight="500" color="#B91C1C" style={{ flex: 1 }}>
+                            <T
+                                size={fontSize.subtitle}
+                                weight="500"
+                                color="#B91C1C"
+                                style={{ flex: 1 }}>
                                 {t('settings.deleteAccount')}
                             </T>
                         )}
                     </TouchableOpacity>
                     <View style={{ flex: 1 }} />
                 </PageLayout>
-            <PopupModal
-                visible={deleteAccountModalVisible}
-                title={t('settings.deleteAccountConfirmTitle')}
-                message={t('settings.deleteAccountConfirmMessage')}
-                type="warning"
-                leftButtonText={t('common.cancel')}
-                rightButtonText={t('settings.deleteAccountConfirm')}
-                onLeftPress={() => setDeleteAccountModalVisible(false)}
-                onRightPress={handleDeleteAccountConfirm}
-            />
+
+                <PopupModal
+                    visible={deleteAccountModalVisible}
+                    title={t('settings.deleteAccountConfirmTitle')}
+                    message={t('settings.deleteAccountConfirmMessage')}
+                    type="warning"
+                    leftButtonText={t('common.cancel')}
+                    rightButtonText={t('settings.deleteAccountConfirm')}
+                    onLeftPress={() => setDeleteAccountModalVisible(false)}
+                    onRightPress={handleDeleteAccountConfirm}
+                />
             </View>
         </GradientLayout>
     );

@@ -24,11 +24,13 @@ import { useAuthStore } from '../store/useAuthStore';
 import colors from '../theme/colors';
 import {iconSize} from '../constants/icons';
 import type { HistoryStackParamList } from './historyNavigation';
+import type { ProfileStackParamList } from './profileNavigation';
 
 import Home from '../screens/Home';
 import History from '../screens/History';
 import HistoryDetail from '../screens/HistoryDetail';
 import Profile from '../screens/Profile';
+import HelpSupport from '../screens/HelpSupport';
 import Settings from '../screens/Settings';
 import PrivacyPolicy from '../screens/PrivacyPolicy';
 import Register from '../screens/Register';
@@ -45,8 +47,7 @@ export type { RootStackParamList };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 const HistoryStackNav = createNativeStackNavigator<HistoryStackParamList>();
-
-const ProfileTab = () => <Profile />;
+const ProfileStackNav = createNativeStackNavigator<ProfileStackParamList>();
 
 /** Geçmiş listesi + detay — tab bar görünür kalsın diye tab içinde stack */
 const HistoryStack = () => (
@@ -54,6 +55,14 @@ const HistoryStack = () => (
         <HistoryStackNav.Screen name="HistoryList" component={History} />
         <HistoryStackNav.Screen name="HistoryDetail" component={HistoryDetail} />
     </HistoryStackNav.Navigator>
+);
+
+/** Profil + yardım — tab bar görünür kalsın diye tab içinde stack */
+const ProfileStack = () => (
+    <ProfileStackNav.Navigator screenOptions={{ headerShown: false }}>
+        <ProfileStackNav.Screen name="ProfileHome" component={Profile} />
+        <ProfileStackNav.Screen name="HelpSupport" component={HelpSupport} />
+    </ProfileStackNav.Navigator>
 );
 
 const TAB_BAR_CONTENT_HEIGHT = 56;
@@ -179,7 +188,19 @@ const MainTabs = () => {
             }}>
             <Tab.Screen name="Analiz" component={Home} options={{ title: t('tabs.analysis') }} />
             <Tab.Screen name="Geçmiş" component={HistoryStack} options={{ title: t('tabs.history') }} />
-            <Tab.Screen name="Profil" component={ProfileTab} options={{ title: t('tabs.profile') }} />
+            <Tab.Screen
+                name="Profil"
+                component={ProfileStack}
+                options={{ title: t('tabs.profile') }}
+                listeners={({ navigation }) => ({
+                    /** Başka sekmeye geçince stack sıfırlansın; dönünce ProfileHome açılsın */
+                    blur: () => {
+                        navigation.navigate('Profil', {
+                            screen: 'ProfileHome',
+                        });
+                    },
+                })}
+            />
         </Tab.Navigator>
     );
 };

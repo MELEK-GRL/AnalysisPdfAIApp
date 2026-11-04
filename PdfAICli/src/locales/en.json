@@ -39,7 +39,18 @@
     "deleteAccountConfirmTitle": "Account will be deleted",
     "deleteAccountConfirmMessage": "Your account will be permanently deleted. This action cannot be undone. Do you confirm?",
     "deleteAccountConfirm": "Delete",
-    "deleteAccountError": "Could not delete account. Please try again."
+    "deleteAccountError": "Could not delete account. Please try again.",
+    "helpSupport": "Help and support",
+    "helpSupportTitle": "Help and support",
+    "helpSupportHint": "Describe your issue, suggestion, or question. Your message goes to our support team; we reply to your email. The support address is not shown in the app.",
+    "helpSupportPlaceholder": "Your message…",
+    "helpSupportMessageLabel": "Message",
+    "helpSupportSend": "Send",
+    "helpSupportSuccess": "Your message was sent. We will get back to you soon.",
+    "helpSupportError": "Could not send the message. Please try again later.",
+    "helpSupportEmpty": "Please write a message.",
+    "helpSupportNameRequired": "Please enter your username.",
+    "helpSupportEmailRequired": "Please enter your email address."
   },
   "logout": {
     "title": "Do you want to sign out?",

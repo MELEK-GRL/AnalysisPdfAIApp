@@ -59,13 +59,15 @@ const Button: React.FC<Props> = ({
                     opacity: disabled ? 0.5 : 1,
                     flexDirection: 'row',
                     gap: 8 * w1px,
-                    width,
+                    /** TouchableOpacity genişliğini doldur; % width iki kez uygulanmasın */
+                    width: '100%',
                     overflow: 'hidden',
                 },
                 buttonView: {
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '100%',
+                    alignSelf: 'center',
+                    width: width === '100%' ? '100%' : width,
                 },
             }),
         [w1px, h1px, disabled, width, backgroundColor, isPurple],
@@ -89,7 +91,7 @@ const Button: React.FC<Props> = ({
                     onPress={onPress}
                     activeOpacity={0.8}
                     disabled={disabled || loading || activityIndicatorLoading}
-                    style={[{ width }, style]}>
+                    style={[{ width: '100%' }, style]}>
                     {isPurple ? (
                         <LinearGradient
                             colors={PURPLE_GRADIENT}

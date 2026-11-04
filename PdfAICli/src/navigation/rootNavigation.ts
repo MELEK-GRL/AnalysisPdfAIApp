@@ -34,3 +34,17 @@ export function navigateToSettings() {
     }
     navigationRef.navigate('Settings');
 }
+
+export function navigateToHelpSupport() {
+    if (!navigationRef.isReady()) {
+        return;
+    }
+    // Tab içi Profile stack — alt menü görünür kalsın
+    (navigationRef.navigate as (name: string, params?: object) => void)(
+        'MainTabs',
+        {
+            screen: 'Profil',
+            params: { screen: 'HelpSupport' },
+        },
+    );
+}

@@ -78,4 +78,62 @@ async function sendPasswordResetCodeEmail(email, code) {
     return { sent: false, smtpConfigured: false };
 }
 
-module.exports = { sendPasswordResetEmail, sendPasswordResetCodeEmail };
+/**
+ * Uygulama içi yardım/destek mesajı.
+ * Alıcı: SUPPORT_INBOX (varsayılan labanalysis.noreply@gmail.com) — client'ta gösterilmez.
+ */
+async function sendSupportEmail({ fromName, fromEmail, userId, message }) {
+    const inbox =
+        (process.env.SUPPORT_INBOX || 'labanalysis.noreply@gmail.com').trim();
+    const subject = `[Destek] ${fromName || fromEmail || 'Kullanıcı'}`;
+    const text = [
+        'Uygulama destek talebi',
+        '',
+        `Kullanıcı: ${fromName || '—'}`,
+        `E-posta: ${fromEmail || '—'}`,
+        `User ID: ${userId || '—'}`,
+        '',
+        'Mesaj:',
+        String(message || '').trim(),
+    ].join('\n');
+
+    const host = process.env.SMTP_HOST;
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+
+    if (host && user && pass) {
+        try {
+            const nodemailer = require('nodemailer');
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST,
+                port: Number(process.env.SMTP_PORT) || 587,
+                secure: process.env.SMTP_SECURE === 'true',
+                auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+            });
+            await transporter.sendMail({
+                from: process.env.MAIL_FROM || process.env.SMTP_USER,
+                to: inbox,
+                replyTo: fromEmail || undefined,
+                subject,
+                text,
+            });
+            return { sent: true };
+        } catch (err) {
+            console.error('[Mail] Support send error:', err?.message || err);
+            return { sent: false, smtpConfigured: true, error: err?.message };
+        }
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('[Mail] Support (SMTP yok, log):', { inbox, subject, text });
+        return { sent: true, smtpConfigured: false, logged: true };
+    }
+
+    return { sent: false, smtpConfigured: false };
+}
+
+module.exports = {
+    sendPasswordResetEmail,
+    sendPasswordResetCodeEmail,
+    sendSupportEmail,
+};

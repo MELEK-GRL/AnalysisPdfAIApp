@@ -19,7 +19,6 @@ const endpoints = {
     forgotPassword: '/auth/forgot-password',
     resetPassword: '/auth/reset-password',
     resetPasswordByCode: '/auth/reset-password-by-code',
-    resetPasswordByEmail: '/auth/reset-password-by-email',
     deleteAccount: '/auth/account',
 };
 
@@ -62,16 +61,6 @@ export async function resetPasswordByCode(
     return post<{ message: string }>(endpoints.resetPasswordByCode, {
         email,
         code,
-        newPassword,
-    });
-}
-
-export async function resetPasswordByEmail(
-    email: string,
-    newPassword: string,
-): Promise<{ message: string }> {
-    return post<{ message: string }>(endpoints.resetPasswordByEmail, {
-        email,
         newPassword,
     });
 }

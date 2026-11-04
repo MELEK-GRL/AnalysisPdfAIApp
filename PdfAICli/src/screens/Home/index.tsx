@@ -13,7 +13,6 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { uploadPdf, LabItem } from '../../server/api/Lab';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useT, useLocaleStore } from '../../store/useLocaleStore';
-import { useAnalizResetStore } from '../../store/useAnalizResetStore';
 import { useAnalysisLoadingStore } from '../../store/useAnalysisLoadingStore';
 import { useQuotaStore } from '../../store/useQuotaStore';
 import { trackButtonClick } from '../../server/api/Analytics';
@@ -69,31 +68,7 @@ const Home: React.FC = () => {
     const [noPdfWarningVisible, setNoPdfWarningVisible] = useState(false);
     const t = useT();
     const locale = useLocaleStore(s => s.locale);
-    const resetTrigger = useAnalizResetStore((s) => s.resetTrigger);
     const { w1px, h1px, fs1px } = useResponsive();
-
-    const resetAnalizScreen = useCallback(() => {
-        setPhase('idle');
-        setFileName(null);
-        setPickedFile(null);
-        setItems([]);
-        setRawItems([]);
-        setAnalysis('');
-        setShowUploadArea(true);
-        setSelectErrorVisible(false);
-        setUploadSuccessVisible(false);
-        setNotLabVisible(false);
-        setUploadErrorVisible(false);
-        setRateLimitModalVisible(false);
-        setRateLimitAdsOffer(false);
-        setRateLimitCreditGranted(false);
-        setRewardedUnitId(TEST_REWARDED_UNIT_ID);
-        setAdWatching(false);
-    }, []);
-
-    useEffect(() => {
-        if (resetTrigger > 0) resetAnalizScreen();
-    }, [resetTrigger, resetAnalizScreen]);
 
     useFocusEffect(
         useCallback(() => {

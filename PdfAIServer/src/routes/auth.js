@@ -11,7 +11,7 @@ const DeviceSession = require('../models/DeviceSession');
 const Consent = require('../models/Consent');
 const AppAnalytics = require('../models/AppAnalytics');
 const requireAuth = require('../middleware/requireAuth');
-const { sendPasswordResetEmail, sendPasswordResetCodeEmail } = require('../services/mail');
+const { sendPasswordResetCodeEmail } = require('../services/mail');
 const { JWT_EXPIRES_IN, BCRYPT_ROUNDS } = require('../constants');
 
 const RESET_CODE_EXPIRY_MS = 60 * 60 * 1000; // 1 saat (link için)
@@ -227,32 +227,6 @@ router.post('/reset-password-by-code', async (req, res) => {
         return res.json({ message: 'Password updated. You can sign in with your new password.' });
     } catch (e) {
         console.error('RESET-PASSWORD-BY-CODE ERR:', e?.message || e);
-        return res.status(500).json({ message: 'Reset failed' });
-    }
-});
-
-router.post('/reset-password-by-email', async (req, res) => {
-    try {
-        let { email, newPassword } = req.body || {};
-        email = typeof email === 'string' ? email.trim().toLowerCase() : '';
-        newPassword = typeof newPassword === 'string' ? newPassword : '';
-        if (!email || !newPassword) {
-            return res.status(400).json({ message: 'Email and new password required' });
-        }
-        if (newPassword.length < 6) {
-            return res.status(400).json({ message: 'Password must be at least 6 characters' });
-        }
-
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ message: 'User not found' });
-
-        const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
-        user.password = hash;
-        await user.save();
-
-        return res.json({ message: 'Password updated. You can sign in with your new password.' });
-    } catch (e) {
-        console.error('RESET-PASSWORD-BY-EMAIL ERR:', e?.message || e);
         return res.status(500).json({ message: 'Reset failed' });
     }
 });

@@ -385,17 +385,6 @@ async function sendMail(opts) {
     };
 }
 
-async function sendPasswordResetEmail(email, token) {
-    const base = process.env.RESET_LINK_BASE || 'pdfai://reset-password';
-    const resetLink = base.includes('?')
-        ? `${base}&token=${token}`
-        : `${base}?token=${token}`;
-    const subject = 'Şifre sıfırlama linki';
-    const text = `Şifrenizi sıfırlamak için aşağıdaki linke tıklayın:\n\n${resetLink}\n\nBu link 1 saat geçerlidir.\n\nBu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.`;
-
-    return sendMail({ to: email, subject, text });
-}
-
 async function sendPasswordResetCodeEmail(email, code) {
     const subject = 'Şifre sıfırlama kodunuz';
     const text = `Şifre sıfırlama kodunuz: ${code}\n\nBu kod 3 dakika geçerlidir. 3 dakika içinde uygulama içinde bu kodu girip şifrenizi yenilemeniz gerekir; aksi halde kod geçersiz olur.\n\nBu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.`;
@@ -457,7 +446,6 @@ async function sendSupportEmail({ fromName, fromEmail, userId, message }) {
 }
 
 module.exports = {
-    sendPasswordResetEmail,
     sendPasswordResetCodeEmail,
     sendSupportEmail,
 };

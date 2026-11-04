@@ -32,7 +32,6 @@ import HistoryDetail from '../screens/HistoryDetail';
 import Profile from '../screens/Profile';
 import HelpSupport from '../screens/HelpSupport';
 import Settings from '../screens/Settings';
-import PrivacyPolicy from '../screens/PrivacyPolicy';
 import Register from '../screens/Register';
 import Login from '../screens/Login';
 import ForgotPassword from '../screens/ForgotPassword';
@@ -40,7 +39,6 @@ import ResetPassword from '../screens/ResetPassword';
 import LanguageSplash from '../screens/Splashs/LanguageSplash';
 import InfoSplash from '../screens/Splashs/InfoSplash';
 import SplashTwo from '../screens/SplashTwo/SplashTwo';
-import Logout from '../screens/Logout';
 
 export type { RootStackParamList };
 
@@ -306,8 +304,6 @@ const AppNavigator = () => {
                 <Stack.Screen name="ResetPassword" component={ResetPassword} />
                 <Stack.Screen name="MainTabs" component={MainTabs} />
                 <Stack.Screen name="Settings" component={Settings} />
-                <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
-                <Stack.Screen name="Logout" component={Logout} />
             </Stack.Navigator>
         </NavigationContainer>
     );

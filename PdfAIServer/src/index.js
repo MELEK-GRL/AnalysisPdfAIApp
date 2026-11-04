@@ -105,7 +105,6 @@ async function start() {
         console.warn('⚠️  MONGODB_URI yok, Mongo atlanıyor.');
     }
 
-    const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
     app.listen(PORT, '0.0.0.0');
 }
 

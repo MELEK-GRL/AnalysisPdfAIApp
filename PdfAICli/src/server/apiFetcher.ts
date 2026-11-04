@@ -123,7 +123,5 @@ export const post = <T>(
     body?: unknown,
     cfg?: AxiosRequestConfig,
 ) => apiFetcher<T>('POST', url, body, cfg);
-export const put = <T>(url: string, body?: unknown, cfg?: AxiosRequestConfig) =>
-    apiFetcher<T>('PUT', url, body, cfg);
 export const del = <T>(url: string, cfg?: AxiosRequestConfig) =>
     apiFetcher<T>('DELETE', url, undefined, cfg);

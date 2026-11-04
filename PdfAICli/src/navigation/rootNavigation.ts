@@ -11,8 +11,6 @@ export type RootStackParamList = {
     ResetPassword: { token?: string; email?: string; devCode?: string };
     MainTabs: undefined;
     Settings: undefined;
-    PrivacyPolicy: undefined;
-    Logout: undefined;
 };
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -33,18 +31,4 @@ export function navigateToSettings() {
         return;
     }
     navigationRef.navigate('Settings');
-}
-
-export function navigateToHelpSupport() {
-    if (!navigationRef.isReady()) {
-        return;
-    }
-    // Tab içi Profile stack — alt menü görünür kalsın
-    (navigationRef.navigate as (name: string, params?: object) => void)(
-        'MainTabs',
-        {
-            screen: 'Profil',
-            params: { screen: 'HelpSupport' },
-        },
-    );
 }

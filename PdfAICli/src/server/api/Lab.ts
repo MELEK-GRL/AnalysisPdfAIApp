@@ -45,11 +45,6 @@ export type LabHistoryDetail = {
     patientName?: string | null;
 };
 
-export async function getLatestLabs(): Promise<LabItem[]> {
-    const res = await api.get<{ items?: LabItem[] }>('/labs/latest');
-    return res.data.items ?? [];
-}
-
 export async function getLabHistory(): Promise<LabHistoryItem[]> {
     const res = await api.get<{ items: LabHistoryItem[] }>('/labs/history');
     return res.data.items ?? [];

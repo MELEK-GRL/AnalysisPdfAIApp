@@ -241,7 +241,7 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
                                     <View style={styles.hintAccent} />
                                     <View style={styles.hintBody}>
                                         <T
-                                            size={fontSize.bodySmall}
+                                            size={fontSize.body}
                                             weight="400"
                                             color={colors.textGraySoft}
                                             align="center">

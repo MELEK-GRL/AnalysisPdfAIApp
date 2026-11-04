@@ -76,7 +76,10 @@ async function ensureAdsInitialized(ads: AdsModule): Promise<void> {
 }
 
 type ShowOptions = {
-    /** true: izleme sonrası /ads/reward bildir (varsayılan true) */
+    /**
+     * true: izleme sonrası /ads/reward → analiz hakkı.
+     * Varsayılan false (karşılaştırma vs. kilit açma analiz hakkı vermez).
+     */
     report?: boolean;
 };
 
@@ -88,7 +91,7 @@ export function showRewardedAd(
     unitId: string,
     options: ShowOptions = {},
 ): Promise<RewardedAdShowResult> {
-    const report = options.report !== false;
+    const report = options.report === true;
 
     return new Promise(async resolve => {
         useAnalysisLoadingStore.getState().acquireHold();
@@ -249,4 +252,11 @@ export function showRewardedAdForCredit(
     return showRewardedAd(unitId, { report: true }).then(r =>
         r.watched && r.reward ? r.reward : null,
     );
+}
+
+/** Karşılaştırma kilidi: reklam izlenir, /ads/reward çağrılmaz (analiz hakkı yok). */
+export function showRewardedAdForCompareUnlock(
+    unitId: string,
+): Promise<boolean> {
+    return showRewardedAd(unitId, { report: false }).then(r => r.watched);
 }

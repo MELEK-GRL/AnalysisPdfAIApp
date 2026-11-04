@@ -31,7 +31,7 @@ import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
 import { getToken } from '../../server/apiFetcher';
-import { showRewardedAd } from '../../utils/ads/rewardedAd';
+import { showRewardedAdForCompareUnlock } from '../../utils/ads/rewardedAd';
 import { waitForPopupClose } from '../../utils/waitForPopupClose';
 import { TEST_REWARDED_UNIT_ID } from '../../constants/limits';
 import Header from '../../components/Header/Header';
@@ -272,12 +272,13 @@ const History: React.FC = () => {
         useSessionStore.getState().touch();
 
         try {
-            const adResult = await showRewardedAd(compareRewardedUnitId, {
-                report: true,
-            });
+            // Analiz hakkı YOK — sadece karşılaştırma kilidi açılır
+            const watched = await showRewardedAdForCompareUnlock(
+                compareRewardedUnitId,
+            );
             useAnalysisLoadingStore.getState().setAdUiLocked(true);
             useAnalysisLoadingStore.getState().remountAdLock();
-            if (!adResult.watched) {
+            if (!watched) {
                 useAnalysisLoadingStore.getState().setAdUiLocked(false);
                 await waitForPopupClose(200);
                 setErrorMessage(t('home.adFailed'));

@@ -2,16 +2,13 @@
  * TAMAMEN ÜCRETSİZ mail köprüsü (Google Apps Script + Gmail).
  *
  * Kurulum:
- * 1) https://script.google.com → Yeni proje
+ * 1) https://script.google.com → Yeni proje (veya mevcut proje)
  * 2) Bu dosyanın içeriğini Code.gs'e yapıştır
- * 3) Deploy → New deployment → Type: Web app
+ * 3) Deploy → New deployment / Manage deployments → Edit → New version
  *    - Execute as: Me
  *    - Who has access: Anyone
- * 4) Deploy → Web app URL'ini kopyala
- * 5) Railway Variables:
- *    GOOGLE_SCRIPT_MAIL_URL=<web app url>
- *    SUPPORT_INBOX=labanalysis.noreply@gmail.com
- * 6) Redeploy
+ * 4) Web app URL'ini Railway GOOGLE_SCRIPT_MAIL_URL olarak koy
+ * 5) Redeploy
  *
  * Not: Script'i labanalysis.noreply@gmail.com hesabıyla oluşturursan
  * mailler o Gmail'den / o gelen kutusuna gider (günlük Gmail kotası içinde, ücret yok).
@@ -29,6 +26,7 @@ function doPost(e) {
     const to = String(data.to || '').trim();
     const subject = String(data.subject || 'Destek').trim();
     const body = String(data.text || data.body || '').trim();
+    const html = String(data.html || '').trim();
     const replyTo = String(data.replyTo || '').trim();
 
     if (!to || !body) {
@@ -36,6 +34,7 @@ function doPost(e) {
     }
 
     const opts = { to: to, subject: subject, body: body };
+    if (html) opts.htmlBody = html;
     if (replyTo) opts.replyTo = replyTo;
 
     MailApp.sendEmail(opts);

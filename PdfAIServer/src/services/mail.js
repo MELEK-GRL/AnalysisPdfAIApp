@@ -385,11 +385,92 @@ async function sendMail(opts) {
     };
 }
 
+/**
+ * Şifre sıfırlama kodu HTML — destek mailiyle aynı marka dili.
+ */
+function buildPasswordResetEmailHtml(code) {
+    const safeCode = escapeHtml(String(code || '').trim());
+    const when = escapeHtml(
+        new Date().toLocaleString('tr-TR', {
+            timeZone: 'Europe/Istanbul',
+            dateStyle: 'long',
+            timeStyle: 'short',
+        }),
+    );
+
+    return `<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Şifre sıfırlama kodu</title>
+</head>
+<body style="margin:0;padding:0;background-color:#e6ecff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#e6ecff" style="background-color:#e6ecff;padding:24px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
+        <tr>
+          <td align="center" style="padding:0 0 14px;">
+            <span style="display:inline-block;background-color:#ECEBFD;color:#4941B3;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;">Şifre sıfırlama</span>
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="#ffffff" style="background-color:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #d8d4f5;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+              <tr>
+                <td bgcolor="#7453E0" style="background-color:#7453E0;padding:26px 28px;">
+                  <div style="font-size:13px;font-weight:600;color:#D8D2FF;letter-spacing:0.04em;">Lab Analysis</div>
+                  <div style="margin-top:8px;font-size:24px;line-height:1.25;font-weight:700;color:#ffffff;">Şifre sıfırlama kodunuz</div>
+                  <div style="margin-top:10px;font-size:13px;line-height:1.45;color:#E8E4FF;">Uygulamada bu kodu girerek yeni şifrenizi belirleyebilirsiniz.</div>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:28px 28px 10px;" align="center">
+                  <div style="font-size:12px;font-weight:700;color:#736EF7;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:12px;">6 haneli kod</div>
+                  <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto;">
+                    <tr>
+                      <td bgcolor="#F8F7FF" style="background-color:#F8F7FF;border:2px solid #D8D2FF;border-radius:14px;padding:18px 28px;">
+                        <div style="font-size:36px;line-height:1;font-weight:800;letter-spacing:0.28em;color:#7453E0;font-family:Menlo,Consolas,monospace;">${safeCode}</div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:18px 28px 26px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#efe9ff" style="background-color:#efe9ff;border-radius:12px;border:1px solid #D8D2FF;">
+                    <tr>
+                      <td style="padding:14px 16px;">
+                        <div style="font-size:13px;font-weight:700;color:#4941B3;margin-bottom:4px;">Önemli</div>
+                        <div style="font-size:13px;line-height:1.5;color:#4B5563;">Bu kod <strong style="color:#7453E0;">3 dakika</strong> geçerlidir. Süre dolmadan uygulamada kodu girip şifrenizi yenilemeniz gerekir.</div>
+                        <div style="margin-top:8px;font-size:13px;line-height:1.5;color:#4B5563;">Bu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.</div>
+                        <div style="margin-top:8px;font-size:12px;color:#8B86C8;">Gönderim: ${when}</div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:16px 8px 0;font-size:11px;line-height:1.5;color:#8B86C8;">
+            Bu e-posta Lab Analysis uygulamasındaki <em>Şifremi unuttum</em> akışından otomatik gönderildi.
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 async function sendPasswordResetCodeEmail(email, code) {
     const subject = 'Şifre sıfırlama kodunuz';
     const text = `Şifre sıfırlama kodunuz: ${code}\n\nBu kod 3 dakika geçerlidir. 3 dakika içinde uygulama içinde bu kodu girip şifrenizi yenilemeniz gerekir; aksi halde kod geçersiz olur.\n\nBu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.`;
+    const html = buildPasswordResetEmailHtml(code);
 
-    return sendMail({ to: email, subject, text });
+    return sendMail({ to: email, subject, text, html });
 }
 
 async function sendSupportEmail({ fromName, fromEmail, userId, message }) {

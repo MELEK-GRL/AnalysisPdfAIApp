@@ -142,8 +142,8 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
                     gap: 6 * w1px,
                 },
                 messageInput: {
-                    minHeight: 150 * h1px,
-                    maxHeight: 220 * h1px,
+                    // Sabit yükseklik — uzun metinde Gönder butonu kaybolmasın
+                    height: 140 * h1px,
                     textAlignVertical: 'top',
                     // TextInputComponent ile aynı tipografi (uygulama geneli body)
                     fontSize: fontSize.body * scale,
@@ -351,6 +351,7 @@ const HelpSupport: React.FC<Props> = ({ navigation }) => {
                                             colors.buttonGray
                                         }
                                         multiline
+                                        scrollEnabled
                                         maxLength={MAX_MESSAGE}
                                         editable={!sending}
                                         onFocus={() => setMessageFocused(true)}

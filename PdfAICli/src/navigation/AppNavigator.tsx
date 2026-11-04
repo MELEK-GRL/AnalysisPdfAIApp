@@ -15,8 +15,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getProfile } from '../server/api/User';
-import { AUTH_TOKEN, CONSENT_GIVEN_ONCE, LANGUAGE_SPLASH_SEEN } from '../constants/storageKeys';
+import {
+    AUTH_TOKEN,
+    CONSENT_GIVEN_ONCE,
+    LANGUAGE_SPLASH_SEEN,
+} from '../constants/storageKeys';
 import { useAuthStore } from '../store/useAuthStore';
 import colors from '../theme/colors';
 import {iconSize} from '../constants/icons';
@@ -215,14 +218,12 @@ const AppNavigator = () => {
     const [ready, setReady] = useState(false);
     const [hasSeenLanguageSplash, setHasSeenLanguageSplash] = useState(false);
     const [hasConsentOnce, setHasConsentOnce] = useState(false);
-    const [hasToken, setHasToken] = useState(false);
     const storeToken = useAuthStore((s) => s.token);
     const prevTokenRef = useRef<string | null | undefined>(undefined);
 
-    // Token varken silinirse (çıkış) Login'e düş — ilk hydrate null'ında tetikleme
+    // Token varken silinirse (çıkış) Login'e düş
     useEffect(() => {
         if (!storeToken) {
-            setHasToken(false);
             if (ready && prevTokenRef.current) {
                 resetToLogin();
             }
@@ -233,38 +234,19 @@ const AppNavigator = () => {
     useEffect(() => {
         (async () => {
             try {
-                const [langSeen, consent, token] = await Promise.all([
+                const [langSeen, consent] = await Promise.all([
                     AsyncStorage.getItem(LANGUAGE_SPLASH_SEEN),
                     AsyncStorage.getItem(CONSENT_GIVEN_ONCE),
-                    AsyncStorage.getItem(AUTH_TOKEN),
                 ]);
                 setHasSeenLanguageSplash(langSeen === '1');
                 setHasConsentOnce(consent === '1');
 
-                if (!token) {
-                    setHasToken(false);
-                } else {
-                    try {
-                        const profile = await getProfile();
-                        // Persist henüz hydrate olmamışsa store'u doldur (cold start)
-                        if (!useAuthStore.getState().token) {
-                            useAuthStore.setState({
-                                token,
-                                user: profile
-                                    ? {
-                                          _id: profile._id,
-                                          name: profile.name,
-                                          email: profile.email,
-                                      }
-                                    : null,
-                            });
-                        }
-                        setHasToken(true);
-                    } catch {
-                        const { logout: doLogout } = useAuthStore.getState();
-                        await doLogout();
-                        setHasToken(false);
-                    }
+                // Cold start: kayıtlı oturumu sil → her açılışta Login
+                try {
+                    await useAuthStore.getState().logout();
+                } catch {
+                    await AsyncStorage.removeItem(AUTH_TOKEN);
+                    useAuthStore.setState({ user: null, token: null });
                 }
             } finally {
                 setReady(true);
@@ -275,15 +257,12 @@ const AppNavigator = () => {
     if (!ready) {
         return <Loader />;
     }
-    // İlk açılışta önce splash akışı (dil → bilgi → onay), sonra login/token
-    // Logout sonrası storeToken null → hemen Login (hasToken ile OR yapma)
+    // İlk açılışta splash (dil → onay), sonra her cold start'ta Login
     const initialRouteName: keyof RootStackParamList = !hasSeenLanguageSplash
         ? 'LanguageSplash'
         : !hasConsentOnce
           ? 'InfoSplash'
-          : storeToken
-            ? 'MainTabs'
-            : 'Login';
+          : 'Login';
 
     const linking = {
         prefixes: ['pdfai://'],

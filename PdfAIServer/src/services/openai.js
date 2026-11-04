@@ -65,6 +65,21 @@ function isJunkLabLabel(test) {
     if (/T\.C\.|SAĞLIK BAKANLIĞI|Genel Müdürlük|Adı\/Soyadı|Cinsiyet\s*:|Doğum tarihi|Sağlık Bilgi Sistemleri/i.test(t)) return true;
     if (/ÖZEL\s+[A-ZİĞÜŞÖÇ]+\s+HASTANESİ|MEDİCALPARK|TarihTahlilSonuç|Tarih\s*Tahlil\s*Sonuç/i.test(t)) return true;
     if (t.length > 80 && /bakanlık|müdürlük|sistemleri|adı\s*\/\s*soyadı|cinsiyet|hastanesi/i.test(t)) return true;
+    // Üst bilgi / meta satırları (tarih, hasta kodu, lab adı vb.) tahlil parametresi değildir
+    if (
+        /^(Numune\s*tarihi|Numune\s*tarih|Örnek\s*tarihi|Sample\s*date|Collection\s*date)$/i.test(t) ||
+        /Numune\s*tarihi|Örnek\s*tarihi|Rapor\s*tarihi|Kabul\s*tarihi|Sonuç\s*tarihi|Sample\s*date/i.test(t)
+    ) {
+        return true;
+    }
+    if (
+        /^(Hasta\s*kodu|Hasta\s*no|Hasta\s*adı|Adı\s*Soyadı|Protocol\s*no|Protokol\s*no)$/i.test(t) ||
+        /^(Rapor\s*no|Rapor\s*türü|Rapor\s*tipi|Report\s*(no|type|number))$/i.test(t) ||
+        /^(Laboratuvar|Laboratuar|Laboratory|Numune|Örnek\s*türü|Örnek\s*tipi|Sample\s*type)$/i.test(t) ||
+        /^(Barkod|Barcode|Kimlik\s*no|T\.?C\.?\s*Kimlik)$/i.test(t)
+    ) {
+        return true;
+    }
     if (/ÖRNEKTİR|GERÇEK TAHLİL RAPORU|Örnek türü|Örnek amaçlı|Rapor\s*no|Örnek Hasta|Örnek Laboratuvar/i.test(t)) return true;
     if (/Parametre\s*Sonuç|ParametreSonuç|SonuçBirim|Referans\s*aralığı/i.test(t)) return true;
     if (/^lar\s+Parametre/i.test(t)) return true;
@@ -73,6 +88,8 @@ function isJunkLabLabel(test) {
     if (/^\/?uL$/i.test(t) || /^lU\/mL\s+Premenopozal/i.test(t)) return true;
     if (/^Postmenopozal$/i.test(t) || /^Hamilelikte$/i.test(t) || /^Hafta$/i.test(t)) return true;
     if (/^HEMOGRAM\s+BAS$/i.test(t)) return true;
+    // Yalnızca durum etiketi (parametre adı değil): "Düşük (L)", "Yüksek (H)", "Normal"
+    if (/^(Normal|Yüksek|Düşük|High|Low|Elevated)(?:\s*\(?\s*[HL]\s*\)?)?$/i.test(t)) return true;
     // Üst bilgi / tablo başlığı birleşmiş aşırı uzun etiket
     if (t.length > 55) return true;
     return false;
@@ -99,6 +116,16 @@ function isLowQualityLabItem(it) {
     // Ref satırı parçası (Kadın: 3.8 – 5.2) sahte test olmuş
     if (/Kadın\s*:|Erkek\s*:/i.test(t) && t.length < 40) return true;
     if (/^(g\/dL|mg\/dL|IU\/L|pg|fL|10[³⁶^/\d]*).{0,8}(Kadın|Erkek)/i.test(t)) return true;
+    // Tarih/meta etiketi + sayısal "değer" (örn. Numune tarihi → 3.11 = 03.11.2026)
+    if (
+        /(numune|örnek|rapor|doğum|sample|collection)?\s*tarih|date|hasta\s*kod|rapor\s*no|laboratuvar|örnek\s*tür|rapor\s*tür/i.test(
+            t,
+        )
+    ) {
+        const hasCat = !!(it.resultLabel || it.valueDisplay);
+        const v = Number(it.value);
+        if (!hasCat && Number.isFinite(v) && v > 0 && v < 100 && !it.unit) return true;
+    }
     return false;
 }
 
@@ -146,25 +173,102 @@ function dedupeHpvGroupedItems(items) {
     });
 }
 
+/**
+ * Durum sütunu test adına yapışmışsa ayıkla:
+ * "Normal HGB" → HGB + Normal
+ * "Yüksek (H) ALT" / "Düşük (L) AST" / "Düşük(L)AST" → temiz ad + durum
+ */
+const STATUS_WORD = 'Normal|Yüksek|Düşük|High|Low|Elevated';
+/**
+ * Önek: "Düşük (L) AST", "Düşük(L)AST", "Normal HGB".
+ * (H)/(L) yalnızca parantez içinde — yoksa HGB'deki H yenir.
+ */
+const STATUS_PREFIX_RX = new RegExp(
+    `^(${STATUS_WORD})\\s*(?:\\(\\s*([HL])\\s*\\))?\\s*`,
+    'i',
+);
+const STATUS_SUFFIX_RX = new RegExp(
+    `\\s+(${STATUS_WORD})(?:\\s*\\(\\s*([HL])\\s*\\))?$`,
+    'i',
+);
+
+function statusLabelFromParts(word, hl) {
+    const w = String(word || '');
+    if (/yüksek|high/i.test(w) || hl === 'H') return 'Yüksek (H)';
+    if (/düşük|low/i.test(w) || hl === 'L') return 'Düşük (L)';
+    if (/normal/i.test(w)) return 'Normal';
+    return null;
+}
+
+/** @returns {{ test: string, statusLabel: string|null }} */
+function splitStatusFromTestName(test) {
+    let t = String(test || '')
+        .trim()
+        .replace(/\s+/g, ' ');
+    let statusLabel = null;
+    let guard = 0;
+    while (guard < 3) {
+        const m = t.match(STATUS_PREFIX_RX);
+        if (!m || m[0].length >= t.length) break;
+        statusLabel = statusLabelFromParts(m[1], m[2]) || statusLabel;
+        t = t.slice(m[0].length).trim();
+        guard += 1;
+    }
+    const suf = t.match(STATUS_SUFFIX_RX);
+    if (suf && suf.index > 0) {
+        statusLabel = statusLabelFromParts(suf[1], suf[2]) || statusLabel;
+        t = t.slice(0, suf.index).trim();
+    }
+    return { test: t, statusLabel };
+}
+
+function normalizeLabTestName(test) {
+    return splitStatusFromTestName(test).test;
+}
+
+function labItemQualityScore(it) {
+    let s = 0;
+    if (it?.unit) s += 3;
+    if (it?.refLow != null || it?.refHigh != null) s += 2;
+    if (it?.resultLabel) s += 1;
+    if (it?.valueDisplay) s += 1;
+    if (Number.isFinite(Number(it?.value)) && Number(it.value) !== -1) s += 1;
+    // Durum önekli yapay adlar daha düşük skor
+    if (/^(Normal|Yüksek|Düşük|High|Low)\b/i.test(String(it?.test || ''))) s -= 5;
+    return s;
+}
+
 /** Merge sonrası son temizlik: çöp kart + hatalı section. */
 function finalizeLabItems(items) {
     if (!Array.isArray(items)) return [];
     const cleaned = dedupeHpvGroupedItems(
         items
-            .filter((it) => !isLowQualityLabItem(it))
+            .map((it) => {
+                if (!it || typeof it !== 'object') return it;
+                const { test, statusLabel } = splitStatusFromTestName(it.test);
+                const resultLabel =
+                    it.resultLabel ||
+                    statusLabel ||
+                    null;
+                return { ...it, test, resultLabel };
+            })
+            .filter((it) => it?.test && !isLowQualityLabItem(it))
             .map((it) => {
                 if (!it.section || !isLowQualitySection(it.section)) return it;
                 return { ...it, section: null };
             }),
     );
-    // Aynı canonical test için birden fazla kaldıysa ilk temiz olanı tut
-    const seen = new Set();
-    return cleaned.filter((it) => {
+    // Aynı canonical test için en zengin kaydı tut (birimli satır > durum-ön ekli kopya)
+    const byKey = new Map();
+    for (const it of cleaned) {
         const key = canonicalTestKey(it.test);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-    });
+        if (!key) continue;
+        const prev = byKey.get(key);
+        if (!prev || labItemQualityScore(it) > labItemQualityScore(prev)) {
+            byKey.set(key, it);
+        }
+    }
+    return [...byKey.values()];
 }
 
 /** Bölüm sadece PDF/LLM'den gelir; test adına göre sabit bölüm atanmaz (her gelen PDF farklı parametre/başlık getirebilir). */
@@ -214,14 +318,16 @@ function coerceAndValidate(payload) {
             }
             const hasCategorical = (resultLabel || valueDisplay) && (value == null || !Number.isFinite(value));
             const numValue = value != null && Number.isFinite(value) ? value : (hasCategorical ? 0 : NaN);
+            const rawTest = typeof it?.test === 'string' ? it.test.trim() : '';
+            const split = splitStatusFromTestName(rawTest);
             return {
-                test: typeof it?.test === 'string' ? it.test.trim() : '',
+                test: split.test,
                 label: label || null,
                 value: numValue,
                 unit,
                 refLow,
                 refHigh,
-                resultLabel: resultLabel || null,
+                resultLabel: resultLabel || split.statusLabel || null,
                 valueDisplay: valueDisplay || null,
                 section: section || null,
             };
@@ -234,14 +340,16 @@ function coerceAndValidate(payload) {
             return true;
         });
 
-    // Aynı test adına sahip tekrarları kaldır (ilk geçen değeri tut)
-    const seen = new Set();
-    out.items = out.items.filter((it) => {
+    // Aynı test adına sahip tekrarları kaldır (zengin olanı tut)
+    const byKey = new Map();
+    for (const it of out.items) {
         const key = canonicalTestKey(it.test);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-    });
+        const prev = byKey.get(key);
+        if (!prev || labItemQualityScore(it) > labItemQualityScore(prev)) {
+            byKey.set(key, it);
+        }
+    }
+    out.items = [...byKey.values()];
 
     out.items = out.items.map((it) => {
         const v = it.value;
@@ -720,13 +828,26 @@ function mergeWithLLM(baseItems, llmItems) {
     const map = new Map();
     const idrarKeepBase = new Set(['ERITROSIT', 'LOKOSIT']);
 
-    for (const it of llmItems || []) {
-        if (!it?.test || isLowQualityLabItem(it)) continue;
+    const normalizeItem = (it) => {
+        const { test, statusLabel } = splitStatusFromTestName(it.test);
+        return {
+            ...it,
+            test,
+            resultLabel: it.resultLabel || statusLabel || null,
+        };
+    };
+
+    for (const raw of llmItems || []) {
+        if (!raw?.test) continue;
+        const it = normalizeItem(raw);
+        if (isLowQualityLabItem(it)) continue;
         map.set(canonicalTestKey(it.test), it);
     }
 
-    for (const it of baseItems || []) {
-        if (!it?.test || isLowQualityLabItem(it)) continue;
+    for (const raw of baseItems || []) {
+        if (!raw?.test) continue;
+        const it = normalizeItem(raw);
+        if (isLowQualityLabItem(it)) continue;
         const key = canonicalTestKey(it.test);
         const existing = map.get(key);
         if (!existing) {
@@ -1347,7 +1468,7 @@ Your task:
 6. Each parameter must use only its own reference range from the same row in the PDF; do not use another parameter's range (e.g. MPV has its own ref, do not use PDW's range for MPV).
 7. When the PDF has section headers (e.g. "İDRAR TETKİKİ", "HEMOGRAM", "BİYOKİMYA (ACİL)", "Tam Kan Sayımı"), set section for each item to the section header under which that test appears. Use the exact header text as in the PDF. If no clear section, use null.
 8. Ignore headers, footers, page numbers, and URLs (e.g. enabiz.gov.tr).
-9. Ignore disclaimer/watermark text (e.g. ÖRNEKTİR, GERÇEK TAHLİL RAPORU DEĞİLDİR), patient/meta rows (Rapor tarihi, Örnek türü, Rapor no), and table column headers (Parametre/Sonuç/Birim/Referans). Never create items from those.
+9. Ignore disclaimer/watermark text (e.g. ÖRNEKTİR, GERÇEK TAHLİL RAPORU DEĞİLDİR), patient/meta rows (Rapor tarihi, Numune tarihi, Örnek tarihi, Örnek türü, Rapor no, Rapor türü, Hasta kodu, Hasta no, Laboratuvar, Numune, Barkod), and table column headers (Parametre/Sonuç/Birim/Referans/Durum/Test adı). Never create items from those — dates like 03.11.2026 must not become a fake numeric result (e.g. value 3.11). Never put status words into the test name (do not emit "Normal HGB" or "Yüksek (H) ALT"); put Normal/Yüksek/Düşük only in resultLabel and keep test as "HGB"/"ALT". Ignore "Test senaryosu" / scenario bullet notes — they are not lab rows.
 10. Do not create items from gender/reference fragments (e.g. "Kadın:", "g/dLKadın"). Reference bounds belong in refLow/refHigh of the real test only.
 11. For qualitative results (Negatif/Pozitif/Non-reaktif), set resultLabel and include every result row from the PDF (e.g. each HPV type line). Do not invent a numeric value from the type number alone (e.g. do not emit test "HR HPV Tip" with value 16 and no resultLabel).
 12. Keep section only for real panel headers (HEMOGRAM, İDRAR, BİYOKİMYA, etc.). Never use hospital/clinic/facility names as section.`;

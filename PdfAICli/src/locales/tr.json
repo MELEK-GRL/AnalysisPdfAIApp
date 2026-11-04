@@ -209,7 +209,21 @@
     "deleteAllButton": "Tümünü Sil",
     "deleteAllConfirm": "Tümünü silmek istediğine emin misin?",
     "deleteSelectedConfirm": "Seçtiklerinizi silmek istediğinize emin misiniz?",
-    "searchPlaceholder": "Arama"
+    "searchPlaceholder": "Arama",
+    "compareButton": "Tahlillerimi Karşılaştır",
+    "compareAction": "Karşılaştır",
+    "compareHint": "Listeden 2 tahlil seçin ({{count}}/2)",
+    "compareReadyHint": "2 tahlil seçildi. Karşılaştırmak için butona basın.",
+    "compareTitle": "Tahlil Karşılaştırma",
+    "compareError": "Karşılaştırma yapılamadı. Lütfen tekrar deneyin.",
+    "compareErrorNotDeployed": "Karşılaştırma API'si sunucuda henüz yok. Backend'i (Railway) güncelleyip yeniden dene.",
+    "compareClose": "Kapat",
+    "compareTabCompare": "Karşılaştırma",
+    "compareTabNotable": "Referans dışı",
+    "compareSummaryCommon": "Ortak parametre",
+    "compareSummaryNotable": "Referans dışı",
+    "compareCommonEmpty": "Ortak parametre bulunamadı. Karşılaştırma için aynı türde iki tahlil seçin (ör. iki hemogram veya iki aynı panel).",
+    "compareNotableEmpty": "Ortak parametrelerde referans dışı veya pozitif bulgu yok."
   },
   "tabs": {
     "analysis": "Tahlil Analiz",

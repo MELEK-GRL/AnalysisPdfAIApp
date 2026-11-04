@@ -1,7 +1,7 @@
 /** İstek/limit sabitleri (tek yerden yönetim) */
 
 /** Günlük PDF analiz hakkı (backend ile uyumlu) */
-export const DAILY_ANALYSIS_LIMIT = 2;
+export const DAILY_ANALYSIS_LIMIT = 1;
 
 /** Kullanıcı başına saklanan maksimum analiz geçmişi (backend MAX_LAB_HISTORY_PER_USER ile uyumlu) */
 export const MAX_LAB_HISTORY_PER_USER = 30;

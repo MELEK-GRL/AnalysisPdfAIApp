@@ -11,17 +11,28 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
-import { getLabHistory, deleteLabHistoryItem, deleteAllLabHistory, LabHistoryItem } from '../../server/api/Lab';
+import {
+    getLabHistory,
+    deleteLabHistoryItem,
+    deleteAllLabHistory,
+    compareLabs,
+    getAdsStatus,
+    LabHistoryItem,
+    LabComparisonResult,
+} from '../../server/api/Lab';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { HistoryStackParamList } from '../../navigation/historyNavigation';
 import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useSessionStore } from '../../store/useSessionStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useAnalysisLoadingStore } from '../../store/useAnalysisLoadingStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
 import { getToken } from '../../server/apiFetcher';
+import { showRewardedAd } from '../../utils/ads/rewardedAd';
+import { TEST_REWARDED_UNIT_ID } from '../../constants/limits';
 import Header from '../../components/Header/Header';
 import PageHeader from '../../components/PageHeader/PageHeader';
 import PageLayout from '../../components/Layout/PageLayout';
@@ -31,6 +42,8 @@ import { useTypography } from '../../theme/useTypography';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
 import PopupModal from '../../components/Modals/PopupModal';
+import CenterModal from '../../components/Modals/CenterModal';
+import LabCompareResult from '../../components/LabCompare/LabCompareResult';
 import EmptyState from '../../components/EmptyState/EmptyState';
 
 const History: React.FC = () => {
@@ -48,7 +61,14 @@ const History: React.FC = () => {
     const [deleteAllConfirmVisible, setDeleteAllConfirmVisible] = useState(false);
     const [deleteSelectedConfirmVisible, setDeleteSelectedConfirmVisible] = useState(false);
     const [selectionMode, setSelectionMode] = useState(false);
+    const [compareMode, setCompareMode] = useState(false);
+    /** Silme seçimi */
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    /** Karşılaştırma seçim sırası (en fazla 2) */
+    const [compareOrder, setCompareOrder] = useState<string[]>([]);
+    const [compareLoading, setCompareLoading] = useState(false);
+    const [compareResult, setCompareResult] = useState<LabComparisonResult | null>(null);
+    const [compareModalVisible, setCompareModalVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const t = useT();
     const locale = useLocaleStore((s) => s.locale);
@@ -137,19 +157,120 @@ const History: React.FC = () => {
         );
     }, [items, searchQuery]);
 
-    const toggleSelection = useCallback((id: string) => {
-        setSelectedIds((prev) => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id);
-            else next.add(id);
-            return next;
-        });
-    }, []);
+    const listSelectMode = selectionMode || compareMode;
+    /** Karşılaştırma için en az 2 tahlil gerekir */
+    const canCompare = items.length >= 2;
+
+    useEffect(() => {
+        if (compareMode && !canCompare) {
+            setCompareMode(false);
+            setCompareOrder([]);
+        }
+    }, [compareMode, canCompare]);
+
+    const toggleSelection = useCallback(
+        (id: string) => {
+            if (compareMode) {
+                setCompareOrder(prev => {
+                    if (prev.includes(id)) return prev.filter(x => x !== id);
+                    if (prev.length >= 2) return prev;
+                    return [...prev, id];
+                });
+                return;
+            }
+            setSelectedIds(prev => {
+                const next = new Set(prev);
+                if (next.has(id)) next.delete(id);
+                else next.add(id);
+                return next;
+            });
+        },
+        [compareMode],
+    );
 
     const exitSelectionMode = useCallback(() => {
         setSelectionMode(false);
+        setCompareMode(false);
         setSelectedIds(new Set());
+        setCompareOrder([]);
     }, []);
+
+    const enterCompareMode = useCallback(() => {
+        setSelectionMode(false);
+        setSelectedIds(new Set());
+        setCompareOrder([]);
+        setCompareMode(true);
+    }, []);
+
+    const handleCompare = useCallback(async () => {
+        if (compareOrder.length !== 2 || compareLoading) return;
+        const [id1, id2] = compareOrder;
+        setCompareLoading(true);
+
+        const loadingStore = useAnalysisLoadingStore.getState();
+        loadingStore.setAdUiLocked(true);
+        loadingStore.acquireHold();
+        useSessionStore.getState().touch();
+
+        try {
+            // Karşılaştırma öncesi 1 reklam zorunlu (ADS_ENABLED açıkken)
+            let adsOn = true;
+            let unitId = TEST_REWARDED_UNIT_ID;
+            try {
+                const status = await getAdsStatus();
+                adsOn = status.adsEnabled === true;
+                // Emülatör/dev: her zaman Google test rewarded unit (canlı unit fill vermez)
+                if (!__DEV__ && status.rewardedUnitId) {
+                    unitId = String(status.rewardedUnitId);
+                }
+            } catch {
+                /* status alınamazsa yine de reklam dene */
+            }
+
+            if (adsOn) {
+                if (__DEV__) {
+                    console.log('[compare] showing rewarded ad', unitId);
+                }
+                // LoadingModal yükleme sırasında açık; show öncesi rewardedAd kilidi indirir
+                const adResult = await showRewardedAd(unitId, { report: true });
+                useAnalysisLoadingStore.getState().setAdUiLocked(true);
+                useAnalysisLoadingStore.getState().remountAdLock();
+                if (!adResult.watched) {
+                    setErrorMessage(t('home.adFailed'));
+                    setErrorSource('detail');
+                    setErrorVisible(true);
+                    return;
+                }
+            }
+
+            const result = await compareLabs(id1, id2);
+            setCompareResult(result);
+            setCompareModalVisible(true);
+        } catch (e: unknown) {
+            const ax = e as {
+                response?: { status?: number; data?: { message?: string } };
+            };
+            const status = ax?.response?.status;
+            const serverMsg = ax?.response?.data?.message;
+            let msg = t('history.compareError');
+            if (isNetworkError(e)) {
+                msg = t('history.fetchErrorNetwork');
+            } else if (status === 404) {
+                msg = t('history.compareErrorNotDeployed');
+            } else if (serverMsg) {
+                msg = serverMsg;
+            }
+            setErrorMessage(msg);
+            setErrorSource('detail');
+            setErrorVisible(true);
+        } finally {
+            useSessionStore.getState().touch();
+            const store = useAnalysisLoadingStore.getState();
+            store.releaseHold();
+            store.setAdUiLocked(false);
+            setCompareLoading(false);
+        }
+    }, [compareOrder, compareLoading, t]);
 
     const handleDeleteSelectedConfirm = useCallback(async () => {
         setDeleteSelectedConfirmVisible(false);
@@ -309,6 +430,30 @@ const History: React.FC = () => {
                     backgroundColor: colors.dangerSoft,
                     borderColor: colors.dangerBorder,
                 },
+                compareButton: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8 * w1px,
+                    marginTop: 10 * h1px,
+                    marginBottom: 4 * h1px,
+                    minHeight: 44 * h1px,
+                    paddingVertical: 10 * h1px,
+                    paddingHorizontal: 14 * w1px,
+                    borderRadius: 10 * w1px,
+                    backgroundColor: colors.backgroundPurpleSoft,
+                    borderWidth: 1,
+                    borderColor: 'rgba(116, 83, 224, 0.22)',
+                },
+                compareButtonReady: {
+                    backgroundColor: colors.backgroundPurple,
+                    borderColor: colors.backgroundPurple,
+                },
+                compareHint: {
+                    marginTop: 8 * h1px,
+                    marginBottom: 2 * h1px,
+                    textAlign: 'center',
+                },
                 checkboxWrap: {
                     marginRight: 12 * w1px,
                 },
@@ -331,20 +476,22 @@ const History: React.FC = () => {
     );
 
     const renderItem = ({ item }: { item: LabHistoryItem }) => {
-        const isSelected = selectedIds.has(item.id);
+        const isSelected = compareMode
+            ? compareOrder.includes(item.id)
+            : selectedIds.has(item.id);
         const isLab = item.itemCount > 0;
         return (
             <TouchableOpacity
                 style={styles.card}
                 onPress={() => {
-                    if (selectionMode) {
+                    if (listSelectMode) {
                         toggleSelection(item.id);
                     } else {
                         handleItemPress(item.id);
                     }
                 }}
                 activeOpacity={0.7}>
-                {selectionMode ? (
+                {listSelectMode ? (
                     <View style={styles.checkboxWrap}>
                         <View
                             style={[
@@ -354,7 +501,7 @@ const History: React.FC = () => {
                             {isSelected ? (
                                 <Ionicons
                                     name="checkmark"
-                                    size={14 * scale}
+                                    size={iconSize.small}
                                     color={colors.white}
                                 />
                             ) : null}
@@ -382,7 +529,7 @@ const History: React.FC = () => {
                         </T>
                     </View>
                 </View>
-                {!selectionMode ? (
+                {!listSelectMode ? (
                     <Ionicons
                         name="chevron-forward"
                         size={iconSize.medium}
@@ -439,7 +586,7 @@ const History: React.FC = () => {
                             ) : null}
                         </View>
                         <View style={styles.deleteAllRow}>
-                            {selectionMode ? (
+                            {listSelectMode ? (
                                 <TouchableOpacity
                                     style={[styles.actionChip, styles.actionChipGhost]}
                                     onPress={exitSelectionMode}
@@ -459,70 +606,150 @@ const History: React.FC = () => {
                                     </T>
                                 </TouchableOpacity>
                             ) : null}
-                            <TouchableOpacity
-                                style={[
-                                    styles.actionChip,
-                                    selectionMode && selectedIds.size > 0
-                                        ? styles.actionChipDanger
-                                        : styles.actionChipOutline,
-                                ]}
-                                onPress={() => {
-                                    if (!selectionMode) {
-                                        setSelectionMode(true);
-                                    } else if (selectedIds.size > 0) {
-                                        setDeleteSelectedConfirmVisible(true);
-                                    } else {
-                                        exitSelectionMode();
-                                    }
-                                }}
-                                activeOpacity={0.75}
-                                accessibilityRole="button"
-                                accessibilityLabel={t('common.delete')}>
-                                <Ionicons
-                                    name={
-                                        selectionMode && selectedIds.size > 0
-                                            ? 'trash'
-                                            : 'trash-outline'
-                                    }
-                                    size={iconSize.small}
-                                    color={
-                                        selectionMode && selectedIds.size > 0
-                                            ? colors.white
-                                            : colors.backgroundPurple
-                                    }
-                                />
-                                <T
-                                    size={fontSize.bodySmall}
-                                    weight="600"
-                                    color={
-                                        selectionMode && selectedIds.size > 0
-                                            ? colors.white
-                                            : colors.backgroundPurple
-                                    }>
-                                    {selectionMode && selectedIds.size > 0
-                                        ? `${t('common.delete')} (${selectedIds.size})`
-                                        : t('common.delete')}
-                                </T>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.actionChip, styles.actionChipDangerSoft]}
-                                onPress={() => setDeleteAllConfirmVisible(true)}
-                                activeOpacity={0.75}
-                                accessibilityRole="button"
-                                accessibilityLabel={t('history.deleteAllButton')}>
-                                <Ionicons
-                                    name="trash-bin-outline"
-                                    size={iconSize.small}
-                                    color={colors.dangerText}
-                                />
-                                <T
-                                    size={fontSize.bodySmall}
-                                    weight="600"
-                                    color={colors.dangerText}>
-                                    {t('history.deleteAllButton')}
-                                </T>
-                            </TouchableOpacity>
+                            {!compareMode ? (
+                                <>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.actionChip,
+                                            selectionMode && selectedIds.size > 0
+                                                ? styles.actionChipDanger
+                                                : styles.actionChipOutline,
+                                        ]}
+                                        onPress={() => {
+                                            if (!selectionMode) {
+                                                setCompareMode(false);
+                                                setSelectedIds(new Set());
+                                                setSelectionMode(true);
+                                            } else if (selectedIds.size > 0) {
+                                                setDeleteSelectedConfirmVisible(true);
+                                            } else {
+                                                exitSelectionMode();
+                                            }
+                                        }}
+                                        activeOpacity={0.75}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={t('common.delete')}>
+                                        <Ionicons
+                                            name={
+                                                selectionMode && selectedIds.size > 0
+                                                    ? 'trash'
+                                                    : 'trash-outline'
+                                            }
+                                            size={iconSize.small}
+                                            color={
+                                                selectionMode && selectedIds.size > 0
+                                                    ? colors.white
+                                                    : colors.backgroundPurple
+                                            }
+                                        />
+                                        <T
+                                            size={fontSize.bodySmall}
+                                            weight="600"
+                                            color={
+                                                selectionMode && selectedIds.size > 0
+                                                    ? colors.white
+                                                    : colors.backgroundPurple
+                                            }>
+                                            {selectionMode && selectedIds.size > 0
+                                                ? `${t('common.delete')} (${selectedIds.size})`
+                                                : t('common.delete')}
+                                        </T>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.actionChip, styles.actionChipDangerSoft]}
+                                        onPress={() => setDeleteAllConfirmVisible(true)}
+                                        activeOpacity={0.75}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={t('history.deleteAllButton')}>
+                                        <Ionicons
+                                            name="trash-bin-outline"
+                                            size={iconSize.small}
+                                            color={colors.dangerText}
+                                        />
+                                        <T
+                                            size={fontSize.bodySmall}
+                                            weight="600"
+                                            color={colors.dangerText}>
+                                            {t('history.deleteAllButton')}
+                                        </T>
+                                    </TouchableOpacity>
+                                </>
+                            ) : null}
                         </View>
+                        {!selectionMode && canCompare ? (
+                            <>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.compareButton,
+                                        compareMode &&
+                                            compareOrder.length === 2 &&
+                                            styles.compareButtonReady,
+                                    ]}
+                                    onPress={() => {
+                                        if (!compareMode) {
+                                            enterCompareMode();
+                                            return;
+                                        }
+                                        if (compareOrder.length === 2 && !compareLoading) {
+                                            void handleCompare();
+                                        }
+                                    }}
+                                    activeOpacity={0.8}
+                                    disabled={compareLoading}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={
+                                        compareMode && compareOrder.length === 2
+                                            ? t('history.compareAction')
+                                            : t('history.compareButton')
+                                    }>
+                                    {compareLoading ? (
+                                        <ActivityIndicator
+                                            size="small"
+                                            color={
+                                                compareOrder.length === 2
+                                                    ? colors.white
+                                                    : colors.backgroundPurple
+                                            }
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            name="git-compare-outline"
+                                            size={iconSize.medium}
+                                            color={
+                                                compareMode && compareOrder.length === 2
+                                                    ? colors.white
+                                                    : colors.backgroundPurple
+                                            }
+                                        />
+                                    )}
+                                    <T
+                                        size={fontSize.body}
+                                        weight="600"
+                                        color={
+                                            compareMode && compareOrder.length === 2
+                                                ? colors.white
+                                                : colors.backgroundPurple
+                                        }>
+                                        {compareMode && compareOrder.length === 2
+                                            ? t('history.compareAction')
+                                            : t('history.compareButton')}
+                                    </T>
+                                </TouchableOpacity>
+                                {compareMode ? (
+                                    <T
+                                        size={fontSize.bodySmall}
+                                        color={colors.textGraySoft}
+                                        style={styles.compareHint}>
+                                        {compareOrder.length === 2
+                                            ? t('history.compareReadyHint')
+                                            : t('history.compareHint').replace(
+                                                  '{{count}}',
+                                                  String(compareOrder.length),
+                                              )}
+                                    </T>
+                                ) : null}
+                            </>
+                        ) : null}
                     </>
                 ) : null}
                 <View style={styles.scrollView}>
@@ -606,6 +833,20 @@ const History: React.FC = () => {
                 onLeftPress={errorSource === 'fetch' ? () => setErrorVisible(false) : undefined}
                 onRightPress={errorSource === 'fetch' ? handleRetry : () => setErrorVisible(false)}
             />
+
+            <CenterModal
+                visible={compareModalVisible}
+                title={t('history.compareTitle')}
+                rightButtonText={t('history.compareClose')}
+                onRightPress={() => {
+                    setCompareModalVisible(false);
+                    setCompareResult(null);
+                }}
+                fixedHeight>
+                {compareResult ? (
+                    <LabCompareResult comparison={compareResult} />
+                ) : null}
+            </CenterModal>
         </View>
     );
 };

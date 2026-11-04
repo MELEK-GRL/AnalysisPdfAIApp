@@ -68,6 +68,78 @@ export async function deleteAllLabHistory(): Promise<void> {
     await api.delete('/labs/history');
 }
 
+export type LabCompareSideValue = {
+    value: number | null;
+    unit: string | null;
+    refLow: number | null;
+    refHigh: number | null;
+    flag: 'L' | 'N' | 'H' | null;
+    status: string;
+    resultLabel: string | null;
+    valueDisplay?: string | null;
+};
+
+export type LabCompareCommonItem = {
+    matchKey: string;
+    name: string;
+    lab1: LabCompareSideValue;
+    lab2: LabCompareSideValue;
+    transition: string | null;
+    comparable: boolean;
+    diff: number | null;
+    percentChange: number | null;
+    percentChangeLabel: string | null;
+    /** up | down | flat — sayısal değer yönü */
+    trend: 'up' | 'down' | 'flat' | null;
+    trendLabel: string | null;
+    unitMismatch: boolean;
+    note: string | null;
+    kind: 'numeric' | 'categorical';
+};
+
+export type LabCompareOnlyItem = {
+    matchKey: string;
+    name: string;
+    side: 1 | 2;
+    value: number | null;
+    unit: string | null;
+    refLow: number | null;
+    refHigh: number | null;
+    flag: 'L' | 'N' | 'H' | null;
+    status: string;
+    resultLabel: string | null;
+    valueDisplay?: string | null;
+    kind: 'numeric' | 'categorical';
+};
+
+export type LabComparisonResult = {
+    id1: string | null;
+    id2: string | null;
+    lab1: { id: string | null; createdAt: string | null; pdfName: string | null };
+    lab2: { id: string | null; createdAt: string | null; pdfName: string | null };
+    summary: {
+        commonCount: number;
+        onlyLab1Count: number;
+        onlyLab2Count: number;
+    };
+    common: LabCompareCommonItem[];
+    onlyLab1: LabCompareOnlyItem[];
+    onlyLab2: LabCompareOnlyItem[];
+    noCommon: boolean;
+};
+
+/** İki tahlili karşılaştır (AI yok). id1/id2 seçim sırası. */
+export async function compareLabs(
+    id1: string,
+    id2: string,
+): Promise<LabComparisonResult> {
+    const res = await api.post<{ comparison: LabComparisonResult }>(
+        '/labs/compare',
+        { id1, id2 },
+    );
+    return res.data.comparison;
+}
+
 export type RateLimitError = Error & {
     isRateLimit: true;
     adsEnabled?: boolean;

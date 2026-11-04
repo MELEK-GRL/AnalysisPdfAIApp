@@ -1,11 +1,12 @@
 const LabHistory = require('../models/LabHistory');
+const AnalysisUsage = require('../models/AnalysisUsage');
 const BonusCredit = require('../models/BonusCredit');
 const AdWatchProgress = require('../models/AdWatchProgress');
 const {
     RATE_LIMIT_ANALYSIS_WINDOW_MS,
     RATE_LIMIT_ANALYSIS_MAX,
     RATE_LIMIT_ANALYSIS_DISABLED,
-    ADS_ENABLED,
+    isAdsEnabled,
     ADS_WATCHES_PER_CREDIT,
 } = require('../constants');
 
@@ -21,8 +22,76 @@ async function countUnusedBonusCredits(userId, since = windowStart()) {
     });
 }
 
+/**
+ * LabHistory satırlarından AnalysisUsage oluşturur (geçmiş silinmeden önce / kota okunurken).
+ * Geçmiş silinse bile kota tüketimi korunur.
+ */
+async function ensureUsageFromHistoryDocs(userId, historyDocs) {
+    if (!historyDocs?.length) return;
+    const ids = historyDocs.map((h) => h._id).filter(Boolean);
+    if (!ids.length) return;
+
+    const existing = await AnalysisUsage.find({
+        user: userId,
+        sourceHistoryId: { $in: ids },
+    })
+        .select('sourceHistoryId')
+        .lean();
+    const have = new Set(existing.map((e) => String(e.sourceHistoryId)));
+    const missing = historyDocs.filter((h) => h._id && !have.has(String(h._id)));
+    if (!missing.length) return;
+
+    try {
+        await AnalysisUsage.insertMany(
+            missing.map((h) => ({
+                user: userId,
+                sourceHistoryId: h._id,
+                createdAt: h.createdAt || new Date(),
+                updatedAt: h.createdAt || new Date(),
+            })),
+            { ordered: false }
+        );
+    } catch (e) {
+        // duplicate key (yarış) — yok say
+        if (e?.code !== 11000) throw e;
+    }
+}
+
+/** Silinecek geçmiş kayıtları için kullanım satırlarını önce yazar. */
+async function preserveUsageForHistoryFilter(userId, filter) {
+    if (RATE_LIMIT_ANALYSIS_DISABLED) return;
+    const docs = await LabHistory.find(filter).select('_id createdAt').lean();
+    await ensureUsageFromHistoryDocs(userId, docs);
+}
+
+async function backfillUsageFromHistory(userId, since = windowStart()) {
+    const docs = await LabHistory.find({
+        user: userId,
+        createdAt: { $gte: since },
+    })
+        .select('_id createdAt')
+        .lean();
+    await ensureUsageFromHistoryDocs(userId, docs);
+}
+
+async function recordAnalysisUsage(userId, sourceHistoryId = null) {
+    if (RATE_LIMIT_ANALYSIS_DISABLED) return null;
+    try {
+        return await AnalysisUsage.create({
+            user: userId,
+            sourceHistoryId: sourceHistoryId || null,
+        });
+    } catch (e) {
+        if (e?.code === 11000 && sourceHistoryId) {
+            return AnalysisUsage.findOne({ user: userId, sourceHistoryId });
+        }
+        throw e;
+    }
+}
+
 async function countAnalysesInWindow(userId, since = windowStart()) {
-    return LabHistory.countDocuments({
+    await backfillUsageFromHistory(userId, since);
+    return AnalysisUsage.countDocuments({
         user: userId,
         createdAt: { $gte: since },
     });
@@ -31,7 +100,7 @@ async function countAnalysesInWindow(userId, since = windowStart()) {
 async function getQuotaForUser(userId) {
     if (RATE_LIMIT_ANALYSIS_DISABLED) {
         return {
-            adsEnabled: ADS_ENABLED,
+            adsEnabled: isAdsEnabled(),
             limitDisabled: true,
             windowMs: RATE_LIMIT_ANALYSIS_WINDOW_MS,
             baseLimit: RATE_LIMIT_ANALYSIS_MAX,
@@ -62,7 +131,7 @@ async function getQuotaForUser(userId) {
     const allowed = analysesUsed + remaining;
 
     return {
-        adsEnabled: ADS_ENABLED,
+        adsEnabled: isAdsEnabled(),
         limitDisabled: false,
         windowMs: RATE_LIMIT_ANALYSIS_WINDOW_MS,
         baseLimit: RATE_LIMIT_ANALYSIS_MAX,
@@ -103,7 +172,7 @@ async function consumeBonusIfNeeded(userId, usedBonus) {
 }
 
 async function recordAdWatch(userId) {
-    if (!ADS_ENABLED) {
+    if (!isAdsEnabled()) {
         const err = new Error('Ads disabled');
         err.code = 'ADS_DISABLED';
         err.status = 403;
@@ -159,4 +228,6 @@ module.exports = {
     assertCanAnalyze,
     consumeBonusIfNeeded,
     recordAdWatch,
+    recordAnalysisUsage,
+    preserveUsageForHistoryFilter,
 };

@@ -1,7 +1,7 @@
 const express = require('express');
 const requireAuth = require('../middleware/requireAuth');
 const {
-    ADS_ENABLED,
+    isAdsEnabled,
     ADS_WATCHES_PER_CREDIT,
     ADMOB_REWARDED_UNIT_ID,
     isOpenAIEnabled,
@@ -13,13 +13,14 @@ const router = express.Router();
 router.get('/status', requireAuth, async (req, res) => {
     try {
         const quota = await getQuotaForUser(req.user._id);
+        const adsOn = isAdsEnabled();
         return res.json({
             ok: true,
-            adsEnabled: ADS_ENABLED,
+            adsEnabled: adsOn,
             openaiEnabled: isOpenAIEnabled(),
             openaiEnabledRaw: process.env.OPENAI_ENABLED ?? null,
             watchesPerCredit: ADS_WATCHES_PER_CREDIT,
-            rewardedUnitId: ADS_ENABLED ? ADMOB_REWARDED_UNIT_ID : null,
+            rewardedUnitId: adsOn ? ADMOB_REWARDED_UNIT_ID : null,
             ...quota,
         });
     } catch (e) {
@@ -33,7 +34,7 @@ router.get('/status', requireAuth, async (req, res) => {
  */
 router.post('/reward', requireAuth, async (req, res) => {
     try {
-        if (!ADS_ENABLED) {
+        if (!isAdsEnabled()) {
             return res.status(403).json({
                 message: 'Reklam ödülleri şu an kapalı.',
                 code: 'ADS_DISABLED',

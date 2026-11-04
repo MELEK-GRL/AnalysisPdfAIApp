@@ -8,7 +8,7 @@ const {
     RATE_LIMIT_ANALYSIS_DISABLED,
     TMP_DIR,
     MAX_UPLOAD_BYTES,
-    ADS_ENABLED,
+    isAdsEnabled,
     ADMOB_REWARDED_UNIT_ID,
 } = require('../constants');
 
@@ -45,13 +45,14 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
         if (!RATE_LIMIT_ANALYSIS_DISABLED) {
             const gate = await assertCanAnalyze(req.user._id);
             if (!gate.ok) {
+                const adsOn = isAdsEnabled();
                 return res.status(429).json({
                     message:
                         'Günlük analiz limitine ulaştınız. 24 saat içinde en fazla 2 PDF analiz edebilirsiniz' +
-                        (ADS_ENABLED ? ' (2 reklam izleyerek +1 hak kazanabilirsiniz).' : '.'),
+                        (adsOn ? ' (2 reklam izleyerek +1 hak kazanabilirsiniz).' : '.'),
                     code: 'RATE_LIMIT_EXCEEDED',
-                    adsEnabled: ADS_ENABLED,
-                    rewardedUnitId: ADS_ENABLED ? ADMOB_REWARDED_UNIT_ID : null,
+                    adsEnabled: adsOn,
+                    rewardedUnitId: adsOn ? ADMOB_REWARDED_UNIT_ID : null,
                     quota: gate.quota,
                 });
             }

@@ -1,20 +1,16 @@
-import { Platform } from 'react-native';
 import { API_BASE_URL as ENV_API_BASE_URL } from '@env';
 
+/** Emülatör / prod varsayılanı — her zaman Railway production */
+export const RAILWAY_API_BASE_URL =
+    'https://analysispdfaiapp-production.up.railway.app';
+
 /**
- * Dev build'de: .env'de API_BASE_URL varsa onu kullan (gerçek cihazda Mac IP için).
- * Yoksa simulator/emulator için localhost / 10.0.2.2.
- * Release build'de .env'deki API_BASE_URL kullanılır.
+ * API base URL.
+ * Emülatör (dev) dahil varsayılan Railway; .env ile override edilebilir.
  */
 export const getApiBaseUrl = (): string => {
     const envUrl = ENV_API_BASE_URL?.trim().replace(/\/+$/, '');
-    if (__DEV__) {
-        if (envUrl) return envUrl;
-        return Platform.OS === 'ios'
-            ? 'http://localhost:4000'
-            : 'http://10.0.2.2:4000';
-    }
-    return envUrl || 'https://analysispdfaiapp-production.up.railway.app';
+    return envUrl || RAILWAY_API_BASE_URL;
 };
 
 /** Tüm API istekleri bu base URL'i kullanmalı (apiFetcher, fetch fallback vb.). */

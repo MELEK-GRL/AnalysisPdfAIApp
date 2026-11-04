@@ -12,7 +12,7 @@ type QuotaState = {
 export const useQuotaStore = create<QuotaState>()((set) => ({
     remaining: null,
     limitDisabled: false,
-    baseLimit: 2,
+    baseLimit: 1,
     loaded: false,
     refresh: async () => {
         try {
@@ -22,7 +22,7 @@ export const useQuotaStore = create<QuotaState>()((set) => ({
                     typeof data.remaining === 'number' ? data.remaining : null,
                 limitDisabled: data.limitDisabled === true,
                 baseLimit:
-                    typeof data.baseLimit === 'number' ? data.baseLimit : 2,
+                    typeof data.baseLimit === 'number' ? data.baseLimit : 1,
                 loaded: true,
             });
         } catch {

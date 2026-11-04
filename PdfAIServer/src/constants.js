@@ -4,7 +4,7 @@ const path = require('path');
 const RATE_LIMIT_ANALYSIS_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 /** 24 saatte izin verilen analiz sayısı (UAT ve PROD'da; DEV'de limit yok) */
-const RATE_LIMIT_ANALYSIS_MAX = 2;
+const RATE_LIMIT_ANALYSIS_MAX = 1;
 
 /**
  * Sadece DEV ortamında günlük analiz limiti kapalı; UAT ve PROD'da 2/24h zorunlu.
@@ -24,8 +24,8 @@ const RATE_LIMIT_ANALYSIS_DISABLED = isDevEnvironment();
  * AdMob: 2 rewarded → +1 analiz hakkı.
  * Aç/kapa sadece sunucu (ADS_ENABLED). Client rebuild gerekmez.
  * Kota hesabı sunucu saatiyle.
+ * Not: Her istekte isAdsEnabled() kullan (destructure/snapshot ADS_ENABLED kullanma).
  */
-const ADS_ENABLED = String(process.env.ADS_ENABLED || '').toLowerCase() === 'true';
 const ADS_WATCHES_PER_CREDIT = Math.max(1, Number(process.env.ADS_WATCHES_PER_CREDIT) || 2);
 
 /**
@@ -45,11 +45,16 @@ function parseEnvFlag(raw, defaultValue) {
     return defaultValue;
 }
 
+function isAdsEnabled() {
+    return parseEnvFlag(process.env.ADS_ENABLED, false);
+}
+
 function isOpenAIEnabled() {
     return parseEnvFlag(process.env.OPENAI_ENABLED, true);
 }
 
-/** Snapshot (modül yükleme anı) — canlı kontrol için isOpenAIEnabled() kullan. */
+/** Snapshot — canlı kontrol için isAdsEnabled() / isOpenAIEnabled() kullan. */
+const ADS_ENABLED = isAdsEnabled();
 const OPENAI_ENABLED = isOpenAIEnabled();
 /** Boşsa Google test rewarded unit (canlıda gerçek unit koy). */
 const ADMOB_REWARDED_UNIT_ID =
@@ -89,6 +94,7 @@ module.exports = {
     RATE_LIMIT_ANALYSIS_DISABLED,
     isDevEnvironment,
     ADS_ENABLED,
+    isAdsEnabled,
     ADS_WATCHES_PER_CREDIT,
     ADMOB_REWARDED_UNIT_ID,
     OPENAI_ENABLED,

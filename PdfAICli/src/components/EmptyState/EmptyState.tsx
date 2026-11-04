@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
-import T from '../Text/T';
 import { fontSize } from '../../constants/typography';
 import { iconSize } from '../../constants/icons';
 import colors from '../../theme/colors';
+import { useTypography } from '../../theme/useTypography';
 
 type Props = {
     title: string;
@@ -15,14 +15,17 @@ type Props = {
 
 const EmptyState: React.FC<Props> = ({ title, subtitle, style }) => {
     const { w1px, h1px } = useResponsive();
+    const { fontFamily, scale } = useTypography();
 
     const styles = useMemo(
         () =>
             StyleSheet.create({
                 container: {
+                    width: '100%',
                     alignItems: 'center',
                     justifyContent: 'center',
                     paddingVertical: 40 * h1px,
+                    paddingHorizontal: 20 * w1px,
                 },
                 iconWrap: {
                     width: 88 * w1px,
@@ -36,10 +39,28 @@ const EmptyState: React.FC<Props> = ({ title, subtitle, style }) => {
                     borderColor: 'rgba(116, 83, 224, 0.15)',
                 },
                 title: {
+                    width: '100%',
+                    alignSelf: 'stretch',
+                    textAlign: 'center',
+                    fontSize: fontSize.subtitle * scale,
+                    fontWeight: 'normal',
+                    fontFamily,
+                    color: '#6B7280',
                     marginBottom: subtitle ? 8 * h1px : 0,
+                    lineHeight: Math.round(fontSize.subtitle * scale * 1.35),
+                },
+                subtitle: {
+                    width: '100%',
+                    alignSelf: 'stretch',
+                    textAlign: 'center',
+                    fontSize: fontSize.body * scale,
+                    fontWeight: 'normal',
+                    fontFamily,
+                    color: '#9CA3AF',
+                    lineHeight: Math.round(fontSize.body * scale * 1.35),
                 },
             }),
-        [w1px, h1px, subtitle],
+        [w1px, h1px, subtitle, fontFamily, scale],
     );
 
     return (
@@ -51,14 +72,8 @@ const EmptyState: React.FC<Props> = ({ title, subtitle, style }) => {
                     color={colors.backgroundPurple}
                 />
             </View>
-            <T size={fontSize.subtitle} weight="700" color="#6B7280" style={styles.title}>
-                {title}
-            </T>
-            {subtitle ? (
-                <T size={fontSize.body} color="#9CA3AF">
-                    {subtitle}
-                </T>
-            ) : null}
+            <Text style={styles.title}>{title}</Text>
+            {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
     );
 };

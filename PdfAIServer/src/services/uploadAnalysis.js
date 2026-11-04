@@ -8,6 +8,7 @@ const { isOpenAIEnabled } = require('../constants');
 const Lab = require('../models/LatestLabResult');
 const LabHistory = require('../models/LabHistory');
 const { MAX_LAB_HISTORY_PER_USER } = require('../constants');
+const { recordAnalysisUsage, preserveUsageForHistoryFilter } = require('./adsQuota');
 
 /**
  * PDF metninden tahlil sahibi/hasta adını çıkarır (yaygın etiketlere göre).
@@ -90,10 +91,13 @@ async function trimLabHistoryForUser(userId) {
         const oldest = await LabHistory.find({ user: userId })
             .sort({ createdAt: 1 })
             .limit(toRemove)
-            .select('_id')
+            .select('_id createdAt')
             .lean();
         const ids = oldest.map((d) => d._id);
-        if (ids.length) await LabHistory.deleteMany({ _id: { $in: ids } });
+        if (ids.length) {
+            await preserveUsageForHistoryFilter(userId, { _id: { $in: ids } });
+            await LabHistory.deleteMany({ _id: { $in: ids } });
+        }
     } catch (ex) {
         if (process.env.NODE_ENV !== 'production') {
             console.error('TRIM LAB HISTORY ERR:', ex?.message || ex);
@@ -122,13 +126,20 @@ async function persistResult(userId, result, pdfName) {
             },
             { upsert: true, new: true, setDefaultsOnInsert: true }
         );
-        await LabHistory.create({
+        const historyDoc = await LabHistory.create({
             user: userId,
             items: result.items,
             analysis: result.analysis ?? null,
             pdfName,
             patientName: result.patientName ?? null,
         });
+        try {
+            await recordAnalysisUsage(userId, historyDoc._id);
+        } catch (usageErr) {
+            if (process.env.NODE_ENV !== 'production') {
+                console.error('ANALYSIS USAGE ERR:', usageErr?.message || usageErr);
+            }
+        }
         await trimLabHistoryForUser(userId);
     } catch (ex) {
         if (process.env.NODE_ENV !== 'production') {

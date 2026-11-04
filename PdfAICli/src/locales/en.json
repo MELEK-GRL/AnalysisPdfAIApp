@@ -209,7 +209,21 @@
     "deleteAllButton": "Delete All",
     "deleteAllConfirm": "Are you sure you want to delete all?",
     "deleteSelectedConfirm": "Are you sure you want to delete the selected items?",
-    "searchPlaceholder": "Search"
+    "searchPlaceholder": "Search",
+    "compareButton": "Compare My Labs",
+    "compareAction": "Compare",
+    "compareHint": "Select 2 labs from the list ({{count}}/2)",
+    "compareReadyHint": "2 labs selected. Tap the button to compare.",
+    "compareTitle": "Lab Comparison",
+    "compareError": "Could not compare. Please try again.",
+    "compareErrorNotDeployed": "Compare API is not on the server yet. Deploy the backend (Railway) and try again.",
+    "compareClose": "Close",
+    "compareTabCompare": "Comparison",
+    "compareTabNotable": "Out of range",
+    "compareSummaryCommon": "Common params",
+    "compareSummaryNotable": "Out of range",
+    "compareCommonEmpty": "No common parameters found. Select two labs of the same type (e.g. two CBCs or the same panel).",
+    "compareNotableEmpty": "No out-of-range or positive findings among common parameters."
   },
   "tabs": {
     "analysis": "Lab Analysis",

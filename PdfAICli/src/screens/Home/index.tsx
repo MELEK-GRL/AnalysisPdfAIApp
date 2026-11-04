@@ -29,6 +29,7 @@ import { MESSAGES } from '../../constants/messages';
 import { useSessionStore } from '../../store/useSessionStore';
 import { TEST_REWARDED_UNIT_ID } from '../../constants/limits';
 import { showRewardedAdForCredit } from '../../utils/ads/rewardedAd';
+import { waitForPopupClose } from '../../utils/waitForPopupClose';
 import PdfUploadSection from './PdfUploadSection';
 import ResultSection from './ResultSection';
 
@@ -334,12 +335,13 @@ const Home: React.FC = () => {
         setAdWatching(true);
         setRateLimitCreditGranted(false);
         setRateLimitMessage(t('home.adLoading'));
-        // LoadingModal (root) hemen açılsın, popup kapansın, reklam yüklensin
+        // Önce popup kapansın; sonra LoadingModal (Modal üst üste binmesin)
+        setRateLimitModalVisible(false);
+        await waitForPopupClose();
         const loadingStore = useAnalysisLoadingStore.getState();
         loadingStore.setAdUiLocked(true);
         loadingStore.acquireHold();
         useSessionStore.getState().touch();
-        setRateLimitModalVisible(false);
         try {
             void trackButtonClick('watch_rewarded_ad', 'Home');
             const maxAds = 2;
@@ -358,6 +360,8 @@ const Home: React.FC = () => {
                 useAnalysisLoadingStore.getState().remountAdLock();
                 if (!result) {
                     setRateLimitMessage(t('home.adFailed'));
+                    useAnalysisLoadingStore.getState().setAdUiLocked(false);
+                    await waitForPopupClose(200);
                     setRateLimitModalVisible(true);
                     return;
                 }
@@ -365,11 +369,15 @@ const Home: React.FC = () => {
                     setRateLimitAdsOffer(false);
                     setRateLimitCreditGranted(true);
                     setRateLimitMessage(t('home.adCreditGranted'));
+                    useAnalysisLoadingStore.getState().setAdUiLocked(false);
+                    await waitForPopupClose(200);
                     setRateLimitModalVisible(true);
                     void useQuotaStore.getState().refresh();
                     return;
                 }
             }
+            useAnalysisLoadingStore.getState().setAdUiLocked(false);
+            await waitForPopupClose(200);
             setRateLimitModalVisible(true);
         } finally {
             useSessionStore.getState().touch();

@@ -34,10 +34,16 @@ const LoadingModal: React.FC<Props> = ({
                     alignItems: 'center',
                 },
                 overlay: {
-                    ...StyleSheet.absoluteFillObject,
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: '100%',
+                    height: '100%',
                     zIndex: 99999,
                     elevation: 99999,
-                    backgroundColor: 'rgba(17, 24, 39, 0.40)',
+                    backgroundColor: 'rgba(17, 24, 39, 0.45)',
                     justifyContent: 'center',
                     alignItems: 'center',
                 },
@@ -118,6 +124,8 @@ const LoadingModal: React.FC<Props> = ({
             visible={visible}
             transparent
             statusBarTranslucent
+            hardwareAccelerated
+            presentationStyle="overFullScreen"
             animationType="fade"
             onRequestClose={() => {}}>
             <View style={styles.fullScreen} pointerEvents="auto">

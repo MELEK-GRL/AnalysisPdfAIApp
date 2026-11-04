@@ -79,16 +79,14 @@ const PopupModal: React.FC<Props> = ({
         [w1px, h1px],
     );
 
-    if (!visible) {
-        return null;
-    }
-
     return (
         <Modal
             visible={visible}
             transparent
             animationType="fade"
             statusBarTranslucent
+            hardwareAccelerated
+            presentationStyle="overFullScreen"
             onRequestClose={() => {
                 // Butonsuz (kilit) modda geri tuşu ile kapanmasın
                 if (locked) return;

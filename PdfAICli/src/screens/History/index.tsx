@@ -32,6 +32,7 @@ import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
 import { getToken } from '../../server/apiFetcher';
 import { showRewardedAd } from '../../utils/ads/rewardedAd';
+import { waitForPopupClose } from '../../utils/waitForPopupClose';
 import { TEST_REWARDED_UNIT_ID } from '../../constants/limits';
 import Header from '../../components/Header/Header';
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -262,6 +263,8 @@ const History: React.FC = () => {
         if (compareLoading) return;
         setCompareAdPromptVisible(false);
         setCompareLoading(true);
+        // Popup Modal kapansın, sonra LoadingModal (üst üste binmesin)
+        await waitForPopupClose();
 
         const loadingStore = useAnalysisLoadingStore.getState();
         loadingStore.setAdUiLocked(true);
@@ -275,11 +278,15 @@ const History: React.FC = () => {
             useAnalysisLoadingStore.getState().setAdUiLocked(true);
             useAnalysisLoadingStore.getState().remountAdLock();
             if (!adResult.watched) {
+                useAnalysisLoadingStore.getState().setAdUiLocked(false);
+                await waitForPopupClose(200);
                 setErrorMessage(t('home.adFailed'));
                 setErrorSource('detail');
                 setErrorVisible(true);
                 return;
             }
+            useAnalysisLoadingStore.getState().setAdUiLocked(false);
+            await waitForPopupClose(200);
             setCompareViewPromptVisible(true);
         } finally {
             useSessionStore.getState().touch();
@@ -296,6 +303,7 @@ const History: React.FC = () => {
         const [id1, id2] = compareOrder;
         setCompareViewPromptVisible(false);
         setCompareLoading(true);
+        await waitForPopupClose();
 
         const loadingStore = useAnalysisLoadingStore.getState();
         loadingStore.setAdUiLocked(true);
@@ -304,6 +312,8 @@ const History: React.FC = () => {
 
         try {
             const result = await compareLabs(id1, id2);
+            useAnalysisLoadingStore.getState().setAdUiLocked(false);
+            await waitForPopupClose(200);
             setCompareResult(result);
             setCompareModalVisible(true);
         } catch (e: unknown) {
@@ -320,6 +330,8 @@ const History: React.FC = () => {
             } else if (status === 404) {
                 msg = t('history.compareErrorNotDeployed');
             }
+            useAnalysisLoadingStore.getState().setAdUiLocked(false);
+            await waitForPopupClose(200);
             setErrorMessage(msg);
             setErrorSource('detail');
             setErrorVisible(true);

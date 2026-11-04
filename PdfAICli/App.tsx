@@ -88,13 +88,17 @@ const App = () => {
               : undefined
           }
         />
-        {/* Görsel kilit — Modal + overlay (native dönüşte epoch ile yenilenir) */}
+        {/*
+          Reklam / karşılaştırma kilidi: sadece overlay.
+          RN Modal + PopupModal aynı anda açılınca Android'de LoadingModal
+          tam ekran olmuyordu; overlay absoluteFill ile her zaman full cover.
+          lockEpoch: native reklam dönüşünde yeniden monte.
+        */}
         <LoadingModal
-          key={`ad-modal-${lockEpoch}`}
+          key={`ad-overlay-${lockEpoch}`}
           visible={adUiLocked}
-          variant="modal"
+          variant="overlay"
         />
-        <LoadingModal visible={adUiLocked} variant="overlay" />
       </View>
     </SafeAreaProvider>
   );

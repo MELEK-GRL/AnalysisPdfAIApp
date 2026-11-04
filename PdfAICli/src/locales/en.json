@@ -226,7 +226,7 @@
     "compareHint": "Select 2 labs from the list ({{count}}/2)",
     "compareReadyHint": "2 labs selected. Tap the button to compare.",
     "compareTitle": "Lab Comparison",
-    "compareAdTitle": "Ad required",
+    "compareAdTitle": "To Continue",
     "compareAdMessage": "Watch a short ad to view the comparison.",
     "compareViewResultTitle": "Ready",
     "compareViewResultMessage": "Ad finished. You can view the comparison result now.",

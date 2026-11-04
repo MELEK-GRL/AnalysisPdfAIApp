@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useResponsive } from '../../utils/deviceStore/device';
@@ -18,6 +18,8 @@ type Props = {
 };
 
 type CompareTab = 'compare' | 'notable';
+
+const PAGE_SIZE = 10;
 
 function formatDate(s: string | null | undefined, locale: string) {
     if (!s) return '—';
@@ -66,6 +68,20 @@ const LabCompareResult: React.FC<Props> = ({ comparison }) => {
     );
 
     const listItems = tab === 'notable' ? notableItems : comparison.common;
+    const totalItems = listItems.length;
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+    const visibleItems = useMemo(
+        () => listItems.slice(0, Math.min(visibleCount, totalItems)),
+        [listItems, visibleCount, totalItems],
+    );
+    const hasMore = visibleCount < totalItems;
+    const showMore = () =>
+        setVisibleCount(c => Math.min(c + PAGE_SIZE, totalItems));
+
+    // Tab veya liste değişince 10'dan başla (analiz detayı Chart ile aynı)
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+    }, [tab, totalItems, comparison.lab1.id, comparison.lab2.id]);
 
     const tabs = useMemo(
         () => [
@@ -486,7 +502,34 @@ const LabCompareResult: React.FC<Props> = ({ comparison }) => {
                         <EmptyState title={emptyMessage} />
                     </View>
                 ) : (
-                    listItems.map(renderItemCard)
+                    <>
+                        {visibleItems.map(renderItemCard)}
+                        {hasMore ? (
+                            <TouchableOpacity
+                                onPress={showMore}
+                                activeOpacity={0.7}
+                                style={{
+                                    marginTop: 4 * h1px,
+                                    paddingVertical: 10 * h1px,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 6 * w1px,
+                                }}>
+                                <Ionicons
+                                    name="chevron-down"
+                                    size={iconSize.medium}
+                                    color={colors.backgroundPurple}
+                                />
+                                <T
+                                    size={fontSize.body}
+                                    weight="600"
+                                    color={colors.backgroundPurple}>
+                                    {t('history.showMore')}
+                                </T>
+                            </TouchableOpacity>
+                        ) : null}
+                    </>
                 )}
             </ScrollView>
         </View>

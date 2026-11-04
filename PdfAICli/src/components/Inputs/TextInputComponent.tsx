@@ -29,9 +29,11 @@ const TextInputComponent: React.FC<Props> = ({
     containerStyle,
     passwordToggle = false,
     secureTextEntry,
+    editable = true,
     autoCapitalize = 'none',
     autoCorrect = false,
     spellCheck = false,
+    style,
     ...props
 }) => {
     const { w1px, h1px, fs1px } = useResponsive();
@@ -39,6 +41,7 @@ const TextInputComponent: React.FC<Props> = ({
     const [visible, setVisible] = useState(false);
     const isPassword = secureTextEntry === true || passwordToggle;
     const showPassword = passwordToggle ? visible : !secureTextEntry;
+    const isSoft = editable === false;
 
     const styles = useMemo(
         () =>
@@ -55,14 +58,14 @@ const TextInputComponent: React.FC<Props> = ({
                     borderWidth: 1,
                     borderColor: error ? '#ef4444' : colors.inputBorder,
                     borderRadius: 8 * w1px,
-                    backgroundColor: '#fff',
+                    backgroundColor: isSoft ? '#F9FAFB' : '#fff',
                 },
                 input: {
                     flex: 1,
                     paddingVertical: 10 * h1px,
                     paddingHorizontal: 12 * w1px,
                     fontSize: fontSize.body * scale,
-                    color: '#111827',
+                    color: isSoft ? '#9CA3AF' : '#111827',
                     paddingRight: passwordToggle ? 44 * w1px : 12 * w1px,
                 },
                 eyeTouch: {
@@ -77,7 +80,7 @@ const TextInputComponent: React.FC<Props> = ({
                     marginTop: 4 * h1px,
                 },
             }),
-        [w1px, h1px, fs1px, error, passwordToggle, scale],
+        [w1px, h1px, fs1px, error, passwordToggle, scale, isSoft],
     );
 
     return (
@@ -95,8 +98,9 @@ const TextInputComponent: React.FC<Props> = ({
             <View style={styles.inputWrap}>
                 <TextInput
                     placeholderTextColor={colors.buttonGray}
-                    style={styles.input}
+                    style={[styles.input, style]}
                     {...props}
+                    editable={editable}
                     // Android klavye ilk harfi büyütmesin (props sonrası zorla)
                     autoCapitalize={autoCapitalize}
                     autoCorrect={autoCorrect}

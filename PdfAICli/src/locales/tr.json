@@ -39,7 +39,18 @@
     "deleteAccountConfirmTitle": "Hesap silinecek",
     "deleteAccountConfirmMessage": "Hesabınız kalıcı olarak silinecektir. Bu işlem geri alınamaz. Onaylıyor musunuz?",
     "deleteAccountConfirm": "Sil",
-    "deleteAccountError": "Hesap silinemedi. Lütfen tekrar deneyin."
+    "deleteAccountError": "Hesap silinemedi. Lütfen tekrar deneyin.",
+    "helpSupport": "Yardım ve destek",
+    "helpSupportTitle": "Yardım ve destek",
+    "helpSupportHint": "Sorun, öneri veya sorularınızı yazın. Mesajınız destek ekibimize iletilir; yanıt e-posta adresinize gelir. Destek adresi uygulamada gösterilmez.",
+    "helpSupportPlaceholder": "Mesajınız…",
+    "helpSupportMessageLabel": "Mesaj",
+    "helpSupportSend": "Gönder",
+    "helpSupportSuccess": "Mesajınız iletildi. En kısa sürede dönüş yapılacaktır.",
+    "helpSupportError": "Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.",
+    "helpSupportEmpty": "Lütfen bir mesaj yazın.",
+    "helpSupportNameRequired": "Lütfen kullanıcı adınızı girin.",
+    "helpSupportEmailRequired": "Lütfen e-posta adresinizi girin."
   },
   "logout": {
     "title": "Oturumu kapatmak istiyor musun?",

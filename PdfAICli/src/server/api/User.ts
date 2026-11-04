@@ -89,3 +89,16 @@ export async function resetPasswordByToken(
 export async function deleteAccount(): Promise<{ success: true }> {
     return del<{ success: true }>(endpoints.deleteAccount);
 }
+
+/** Yardım / destek mesajı (alıcı adresi client'ta yok). */
+export async function sendSupportMessage(payload: {
+    name: string;
+    email: string;
+    message: string;
+}): Promise<{ ok: true }> {
+    return post<{ ok: true }>('/support', {
+        name: payload.name,
+        email: payload.email,
+        message: payload.message,
+    });
+}

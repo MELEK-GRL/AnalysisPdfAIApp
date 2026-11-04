@@ -37,6 +37,10 @@ import { isNetworkError } from '../../utils/errorUtils';
 import TERMS_ITEMS from '../../utils/contractArticles/Articles.json';
 import OPEN_CONSENT_ITEMS from '../../utils/contractArticles/OpenConsentArticles.json';
 import { useKeyboardBottomInset } from '../../hooks/useKeyboardBottomInset';
+import {
+    PASSWORD_MIN_LENGTH,
+    PASSWORD_MAX_LENGTH,
+} from '../../constants/limits';
 
 const Register: React.FC = () => {
     const nav = useNavigation<any>();
@@ -228,7 +232,10 @@ const Register: React.FC = () => {
                 type: 'warning',
             });
         }
-        if (passT.length < 6) {
+        if (
+            passT.length < PASSWORD_MIN_LENGTH ||
+            passT.length > PASSWORD_MAX_LENGTH
+        ) {
             return setModal({
                 visible: true,
                 title: t('common.warning'),
@@ -415,6 +422,7 @@ const Register: React.FC = () => {
                             }
                             secureTextEntry
                             passwordToggle
+                            maxLength={PASSWORD_MAX_LENGTH}
                             returnKeyType="next"
                             onFocus={ensureFieldVisible}
                             containerStyle={{ marginBottom: 10 * h1px }}
@@ -429,6 +437,7 @@ const Register: React.FC = () => {
                             }
                             secureTextEntry
                             passwordToggle
+                            maxLength={PASSWORD_MAX_LENGTH}
                             returnKeyType="done"
                             onFocus={ensureFieldVisible}
                             containerStyle={{ marginBottom: 4 * h1px }}

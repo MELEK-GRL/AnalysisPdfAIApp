@@ -21,6 +21,10 @@ import { fontSize } from '../../constants/typography';
 import GradientLayout from '../../components/Layout/GradientLayout';
 import { useT } from '../../store/useLocaleStore';
 import { useKeyboardBottomInset } from '../../hooks/useKeyboardBottomInset';
+import {
+    PASSWORD_MIN_LENGTH,
+    PASSWORD_MAX_LENGTH,
+} from '../../constants/limits';
 
 type ResetPasswordRoute = { ResetPassword: { token?: string; email?: string; devCode?: string } };
 
@@ -115,7 +119,10 @@ const ResetPassword: React.FC = () => {
             });
             return;
         }
-        if (newPassword.length < 6) {
+        if (
+            newPassword.length < PASSWORD_MIN_LENGTH ||
+            newPassword.length > PASSWORD_MAX_LENGTH
+        ) {
             setModal({
                 visible: true,
                 title: t('common.warning'),
@@ -288,6 +295,7 @@ const ResetPassword: React.FC = () => {
                             }
                             secureTextEntry
                             passwordToggle
+                            maxLength={PASSWORD_MAX_LENGTH}
                             onFocus={scrollToLowerFields}
                             containerStyle={{
                                 marginBottom: 12 * h1px,
@@ -304,6 +312,7 @@ const ResetPassword: React.FC = () => {
                             }
                             secureTextEntry
                             passwordToggle
+                            maxLength={PASSWORD_MAX_LENGTH}
                             returnKeyType="done"
                             onFocus={scrollToLowerFields}
                             onSubmitEditing={handleSubmit}

@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema(
         password: {
             type: String,
             required: true,
+            // Uzunluk kontrolü plaintext üzerinde auth route’ta (hash ~60 karakter)
             minlength: 6,
         },
         termsAcceptedAt: {

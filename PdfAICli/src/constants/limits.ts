@@ -1,5 +1,9 @@
 /** İstek/limit sabitleri (tek yerden yönetim) */
 
+/** Şifre uzunluğu (backend user model / auth ile uyumlu) */
+export const PASSWORD_MIN_LENGTH = 6;
+export const PASSWORD_MAX_LENGTH = 8;
+
 /** Günlük PDF analiz hakkı (backend ile uyumlu) */
 export const DAILY_ANALYSIS_LIMIT = 1;
 

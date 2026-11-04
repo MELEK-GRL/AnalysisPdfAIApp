@@ -76,6 +76,10 @@ const JWT_EXPIRES_IN = '7d';
 /** bcrypt hash rounds */
 const BCRYPT_ROUNDS = 10;
 
+/** Şifre uzunluğu (client limits ile uyumlu) */
+const PASSWORD_MIN_LENGTH = 6;
+const PASSWORD_MAX_LENGTH = 8;
+
 /** Maksimum yükleme boyutu (15 MB) */
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 
@@ -105,6 +109,8 @@ module.exports = {
     DEFAULT_DB_NAME,
     JWT_EXPIRES_IN,
     BCRYPT_ROUNDS,
+    PASSWORD_MIN_LENGTH,
+    PASSWORD_MAX_LENGTH,
     MAX_UPLOAD_BYTES,
     VALID_ANALYTICS_TYPES,
     EARLY_OK,

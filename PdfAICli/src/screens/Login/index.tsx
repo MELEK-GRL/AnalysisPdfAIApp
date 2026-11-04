@@ -25,6 +25,7 @@ import {
     HAS_EVER_LOGGED_IN,
 } from '../../constants/storageKeys';
 import { isNetworkError } from '../../utils/errorUtils';
+import { PASSWORD_MAX_LENGTH } from '../../constants/limits';
 
 const Login: React.FC = () => {
     const nav = useNavigation<any>();
@@ -201,6 +202,7 @@ const Login: React.FC = () => {
                         autoCapitalize="none"
                         secureTextEntry
                         passwordToggle
+                        maxLength={PASSWORD_MAX_LENGTH}
                         returnKeyType="done"
                         onSubmitEditing={handleLogin}
                         containerStyle={{ marginBottom: 4 * h1px }}

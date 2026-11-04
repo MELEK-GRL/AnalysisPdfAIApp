@@ -12,12 +12,24 @@ const Consent = require('../models/Consent');
 const AppAnalytics = require('../models/AppAnalytics');
 const requireAuth = require('../middleware/requireAuth');
 const { sendPasswordResetCodeEmail } = require('../services/mail');
-const { JWT_EXPIRES_IN, BCRYPT_ROUNDS } = require('../constants');
+const {
+    JWT_EXPIRES_IN,
+    BCRYPT_ROUNDS,
+    PASSWORD_MIN_LENGTH,
+    PASSWORD_MAX_LENGTH,
+} = require('../constants');
 
 const RESET_CODE_EXPIRY_MS = 60 * 60 * 1000; // 1 saat (link için)
 const RESET_CODE_6_DIGIT_EXPIRY_MS = 3 * 60 * 1000; // 3 dakika (6 haneli kod – süre dolunca hak düşer)
 const FORGOT_PASSWORD_MAX_ATTEMPTS_PER_24H = 4;
 const FORGOT_PASSWORD_24H_MS = 24 * 60 * 60 * 1000;
+
+function isPasswordLengthValid(password) {
+    const len = typeof password === 'string' ? password.length : 0;
+    return len >= PASSWORD_MIN_LENGTH && len <= PASSWORD_MAX_LENGTH;
+}
+
+const PASSWORD_LENGTH_MESSAGE = `Password must be ${PASSWORD_MIN_LENGTH}-${PASSWORD_MAX_LENGTH} characters`;
 
 function generateResetToken() {
     return crypto.randomBytes(32).toString('hex');
@@ -52,6 +64,12 @@ router.post('/register', async (req, res) => {
         }
         if (!accepted) {
             return res.status(400).json({ message: 'Terms must be accepted' });
+        }
+        if (!isPasswordLengthValid(password)) {
+            return res.status(400).json({
+                message: PASSWORD_LENGTH_MESSAGE,
+                code: 'PASSWORD_LENGTH',
+            });
         }
 
         const exists = await User.findOne({ email }).lean();
@@ -207,8 +225,8 @@ router.post('/reset-password-by-code', async (req, res) => {
         if (!/^\d{6}$/.test(code)) {
             return res.status(400).json({ message: 'Invalid or expired code' });
         }
-        if (newPassword.length < 6) {
-            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        if (!isPasswordLengthValid(newPassword)) {
+            return res.status(400).json({ message: PASSWORD_LENGTH_MESSAGE });
         }
 
         const reset = await PasswordReset.findOne({ email, token: code }).sort({ createdAt: -1 });
@@ -239,8 +257,8 @@ router.post('/reset-password', async (req, res) => {
         if (!token || !newPassword) {
             return res.status(400).json({ message: 'Token and new password required' });
         }
-        if (newPassword.length < 6) {
-            return res.status(400).json({ message: 'Password must be at least 6 characters' });
+        if (!isPasswordLengthValid(newPassword)) {
+            return res.status(400).json({ message: PASSWORD_LENGTH_MESSAGE });
         }
 
         const reset = await PasswordReset.findOne({ token }).sort({ createdAt: -1 });

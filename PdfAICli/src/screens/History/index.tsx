@@ -17,6 +17,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { HistoryStackParamList } from '../../navigation/historyNavigation';
 import { useT, useLocaleStore } from '../../store/useLocaleStore';
 import { useSessionStore } from '../../store/useSessionStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { useScreenTime } from '../../utils/analytics/useScreenTime';
 import { isNetworkError } from '../../utils/errorUtils';
 import { getProfile } from '../../server/api/User';
@@ -39,7 +40,8 @@ const History: React.FC = () => {
     const [items, setItems] = useState<LabHistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [displayName, setDisplayName] = useState('');
+    const user = useAuthStore(s => s.user);
+    const [displayName, setDisplayName] = useState(user?.name || '');
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [errorSource, setErrorSource] = useState<'fetch' | 'detail'>('fetch');
@@ -65,7 +67,11 @@ const History: React.FC = () => {
                 (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
             );
             setItems(sorted);
-            if (me?.name) setDisplayName(me.name);
+            if (me?.name) {
+                setDisplayName(me.name);
+            } else if (useAuthStore.getState().user?.name) {
+                setDisplayName(useAuthStore.getState().user!.name);
+            }
         } catch (e) {
             const msg = isNetworkError(e)
                 ? t('history.fetchErrorNetwork')
@@ -78,6 +84,10 @@ const History: React.FC = () => {
             setRefreshing(false);
         }
     }, [t]);
+
+    useEffect(() => {
+        if (user?.name) setDisplayName(user.name);
+    }, [user?.name]);
 
     useEffect(() => {
         fetchHistory();

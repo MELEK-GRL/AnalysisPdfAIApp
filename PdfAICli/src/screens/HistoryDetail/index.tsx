@@ -14,6 +14,7 @@ import type {HistoryStackParamList} from '../../navigation/historyNavigation';
 import {useResponsive} from '../../utils/deviceStore/device';
 import {useT, useLocaleStore} from '../../store/useLocaleStore';
 import {useSessionStore} from '../../store/useSessionStore';
+import {useAuthStore} from '../../store/useAuthStore';
 import {useScreenTime} from '../../utils/analytics/useScreenTime';
 import Header from '../../components/Header/Header';
 import PageHeader from '../../components/PageHeader/PageHeader';
@@ -44,6 +45,7 @@ const HistoryDetail: React.FC = () => {
   const {id} = route.params;
   const t = useT();
   const locale = useLocaleStore(s => s.locale);
+  const displayName = useAuthStore(s => s.user?.name ?? '');
   const {w1px, h1px} = useResponsive();
 
   const [detail, setDetail] = useState<LabHistoryDetail | null>(null);
@@ -161,7 +163,7 @@ const HistoryDetail: React.FC = () => {
 
   return (
     <View style={styles.root}>
-      <Header />
+      <Header title={displayName} />
       <PageLayout>
         <PageHeader title={t('history.detailTitle')} />
 

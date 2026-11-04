@@ -82,8 +82,8 @@ android {
         applicationId "com.pdfaicli"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21   // Her Play Store yayınında artır (1, 2, 3...)
-        versionName "1.0.20"
+        versionCode 22   // Her Play Store yayınında artır (Play'de son: 9 / 1.0.8)
+        versionName "1.0.21"
     }
     signingConfigs {
         debug {

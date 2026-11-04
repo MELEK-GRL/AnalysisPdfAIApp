@@ -7,6 +7,7 @@ import useDeviceStore from './src/store/useDeviceStore';
 import { useAnalysisLoadingStore } from './src/store/useAnalysisLoadingStore';
 import { useLocaleStore } from './src/store/useLocaleStore';
 import { useInactivityTimeout } from './src/hooks/useInactivityTimeout';
+import { enableFirebaseAnalyticsIfConsented } from './src/utils/analytics/firebaseAnalytics';
 
 /** Hızlı 429 / hata cevaplarında "1–2 dk bekleyin" flaşını engeller */
 const ANALYSIS_LOADING_UI_DELAY_MS = 350;
@@ -20,6 +21,11 @@ const App = () => {
   const [showAnalysisLoadingUi, setShowAnalysisLoadingUi] = useState(false);
 
   useInactivityTimeout();
+
+  // KVKK rızası varsa GA collection’ı aç (manifest’te default kapalı)
+  useEffect(() => {
+    void enableFirebaseAnalyticsIfConsented();
+  }, []);
 
   useEffect(() => {
     if (!analysisLoading) {

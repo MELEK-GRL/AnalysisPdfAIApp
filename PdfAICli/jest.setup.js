@@ -5,6 +5,21 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+jest.mock('@react-native-firebase/analytics', () => {
+  const analytics = () => ({
+    logEvent: jest.fn(() => Promise.resolve()),
+    logScreenView: jest.fn(() => Promise.resolve()),
+    logLogin: jest.fn(() => Promise.resolve()),
+    setAnalyticsCollectionEnabled: jest.fn(() => Promise.resolve()),
+  });
+  return { __esModule: true, default: analytics };
+});
+
+jest.mock('@react-native-firebase/app', () => ({
+  __esModule: true,
+  default: () => ({}),
+}));
+
 jest.mock('@react-native-documents/picker', () => ({
   pick: jest.fn(() => Promise.resolve([{}])),
   types: { pdf: 'application/pdf' },

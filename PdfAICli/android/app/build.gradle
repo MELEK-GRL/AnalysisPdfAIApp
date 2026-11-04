@@ -129,3 +129,9 @@ dependencies {
 }
 
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+
+// Firebase Analytics: yalnız gerçek google-services.json varken plugin uygula
+// (örnek dosya: google-services.json.example → google-services.json kopyala)
+if (file("google-services.json").exists()) {
+    apply plugin: "com.google.gms.google-services"
+}

@@ -1,17 +1,13 @@
 /**
  * TAMAMEN ÜCRETSİZ mail köprüsü (Google Apps Script + Gmail).
  *
- * Kurulum:
- * 1) https://script.google.com → Yeni proje (veya mevcut proje)
- * 2) Bu dosyanın içeriğini Code.gs'e yapıştır
- * 3) Deploy → New deployment / Manage deployments → Edit → New version
- *    - Execute as: Me
- *    - Who has access: Anyone
- * 4) Web app URL'ini Railway GOOGLE_SCRIPT_MAIL_URL olarak koy
- * 5) Redeploy
+ * ÖNEMLİ — HTML mail görünmesi için bu dosyayı Google'da güncelle:
+ * 1) https://script.google.com → mail köprüsü projeni aç
+ * 2) Code.gs içeriğini BU dosyanın tamamıyla değiştir (htmlBody satırları şart)
+ * 3) Deploy → Manage deployments → kalem (Edit) → Version: New version → Deploy
+ * 4) URL değişirse Railway GOOGLE_SCRIPT_MAIL_URL'i güncelle
  *
- * Not: Script'i labanalysis.noreply@gmail.com hesabıyla oluşturursan
- * mailler o Gmail'den / o gelen kutusuna gider (günlük Gmail kotası içinde, ücret yok).
+ * htmlBody yoksa Gmail sadece düz metin gösterir (renkli tasarım gelmez).
  */
 
 function doPost(e) {

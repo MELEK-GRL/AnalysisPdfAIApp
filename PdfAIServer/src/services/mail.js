@@ -116,65 +116,114 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
-/** Destek maili — marka moru (#736EF7 / #7453E0) */
+/**
+ * Destek maili HTML — uygulama renkleri (#7453E0, #736EF7, #e6ecff).
+ * Gmail uyumu için solid renk + table layout (gradient çoğu istemcide düşer).
+ */
 function buildSupportEmailHtml({ fromName, fromEmail, userId, message }) {
     const name = escapeHtml(fromName || '—');
     const email = escapeHtml(fromEmail || '—');
     const uid = escapeHtml(userId || '—');
     const msg = escapeHtml(String(message || '').trim()).replace(/\n/g, '<br/>');
     const when = escapeHtml(
-        new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }),
+        new Date().toLocaleString('tr-TR', {
+            timeZone: 'Europe/Istanbul',
+            dateStyle: 'long',
+            timeStyle: 'short',
+        }),
     );
 
     return `<!DOCTYPE html>
 <html lang="tr">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#F3F1FF;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F3F1FF;padding:28px 12px;">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Destek talebi</title>
+</head>
+<body style="margin:0;padding:0;background-color:#e6ecff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#e6ecff" style="background-color:#e6ecff;padding:24px 12px;">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 28px rgba(116,83,224,0.12);">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;">
         <tr>
-          <td style="background:linear-gradient(135deg,#7453E0 0%,#736EF7 100%);padding:28px 28px 22px;">
-            <div style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.78);font-weight:600;">Lab Analysis</div>
-            <div style="margin-top:8px;font-size:22px;line-height:1.3;color:#ffffff;font-weight:700;">Yeni destek talebi</div>
-            <div style="margin-top:6px;font-size:13px;color:rgba(255,255,255,0.85);">${when}</div>
+          <td align="center" style="padding:0 0 14px;">
+            <span style="display:inline-block;background-color:#ECEBFD;color:#4941B3;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;">Yardım &amp; destek</span>
           </td>
         </tr>
         <tr>
-          <td style="padding:24px 28px 8px;">
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#F8F7FF;border:1px solid #E8E4FF;border-radius:12px;">
+          <td bgcolor="#ffffff" style="background-color:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #d8d4f5;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
               <tr>
-                <td style="padding:14px 16px;border-bottom:1px solid #E8E4FF;">
-                  <div style="font-size:11px;color:#8B86C8;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Kullanıcı</div>
-                  <div style="margin-top:4px;font-size:15px;color:#1F1B3D;font-weight:600;">${name}</div>
+                <td bgcolor="#7453E0" style="background-color:#7453E0;padding:26px 28px;">
+                  <div style="font-size:13px;font-weight:600;color:#D8D2FF;letter-spacing:0.04em;">Lab Analysis</div>
+                  <div style="margin-top:8px;font-size:24px;line-height:1.25;font-weight:700;color:#ffffff;">Yeni destek talebi geldi</div>
+                  <div style="margin-top:10px;font-size:13px;line-height:1.45;color:#E8E4FF;">Uygulamadaki formdan iletildi. Kullanıcıya dönüş için bu mailde <strong style="color:#ffffff;">Yanıtla</strong> kullanın.</div>
                 </td>
               </tr>
               <tr>
-                <td style="padding:14px 16px;border-bottom:1px solid #E8E4FF;">
-                  <div style="font-size:11px;color:#8B86C8;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">E-posta</div>
-                  <div style="margin-top:4px;font-size:15px;color:#1F1B3D;">
-                    <a href="mailto:${email}" style="color:#5E55DB;text-decoration:none;font-weight:600;">${email}</a>
-                  </div>
+                <td style="padding:22px 28px 6px;">
+                  <div style="font-size:12px;font-weight:700;color:#736EF7;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;">Gönderen bilgileri</div>
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f9fafd" style="background-color:#f9fafd;border:1px solid #E4E0FA;border-radius:12px;">
+                    <tr>
+                      <td style="padding:14px 16px;border-bottom:1px solid #E4E0FA;width:34%;vertical-align:top;">
+                        <div style="font-size:11px;color:#8B86C8;font-weight:600;">Kullanıcı adı</div>
+                      </td>
+                      <td style="padding:14px 16px;border-bottom:1px solid #E4E0FA;vertical-align:top;">
+                        <div style="font-size:15px;color:#1D1D1F;font-weight:700;">${name}</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:14px 16px;border-bottom:1px solid #E4E0FA;width:34%;vertical-align:top;">
+                        <div style="font-size:11px;color:#8B86C8;font-weight:600;">E-posta</div>
+                      </td>
+                      <td style="padding:14px 16px;border-bottom:1px solid #E4E0FA;vertical-align:top;">
+                        <a href="mailto:${email}" style="font-size:15px;color:#3B49F7;font-weight:700;text-decoration:none;">${email}</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:14px 16px;width:34%;vertical-align:top;">
+                        <div style="font-size:11px;color:#8B86C8;font-weight:600;">User ID</div>
+                      </td>
+                      <td style="padding:14px 16px;vertical-align:top;">
+                        <div style="font-size:12px;color:#6E6E73;font-family:Menlo,Consolas,monospace;word-break:break-all;">${uid}</div>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
               <tr>
-                <td style="padding:14px 16px;">
-                  <div style="font-size:11px;color:#8B86C8;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">User ID</div>
-                  <div style="margin-top:4px;font-size:13px;color:#6E6E73;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;">${uid}</div>
+                <td style="padding:18px 28px 8px;">
+                  <div style="font-size:12px;font-weight:700;color:#736EF7;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;">Kullanıcı mesajı</div>
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                      <td bgcolor="#ECEBFD" width="5" style="background-color:#736EF7;width:5px;border-radius:4px 0 0 4px;"></td>
+                      <td bgcolor="#F8F7FF" style="background-color:#F8F7FF;border:1px solid #E4E0FA;border-left:none;border-radius:0 12px 12px 0;padding:16px 18px;font-size:15px;line-height:1.6;color:#1D1D1F;">${msg}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:16px 28px 26px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" bgcolor="#efe9ff" style="background-color:#efe9ff;border-radius:12px;border:1px solid #D8D2FF;">
+                    <tr>
+                      <td style="padding:14px 16px;">
+                        <div style="font-size:13px;font-weight:700;color:#4941B3;margin-bottom:4px;">Nasıl yanıtlanır?</div>
+                        <div style="font-size:13px;line-height:1.5;color:#4B5563;">Gmail’de <strong style="color:#7453E0;">Yanıtla</strong>’ya basın. Reply-To kullanıcının e-postasıdır; cevap doğrudan <strong>${email}</strong> adresine gider.</div>
+                        <div style="margin-top:8px;font-size:12px;color:#8B86C8;">Talep zamanı: ${when}</div>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>
           </td>
         </tr>
         <tr>
-          <td style="padding:16px 28px 28px;">
-            <div style="font-size:11px;color:#8B86C8;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:10px;">Mesaj</div>
-            <div style="background:#ffffff;border:1px solid #E8E4FF;border-left:4px solid #736EF7;border-radius:10px;padding:16px 18px;font-size:15px;line-height:1.55;color:#1F1B3D;">${msg}</div>
-            <div style="margin-top:18px;font-size:12px;color:#9B97B8;line-height:1.45;">Yanıtlamak için bu mailde <strong style="color:#736EF7;">Yanıtla</strong> kullanın; yanıt doğrudan kullanıcının e-postasına gider.</div>
+          <td align="center" style="padding:16px 8px 0;font-size:11px;line-height:1.5;color:#8B86C8;">
+            Bu e-posta Lab Analysis uygulamasındaki <em>Yardım ve destek</em> ekranından otomatik gönderildi.<br/>
+            Destek adresi uygulamada gösterilmez.
           </td>
         </tr>
       </table>
-      <div style="max-width:560px;margin-top:14px;font-size:11px;color:#A39FBF;text-align:center;">Bu mesaj uygulama içi Yardım ve destek formundan iletildi.</div>
     </td></tr>
   </table>
 </body>

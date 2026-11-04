@@ -306,6 +306,20 @@ const History: React.FC = () => {
                 checkboxWrap: {
                     marginRight: 12 * w1px,
                 },
+                checkbox: {
+                    width: 22 * w1px,
+                    height: 22 * w1px,
+                    borderRadius: 11 * w1px,
+                    borderWidth: 2,
+                    borderColor: colors.backgroundPurple,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: colors.white,
+                },
+                checkboxChecked: {
+                    backgroundColor: colors.backgroundPurple,
+                    borderColor: colors.backgroundPurple,
+                },
             }),
         [w1px, h1px, fs1px, scale],
     );
@@ -326,11 +340,19 @@ const History: React.FC = () => {
                 activeOpacity={0.7}>
                 {selectionMode ? (
                     <View style={styles.checkboxWrap}>
-                        <Ionicons
-                            name={isSelected ? 'checkbox' : 'checkbox-outline'}
-                            size={24}
-                            color={isSelected ? '#22C55E' : '#9CA3AF'}
-                        />
+                        <View
+                            style={[
+                                styles.checkbox,
+                                isSelected && styles.checkboxChecked,
+                            ]}>
+                            {isSelected ? (
+                                <Ionicons
+                                    name="checkmark"
+                                    size={14 * scale}
+                                    color={colors.white}
+                                />
+                            ) : null}
+                        </View>
                     </View>
                 ) : (
                     <View style={styles.cardAccent} />

@@ -48,7 +48,10 @@ router.post('/', requireAuth, async (req, res) => {
             return res.status(503).json({
                 message:
                     'Destek mesajı şu an gönderilemedi. Lütfen daha sonra tekrar deneyin.',
-                code: 'SUPPORT_SEND_FAILED',
+                code: result.smtpConfigured
+                    ? 'SUPPORT_SMTP_FAILED'
+                    : 'SUPPORT_SMTP_NOT_CONFIGURED',
+                detail: result.error || undefined,
             });
         }
 

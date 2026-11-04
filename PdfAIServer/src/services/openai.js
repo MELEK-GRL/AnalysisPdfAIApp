@@ -1,8 +1,12 @@
 
 const OpenAI = require('openai');
+const { OPENAI_ENABLED } = require('../constants');
 
 let _openaiClient;
 function getOpenAIClient() {
+    if (!OPENAI_ENABLED) {
+        throw new Error('OPENAI_ENABLED is false');
+    }
     const key = process.env.OPENAI_API_KEY;
     if (!key || !String(key).trim()) {
         throw new Error('OPENAI_API_KEY missing');
@@ -998,6 +1002,9 @@ const LAB_EXTRACTION_FORMAT = {
 
 
 async function callOpenAI({ instructions, input, timeoutMs = TIMEOUT_PRIMARY, model = MODEL }) {
+    if (!OPENAI_ENABLED) {
+        throw new Error('OPENAI_ENABLED is false');
+    }
     const resp = await withTimeout(
         getOpenAIClient().responses.create({
             model,
@@ -1167,6 +1174,9 @@ async function generateAnalysisText(items, locale = 'tr') {
     }
 
     const localAnalysis = buildLocalAnalysisFromItems(clean, locale);
+    if (!OPENAI_ENABLED) {
+        return localAnalysis;
+    }
     const notable = collectNotableFindings(clean, locale);
     const bullet = itemsToBulletedText(clean);
     const notableBlock = notable.length
@@ -1356,6 +1366,54 @@ async function classifyAndExtract(text, locale = 'tr') {
     }
     const regexLikely = (local0.items?.length || 0) >= 3;
 
+    /** OpenAI kapalı veya LLM fail: regex + lokal yorum (API isteği yok). */
+    async function finishWithLocalOnly(reasonLab, reasonNonLab) {
+        const local = local0;
+        const rawItems = local.items || [];
+        const filteredItems = rawItems.filter(
+            (it) =>
+                it?.test &&
+                !isJunkLabLabel(it.test) &&
+                !(it.test.trim() === 'HIV' && it.value === 1)
+        );
+        const txt = text || '';
+        const textLooksLikeLab =
+            txt.length >= 200 &&
+            LAB_KEYWORDS.test(txt) &&
+            (/\d+(?:[.,]\d+)?\s*[-–~]\s*\d+(?:[.,]\d+)?|mg\/dl|mmol\/l|referans|\d+(?:[.,]\d+)/i.test(txt));
+        const isLabFinal = filteredItems.length >= 1 || (filteredItems.length === 0 && textLooksLikeLab);
+        const coercedFallback = coerceAndValidate({
+            isLab: isLabFinal,
+            confidence: isLabFinal ? 0.35 : 0,
+            reason: isLabFinal ? reasonLab : reasonNonLab,
+            items: isLabFinal ? filteredItems : [],
+        });
+        const fallbackRawItems = ensureBetaHCGIfInText(
+            fullText,
+            mergeWithLLM(fullBaseItems, coercedFallback.items),
+        );
+        const fallbackItemsMerged = postProcessItems(fullText, fallbackRawItems);
+        const fallback = {
+            isLab: isLabFinal && fallbackItemsMerged.length > 0,
+            confidence: coercedFallback.confidence,
+            reason: coercedFallback.reason,
+            items: fallbackItemsMerged,
+            rawItems: fallbackItemsMerged,
+        };
+        const analysis = fallback.isLab
+            ? await generateAnalysisText(fallback.items, locale)
+            : defaultAnalysisFallback(locale);
+        return { ...fallback, analysis };
+    }
+
+    if (!OPENAI_ENABLED) {
+        if (DEV) console.warn('OPENAI_ENABLED=false — local regex only');
+        return finishWithLocalOnly(
+            'Local regex extraction (OPENAI_ENABLED=false)',
+            'OPENAI_ENABLED=false – not treated as lab',
+        );
+    }
+
     const clippedFirst = clipped.length > MAX_INPUT_CHARS_FIRST_TRY ? clipped.slice(0, MAX_INPUT_CHARS_FIRST_TRY) : clipped;
     try {
         const r1 = await callOpenAI({
@@ -1438,50 +1496,11 @@ async function classifyAndExtract(text, locale = 'tr') {
         console.warn('OPENAI TRY2 ERR:', e?.message || e);
     }
 
-    /* On LLM timeout: do not treat as lab from regex alone – CVs can match numbers. Prefer non-lab. */
-    const local = local0;
-    const items = local.items || [];
-    const hasManyLabLikeItems = items.length >= 5 || items.length >= 1;
-    const hasExplicitMedicalUnits = items.some(
-        (it) => it?.unit && /(mg\/dl|mmol\/l|g\/l|%|fl|HPF|10\^9|referans)/i.test(String(it.unit))
+    /* On LLM timeout/fail: regex only – CVs can match numbers; prefer non-lab when empty. */
+    return finishWithLocalOnly(
+        'Local regex extraction (LLM timeout)',
+        'LLM timeout – not treated as lab',
     );
-    const refCount = items.filter((it) => it?.refLow != null && it?.refHigh != null).length;
-    const hasRefRanges = refCount >= (items.length >= 5 ? 2 : 1);
-    const hasTruncatedUnits = items.length >= 10 && items.some((it) => it?.unit && String(it.unit).trim().length > 0);
-    const hasMedicalUnits = hasExplicitMedicalUnits || hasRefRanges || hasTruncatedUnits;
-    const isLab = items.length >= 1 && hasMedicalUnits;
-    const rawItems = local.items || [];
-    const filteredItems = rawItems.filter(
-        (it) =>
-            it?.test &&
-            !isJunkLabLabel(it.test) &&
-            !(it.test.trim() === 'HIV' && it.value === 1)
-    );
-    const txt = text || '';
-    const textLooksLikeLab =
-        txt.length >= 200 &&
-        LAB_KEYWORDS.test(txt) &&
-        (/\d+(?:[.,]\d+)?\s*[-–~]\s*\d+(?:[.,]\d+)?|mg\/dl|mmol\/l|referans|\d+(?:[.,]\d+)/i.test(txt));
-    const isLabFinal = filteredItems.length >= 1 || (filteredItems.length === 0 && textLooksLikeLab);
-    let fallbackItems = isLabFinal ? filteredItems : [];
-    const coercedFallback = coerceAndValidate({
-        isLab: isLabFinal,
-        confidence: isLabFinal ? 0.35 : 0,
-        reason: isLabFinal ? 'Local regex extraction (LLM timeout)' : 'LLM timeout – not treated as lab',
-        items: fallbackItems,
-    });
-    const fallbackRawItems = ensureBetaHCGIfInText(fullText, mergeWithLLM(fullBaseItems, coercedFallback.items));
-    const fallbackItemsMerged = postProcessItems(fullText, fallbackRawItems);
-    const fallback = {
-        isLab: isLabFinal && fallbackItemsMerged.length > 0,
-        confidence: coercedFallback.confidence,
-        reason: coercedFallback.reason,
-        items: fallbackItemsMerged,
-        rawItems: fallbackItemsMerged,
-    };
-
-    const analysis = fallback.isLab ? await generateAnalysisText(fallback.items, locale) : defaultAnalysisFallback(locale);
-    return { ...fallback, analysis };
 }
 
 module.exports = {
@@ -1491,4 +1510,6 @@ module.exports = {
     finalizeLabItems,
     isJunkLabLabel,
     isLowQualityLabItem,
+    /** env flag (constants) — test / ops */
+    OPENAI_ENABLED,
 };

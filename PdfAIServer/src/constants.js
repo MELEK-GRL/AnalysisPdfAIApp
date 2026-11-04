@@ -27,6 +27,13 @@ const RATE_LIMIT_ANALYSIS_DISABLED = isDevEnvironment();
  */
 const ADS_ENABLED = String(process.env.ADS_ENABLED || '').toLowerCase() === 'true';
 const ADS_WATCHES_PER_CREDIT = Math.max(1, Number(process.env.ADS_WATCHES_PER_CREDIT) || 2);
+
+/**
+ * OpenAI LLM çağrıları. Aç/kapa sadece sunucu (OPENAI_ENABLED).
+ * Varsayılan: açık. Token bitince OPENAI_ENABLED=false → regex + lokal yorum (API isteği yok).
+ * Client rebuild gerekmez; env değişince process restart yeter.
+ */
+const OPENAI_ENABLED = String(process.env.OPENAI_ENABLED ?? 'true').toLowerCase() !== 'false';
 /** Boşsa Google test rewarded unit (canlıda gerçek unit koy). */
 const ADMOB_REWARDED_UNIT_ID =
     (process.env.ADMOB_REWARDED_UNIT_ID || '').trim() ||
@@ -67,6 +74,7 @@ module.exports = {
     ADS_ENABLED,
     ADS_WATCHES_PER_CREDIT,
     ADMOB_REWARDED_UNIT_ID,
+    OPENAI_ENABLED,
     TMP_DIR,
     DEFAULT_PORT,
     DEFAULT_DB_NAME,

@@ -277,31 +277,37 @@ const History: React.FC = () => {
                     flexDirection: 'row',
                     justifyContent: 'flex-end',
                     alignItems: 'center',
-                    gap: 10 * w1px,
-                    marginTop:h1px*5
+                    flexWrap: 'wrap',
+                    gap: 8 * w1px,
+                    marginTop: 8 * h1px,
+                    marginBottom: 4 * h1px,
                 },
-                deleteButton: {
+                actionChip: {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6 * w1px,
+                    minHeight: 36 * h1px,
+                    paddingVertical: 8 * h1px,
+                    paddingHorizontal: 12 * w1px,
+                    borderRadius: 10 * w1px,
+                    borderWidth: 1,
+                },
+                actionChipGhost: {
+                    backgroundColor: colors.backgroundPurpleSoft,
+                    borderColor: 'rgba(116, 83, 224, 0.18)',
+                },
+                actionChipOutline: {
                     backgroundColor: colors.white,
-                    borderWidth: 1.5,
-                    borderColor: colors.backgroundPurple,
-                    borderRadius: 8 * w1px,
-                    paddingVertical: 7 * h1px,
-                    paddingHorizontal: 12 * w1px,
+                    borderColor: 'rgba(116, 83, 224, 0.28)',
                 },
-                deleteButtonRed: {
-                    backgroundColor: '#DC2626',
-                    borderWidth: 0,
-                    borderRadius: 8 * w1px,
-                    paddingVertical: 7 * h1px,
-                    paddingHorizontal: 12 * w1px,
+                actionChipDanger: {
+                    backgroundColor: colors.danger,
+                    borderColor: colors.danger,
                 },
-                deleteAllButton: {
-                    backgroundColor: colors.white,
-                    borderWidth: 1.5,
-                    borderColor: colors.backgroundPurple,
-                    borderRadius: 8 * w1px,
-                    paddingVertical: 7 * h1px,
-                    paddingHorizontal: 12 * w1px,
+                actionChipDangerSoft: {
+                    backgroundColor: colors.dangerSoft,
+                    borderColor: colors.dangerBorder,
                 },
                 checkboxWrap: {
                     marginRight: 12 * w1px,
@@ -435,20 +441,31 @@ const History: React.FC = () => {
                         <View style={styles.deleteAllRow}>
                             {selectionMode ? (
                                 <TouchableOpacity
-                                    style={styles.deleteButton}
+                                    style={[styles.actionChip, styles.actionChipGhost]}
                                     onPress={exitSelectionMode}
-                                    activeOpacity={0.7}>
-                                    <T size={fontSize.body} weight="600" color={colors.backgroundPurple}>
+                                    activeOpacity={0.75}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={t('common.cancel')}>
+                                    <Ionicons
+                                        name="close"
+                                        size={iconSize.small}
+                                        color={colors.backgroundPurple}
+                                    />
+                                    <T
+                                        size={fontSize.bodySmall}
+                                        weight="600"
+                                        color={colors.backgroundPurple}>
                                         {t('common.cancel')}
                                     </T>
                                 </TouchableOpacity>
                             ) : null}
                             <TouchableOpacity
-                                style={
+                                style={[
+                                    styles.actionChip,
                                     selectionMode && selectedIds.size > 0
-                                        ? styles.deleteButtonRed
-                                        : styles.deleteButton
-                                }
+                                        ? styles.actionChipDanger
+                                        : styles.actionChipOutline,
+                                ]}
                                 onPress={() => {
                                     if (!selectionMode) {
                                         setSelectionMode(true);
@@ -458,19 +475,50 @@ const History: React.FC = () => {
                                         exitSelectionMode();
                                     }
                                 }}
-                                activeOpacity={0.7}>
+                                activeOpacity={0.75}
+                                accessibilityRole="button"
+                                accessibilityLabel={t('common.delete')}>
+                                <Ionicons
+                                    name={
+                                        selectionMode && selectedIds.size > 0
+                                            ? 'trash'
+                                            : 'trash-outline'
+                                    }
+                                    size={iconSize.small}
+                                    color={
+                                        selectionMode && selectedIds.size > 0
+                                            ? colors.white
+                                            : colors.backgroundPurple
+                                    }
+                                />
                                 <T
                                     size={fontSize.bodySmall}
                                     weight="600"
-                                    color={selectionMode && selectedIds.size > 0 ? '#fff' : colors.backgroundPurple}>
-                                    {t('common.delete')}
+                                    color={
+                                        selectionMode && selectedIds.size > 0
+                                            ? colors.white
+                                            : colors.backgroundPurple
+                                    }>
+                                    {selectionMode && selectedIds.size > 0
+                                        ? `${t('common.delete')} (${selectedIds.size})`
+                                        : t('common.delete')}
                                 </T>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={styles.deleteAllButton}
+                                style={[styles.actionChip, styles.actionChipDangerSoft]}
                                 onPress={() => setDeleteAllConfirmVisible(true)}
-                                activeOpacity={0.7}>
-                                <T size={fontSize.bodySmall} weight="600" color={colors.backgroundPurple}>
+                                activeOpacity={0.75}
+                                accessibilityRole="button"
+                                accessibilityLabel={t('history.deleteAllButton')}>
+                                <Ionicons
+                                    name="trash-bin-outline"
+                                    size={iconSize.small}
+                                    color={colors.dangerText}
+                                />
+                                <T
+                                    size={fontSize.bodySmall}
+                                    weight="600"
+                                    color={colors.dangerText}>
                                     {t('history.deleteAllButton')}
                                 </T>
                             </TouchableOpacity>

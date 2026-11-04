@@ -2,17 +2,17 @@
  * Home – Analiz Sonucu: Değerler / Dikkat; Tahlil Yorumu üstte modal.
  */
 import React, {useMemo, useState} from 'react';
-import {View, TouchableOpacity, StyleSheet, ScrollView} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {View, StyleSheet, ScrollView} from 'react-native';
 import T from '../../components/Text/T';
 import Chart from '../../components/Chart/Chart';
 import AnalysisContent from '../../components/AnalysisContent/AnalysisContent';
+import AnalysisCommentButton from '../../components/AnalysisCommentButton/AnalysisCommentButton';
 import EmptyState from '../../components/EmptyState/EmptyState';
+import RangeBarLegend from '../../components/RangeBarLegend/RangeBarLegend';
 import CenterModal from '../../components/Modals/CenterModal';
 import SegmentedTabs from '../../components/SegmentedTabs/SegmentedTabs';
 import colors from '../../theme/colors';
 import {fontSize} from '../../constants/typography';
-import {iconSize} from '../../constants/icons';
 import type {LabItem} from '../../server/api/Lab';
 import {filterNotableLabItems} from '../../utils/labNotable';
 
@@ -54,42 +54,11 @@ function ResultSection({
   const local = useMemo(
     () =>
       StyleSheet.create({
-        analysisBtn: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 8 * w1px,
-          marginBottom: 8 * h1px,
-          paddingVertical: 10 * h1px,
-          paddingHorizontal: 12 * w1px,
-          backgroundColor: colors.white,
-          borderRadius: 12 * w1px,
-          borderWidth: 1,
-          borderColor: 'rgba(116, 83, 224, 0.22)',
-        },
-        analysisBtnIcon: {
-          width: 32 * w1px,
-          height: 32 * w1px,
-          borderRadius: 9 * w1px,
-          backgroundColor: colors.backgroundPurpleSoft,
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
         tabsWrap: {
           marginBottom: 10 * h1px,
         },
-        emptyHint: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 8 * w1px,
-          backgroundColor: colors.backgroundPurpleSoft,
-          paddingVertical: 8 * h1px,
-          paddingHorizontal: 10 * w1px,
-          borderRadius: 12 * w1px,
-          borderWidth: 1,
-          borderColor: colors.backgroundPurple + '30',
-        },
       }),
-    [w1px, h1px],
+    [h1px],
   );
 
   const resultTabs = useMemo(
@@ -121,60 +90,23 @@ function ResultSection({
       </T>
 
       {!hasValues && !hasAnalysis ? (
-        <TouchableOpacity
-          onPress={() => {
-            trackButtonClick('interpret_result', {screen: 'Home'});
-            onNoPdfWarning();
-          }}
-          activeOpacity={0.7}
-          style={local.emptyHint}>
-          <Ionicons
-            name="document-text-outline"
-            size={iconSize.medium}
-            color={colors.backgroundPurple}
+        <>
+          <RangeBarLegend />
+          <AnalysisCommentButton
+            onPress={() => {
+              trackButtonClick('interpret_result', {screen: 'Home'});
+              onNoPdfWarning();
+            }}
           />
-          <T
-            size={fontSize.body}
-            weight="600"
-            color={colors.backgroundPurple}
-            style={{flex: 1}}>
-            {t('home.interpretButton')}
-          </T>
-          <Ionicons
-            name="chevron-forward"
-            size={iconSize.small}
-            color={colors.backgroundPurple}
-          />
-        </TouchableOpacity>
+        </>
       ) : (
         <>
-          <TouchableOpacity
-            style={local.analysisBtn}
+          <AnalysisCommentButton
             onPress={() => {
               trackButtonClick('interpret_result', {screen: 'Home'});
               setAnalysisVisible(true);
             }}
-            activeOpacity={0.75}>
-            <View style={local.analysisBtnIcon}>
-              <Ionicons
-                name="chatbubble-ellipses-outline"
-                size={iconSize.medium}
-                color={colors.backgroundPurple}
-              />
-            </View>
-            <T
-              size={fontSize.body}
-              weight="600"
-              color={colors.backgroundPurpleDark}
-              style={{flex: 1}}>
-              {t('history.analysisComment')}
-            </T>
-            <Ionicons
-              name="chevron-forward"
-              size={iconSize.small}
-              color={colors.backgroundPurple}
-            />
-          </TouchableOpacity>
+          />
 
           <SegmentedTabs
             items={resultTabs}

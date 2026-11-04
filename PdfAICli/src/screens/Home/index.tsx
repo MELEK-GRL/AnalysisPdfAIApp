@@ -98,10 +98,6 @@ const Home: React.FC = () => {
     useFocusEffect(
         useCallback(() => {
             useSessionStore.getState().touch();
-            setItems([]);
-            setRawItems([]);
-            setAnalysis('');
-            setShowUploadArea(true);
         }, []),
     );
 

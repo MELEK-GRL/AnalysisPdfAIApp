@@ -2,12 +2,7 @@
  * Geçmiş analiz detay sayfası (stack; tab menüsünde yok).
  */
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import {View, StyleSheet, ScrollView} from 'react-native';
 import {useNavigation, useRoute, type RouteProp} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -27,6 +22,8 @@ import T from '../../components/Text/T';
 import Chart from '../../components/Chart/Chart';
 import AnalysisContent from '../../components/AnalysisContent/AnalysisContent';
 import EmptyState from '../../components/EmptyState/EmptyState';
+import RangeBarLegend from '../../components/RangeBarLegend/RangeBarLegend';
+import AnalysisCommentButton from '../../components/AnalysisCommentButton/AnalysisCommentButton';
 import LoadingIndicator from '../../components/LoadingIndicator/LoadingIndicator';
 import CenterModal from '../../components/Modals/CenterModal';
 import PopupModal from '../../components/Modals/PopupModal';
@@ -137,26 +134,6 @@ const HistoryDetail: React.FC = () => {
           paddingVertical: 2 * h1px,
           paddingHorizontal: 7 * w1px,
         },
-        analysisBtn: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 8 * w1px,
-          marginBottom: 8 * h1px,
-          paddingVertical: 10 * h1px,
-          paddingHorizontal: 12 * w1px,
-          backgroundColor: colors.white,
-          borderRadius: 12 * w1px,
-          borderWidth: 1,
-          borderColor: 'rgba(116, 83, 224, 0.22)',
-        },
-        analysisBtnIcon: {
-          width: 32 * w1px,
-          height: 32 * w1px,
-          borderRadius: 9 * w1px,
-          backgroundColor: colors.backgroundPurpleSoft,
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
         tabsWrap: {
           marginBottom: 12 * h1px,
         },
@@ -238,30 +215,9 @@ const HistoryDetail: React.FC = () => {
                 </View>
               </View>
 
-              <TouchableOpacity
-                style={styles.analysisBtn}
+              <AnalysisCommentButton
                 onPress={() => setAnalysisVisible(true)}
-                activeOpacity={0.75}>
-                <View style={styles.analysisBtnIcon}>
-                  <Ionicons
-                    name="chatbubble-ellipses-outline"
-                    size={iconSize.medium}
-                    color={colors.backgroundPurple}
-                  />
-                </View>
-                <T
-                  size={fontSize.body}
-                  weight="600"
-                  color={colors.backgroundPurpleDark}
-                  style={{flex: 1}}>
-                  {t('history.analysisComment')}
-                </T>
-                <Ionicons
-                  name="chevron-forward"
-                  size={iconSize.small}
-                  color={colors.backgroundPurple}
-                />
-              </TouchableOpacity>
+              />
 
               <SegmentedTabs
                 items={detailTabs}
@@ -274,14 +230,20 @@ const HistoryDetail: React.FC = () => {
                 detail.items?.length > 0 ? (
                   <Chart items={detail.items} />
                 ) : (
-                  <T size={fontSize.body} color="#6B7280">
-                    {t('history.noRecord')}
-                  </T>
+                  <>
+                    <RangeBarLegend />
+                    <T size={fontSize.body} color="#6B7280">
+                      {t('history.noRecord')}
+                    </T>
+                  </>
                 )
               ) : notableItems.length > 0 ? (
                 <Chart items={notableItems} />
               ) : (
-                <EmptyState title={t('history.notableEmpty')} />
+                <>
+                  <RangeBarLegend />
+                  <EmptyState title={t('history.notableEmpty')} />
+                </>
               )}
             </ScrollView>
           </>
